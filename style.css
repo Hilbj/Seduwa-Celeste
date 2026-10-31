@@ -2584,7 +2584,8 @@ button:disabled, input:disabled, select:disabled {
 #app.discovery-mode { background: radial-gradient(ellipse at 50% 48%, rgba(47,77,130,.28), transparent 55%), #030817; }
 #app.discovery-mode #sky { filter: brightness(1.12) saturate(1.12); }
 /* v375 : la direction observée reste visible en mode Découverte. */
-#app.discovery-mode .live-status, #app.discovery-mode #location-coordinates { display: none; }
+#app.discovery-mode .live-status { display: none; }
+/* Les coordonnées restent visibles pour unifier la hauteur du bandeau avec le mode Expert */
 #app.discovery-mode .topbar { right: max(16px, env(safe-area-inset-right)); }
 #app.discovery-mode > .toolbar { display: none !important; }
 #app.discovery-mode #review-stars-toggle { display: none; }
@@ -6112,3 +6113,41 @@ button:disabled, input:disabled, select:disabled {
 @media screen and (min-width: 901px) and (pointer: fine) {
   .horizon-label { top: 76%; }
 }
+
+/* Alignement du titre Expert sur le titre Découverte en mode bureau */
+@media screen and (min-width: 901px) {
+  #app:not(.discovery-mode) .topbar {
+    top: max(8px, env(safe-area-inset-top, 0px)) !important;
+  }
+}
+
+/* v491 — en mode Découverte desktop, afficher les coordonnées à droite du nom du lieu,
+comme en mode Expert, pour uniformiser les deux en-têtes. */
+@media screen and (min-width: 901px) {
+  #app.discovery-mode .topbar #location-coordinates {
+    display: inline-block !important;
+    max-width: 100% !important;
+    margin: 0 0 0 6px !important;
+    padding: 0 !important;
+    font-size: 0.68rem !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  #app.discovery-mode .topbar #location {
+    display: inline-block !important;
+    max-width: calc(100% - 120px) !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+

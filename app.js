@@ -76,8 +76,8 @@ import { createUI } from "./js/ui.js";
    */
   const CATALOGUE_EPOCH = "J2000";
 
-  // Noms usuels des étoiles les plus brillantes, indexés par numéro HIP.
-  // Le nom du catalogue reste inchangé pour les recherches et les constellations.
+    // Noms usuels des étoiles les plus brillantes, indexés par numéro HIP.
+  // (Doublons supprimés pour éviter les écrasements silencieux)
   const COMMON_STAR_NAMES = {
     677: "Alphératz", 746: "Caph", 1067: "Algenib", 3179: "Schedar",
     4427: "Navi", 5447: "Mirach", 6686: "Ruchbah", 7588: "Achernar",
@@ -91,13 +91,12 @@ import { createUI } from "./js/ui.js";
     65474: "Spica", 67301: "Alkaïd", 68702: "Hadar", 69673: "Arcturus",
     71683: "Alpha Centauri", 80763: "Antarès", 91262: "Véga", 97649: "Altaïr",
     102098: "Deneb", 102488: "Gienah", 113368: "Fomalhaut", 11767: "Étoile Polaire",
-    31592: "Alhena", 36850: "Castor", 39953: "Avior", 41037: "Menkalinan",
-    46390: "Adhara", 54061: "Dubhé", 59774: "Alphard", 62956: "Gienah Corvi",
-    65477: "Syrma", 68702: "Hadar", 76267: "Kaus Australis", 77070: "Shaula",
-    82273: "Kaus Media", 85927: "Nunki", 86742: "Rasalhague", 88635: "Eltanin",
-    90185: "Peacock", 92855: "Rasalgethi", 94376: "Rastaban", 100453: "Sadr",
-    104732: "Enif", 107315: "Sadalsuud", 109268: "Sadalmelik", 110960: "Scheat",
-    113881: "Markab", 116727: "Mimosa", 15863: "Mirfak"
+    31592: "Alhena", 39953: "Avior", 41037: "Menkalinan", 46390: "Adhara",
+    59774: "Alphard", 62956: "Gienah Corvi", 65477: "Syrma", 76267: "Kaus Australis",
+    77070: "Shaula", 82273: "Kaus Media", 85927: "Nunki", 86742: "Rasalhague",
+    88635: "Eltanin", 90185: "Peacock", 92855: "Rasalgethi", 94376: "Rastaban",
+    100453: "Sadr", 104732: "Enif", 107315: "Sadalsuud", 109268: "Sadalmelik",
+    110960: "Scheat", 113881: "Markab", 116727: "Mimosa"
   };
 
   function displayStarName(star) {
@@ -106,7 +105,10 @@ import { createUI } from "./js/ui.js";
     const properName = star?.proper_name || star?.properName;
     if (properName && !/^HIP[_\s-]*\d+$/i.test(String(properName))) return properName;
     const catalogName = star?.name;
-    return catalogName && !/^HIP[_\s-]*\d+$/i.test(String(catalogName)) ? catalogName : "";
+    if (!catalogName || /^HIP[_\s-]*\d+$/i.test(String(catalogName))) {
+      return hip ? `HIP ${hip}` : "";
+    }
+    return catalogName.replace(/^HIP[_\s-]*(\d+)$/i, "HIP $1");
   }
 
   const LOCATION_STORAGE_KEY = "atlas-celeste-last-observation-location";
@@ -163,6 +165,82 @@ import { createUI } from "./js/ui.js";
     try { localStorage.setItem(DISPLAY_CATEGORY_STORAGE_KEY, JSON.stringify(preferences)); }
     catch { /* L'affichage reste utilisable sans stockage local. */ }
   }
+
+  /**
+   * @typedef {Object} AppState
+   * @property {number} latitude
+   * @property {number} longitude
+   * @property {string} locationName
+   * @property {boolean} locationReady
+   * @property {Date|null} observationDate
+   * @property {number} heading
+   * @property {number} pitch
+   * @property {number|null} rawHeading
+   * @property {string} headingSource
+   * @property {number} rawHeadingDelta
+   * @property {number} filteredHeadingDelta
+   * @property {boolean} gyroDataSeen
+   * @property {number|null} gyroRateAlpha
+   * @property {number|null} gyroRateBeta
+   * @property {number|null} gyroRateGamma
+   * @property {number|null} gyroRateMagnitude
+   * @property {number} gyroLastUpdate
+   * @property {boolean} gyroMotionActive
+   * @property {string} headingDecision
+   * @property {number} headingMotionSamples
+   * @property {number} headingMotionTravel
+   * @property {boolean} headingMotionConfirmed
+   * @property {number} roll
+   * @property {boolean} sensorActive
+   * @property {boolean} orientationListening
+   * @property {number} lastOrientationTime
+   * @property {number} lastPitchTime
+   * @property {number} orientationSamples
+   * @property {number} fov
+   * @property {number} verticalFov
+   * @property {number} horizonRatio
+   * @property {number} width
+   * @property {number} height
+   * @property {number} dpr
+   * @property {Array<any>} stars
+   * @property {Array<any>} messier
+   * @property {Array<any>} ngc
+   * @property {Array<any>} minorPlanets
+   * @property {number} minorPlanetsEpochJD
+   * @property {Object} displayCategories
+   * @property {Array<any>} constellations
+   * @property {Array<any>} visibleObjects
+   * @property {boolean} showConstellations
+   * @property {boolean} showEclipticGrid
+   * @property {string} discoveryConstellationId
+   * @property {any} discoveryWalkOverlay
+   * @property {Set<string>} discoveryConstellationStarIds
+   * @property {string} discoveryConstellationTargetStarId
+   * @property {boolean} showConstellationBoundaries
+   * @property {boolean} showStarLabels
+   * @property {boolean} reviewStarsOnly
+   * @property {any} constellationBoundaryLines
+   * @property {boolean} constellationBoundariesLoading
+   * @property {any} selected
+   * @property {boolean} finderActive
+   * @property {boolean} finderLocked
+   * @property {number} finderLockSince
+   * @property {string} skyGuideMode
+   * @property {string} skyGuideFreeTargetId
+   * @property {any} skyGuideSavedSelection
+   * @property {any} skyGuideSavedConstellations
+   * @property {number} skyGuideProgress
+   * @property {boolean} dragging
+   * @property {boolean} moved
+   * @property {number} lastX
+   * @property {number} lastY
+   * @property {number} starCount
+   * @property {number} starsAboveHorizon
+   * @property {number} objectsInField
+   * @property {boolean} immersive
+  */
+
+  /** @type {AppState} */
 
   const state = {
     latitude: initialLocation.latitude,
