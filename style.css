@@ -6107,6 +6107,18 @@ button:disabled, input:disabled, select:disabled {
   }
 }
 
+
+/* v490 — « Ma soirée en 3 étapes » reprend le comportement mobile de
+   « Visible maintenant » : contenu borné et défilant sans agrandir le panneau. */
+@media (max-width: 600px) {
+  #app.discovery-mode .discovery-evening-route {
+    max-height: min(43vh, 330px);
+    overflow-y: auto;
+    overscroll-behavior: contain;
+    padding: 8px;
+  }
+}
+
 /* v488 — bureau : la visée initiale est relevée (≈ 20°), l'horizon est donc plus bas.
    Les repères « HORIZON » / « ZÉNITH » descendent sous le relief pour ne plus
    chevaucher les arbres et les maisons. */
@@ -6151,3 +6163,225 @@ comme en mode Expert, pour uniformiser les deux en-têtes. */
 }
 
 
+
+/* v492 — alignement commun des textes d’en-tête Découverte / Expert.
+   Le titre, le lieu et les coordonnées utilisent les mêmes dimensions et espacements
+   sur ordinateur ; sur mobile, Découverte reprend exactement la présentation Expert. */
+@media screen and (min-width: 601px) {
+  #app.discovery-mode .topbar .brand,
+  #app:not(.discovery-mode) .topbar .brand {
+    align-items: center !important;
+  }
+  #app.discovery-mode .topbar .brand-emblem,
+  #app:not(.discovery-mode) .topbar .brand-emblem {
+    align-self: center !important;
+    transform: none !important;
+  }
+  #app.discovery-mode .topbar .brand-title-row,
+  #app:not(.discovery-mode) .topbar .brand-title-row {
+    align-items: center !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #app.discovery-mode .topbar .brand-title-row > h1,
+  #app:not(.discovery-mode) .topbar .brand-title-row > h1 {
+    font-size: 12px !important;
+    letter-spacing: .24em !important;
+    line-height: 1.2 !important;
+    margin: 0 8px 0 0 !important;
+    white-space: nowrap !important;
+  }
+  #app.discovery-mode .topbar #location,
+  #app:not(.discovery-mode) .topbar #location {
+    display: inline-block !important;
+    max-width: 100% !important;
+    margin: 5px 6px 0 0 !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #app.discovery-mode .topbar #location-coordinates,
+  #app:not(.discovery-mode) .topbar #location-coordinates {
+    display: inline-block !important;
+    max-width: 100% !important;
+    margin: 5px 0 0 !important;
+    padding: 0 !important;
+    font-size: .68rem !important;
+    line-height: 1.2 !important;
+    vertical-align: middle !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  #app.discovery-mode .topbar .brand,
+  #app:not(.discovery-mode) .topbar .brand {
+    align-items: center !important;
+    gap: 13px !important;
+  }
+  #app.discovery-mode .topbar .brand-emblem,
+  #app:not(.discovery-mode) .topbar .brand-emblem {
+    align-self: center !important;
+    transform: translateY(5px) !important;
+  }
+  #app.discovery-mode .topbar .brand-title-row,
+  #app:not(.discovery-mode) .topbar .brand-title-row {
+    align-items: center !important;
+    min-height: 0 !important;
+    height: auto !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+  #app.discovery-mode .topbar .brand-title-row > h1,
+  #app:not(.discovery-mode) .topbar .brand-title-row > h1 {
+    font-size: 12px !important;
+    letter-spacing: .24em !important;
+    line-height: 1.2 !important;
+    margin: 0 !important;
+    white-space: nowrap !important;
+  }
+  #app.discovery-mode .topbar #location,
+  #app:not(.discovery-mode) .topbar #location {
+    display: block !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+  #app.discovery-mode .topbar #location-coordinates,
+  #app:not(.discovery-mode) .topbar #location-coordinates {
+    display: none !important;
+  }
+}
+
+
+/* v494 — alignement final du bloc titre entre Découverte et Expert.
+   Les mêmes règles s'appliquent aux deux modes ; seuls les boutons d'action
+   conservent leur positionnement propre. */
+@media screen and (min-width: 601px) {
+  #app.discovery-mode .topbar #location,
+  #app:not(.discovery-mode) .topbar #location {
+    margin: 0 6px 0 0 !important;
+  }
+  #app.discovery-mode .topbar #location-coordinates,
+  #app:not(.discovery-mode) .topbar #location-coordinates {
+    margin: 0 !important;
+  }
+}
+
+@media screen and (max-width: 600px) {
+  #app.discovery-mode .topbar > .brand,
+  #app:not(.discovery-mode) .topbar > .brand {
+    display: flex !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    align-items: center !important;
+    gap: 13px !important;
+    transform: none !important;
+  }
+
+  #app.discovery-mode .topbar > .brand > .brand-emblem,
+  #app:not(.discovery-mode) .topbar > .brand > .brand-emblem {
+    align-self: center !important;
+    transform: none !important;
+    flex: 0 0 auto !important;
+  }
+
+  #app.discovery-mode .topbar > .brand > div:last-child,
+  #app:not(.discovery-mode) .topbar > .brand > div:last-child {
+    position: static !important;
+    display: block !important;
+    flex: 1 1 auto !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+  }
+
+  #app.discovery-mode .topbar .brand-title-row,
+  #app:not(.discovery-mode) .topbar .brand-title-row {
+    position: static !important;
+    display: flex !important;
+    align-items: center !important;
+    justify-content: flex-start !important;
+    gap: 0 !important;
+    width: 100% !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    height: auto !important;
+    min-height: 0 !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    box-sizing: border-box !important;
+  }
+
+  #app.discovery-mode .topbar .brand-title-row > h1,
+  #app:not(.discovery-mode) .topbar .brand-title-row > h1 {
+    flex: 0 1 auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 12px !important;
+    letter-spacing: .24em !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+  }
+
+  #app.discovery-mode .topbar #location,
+  #app:not(.discovery-mode) .topbar #location {
+    display: block !important;
+    width: auto !important;
+    min-width: 0 !important;
+    max-width: 100% !important;
+    margin: 0 !important;
+    padding: 0 !important;
+    font-size: 11px !important;
+    line-height: 1.2 !important;
+    white-space: nowrap !important;
+    overflow: hidden !important;
+    text-overflow: ellipsis !important;
+  }
+
+  #app.discovery-mode .topbar #location-coordinates,
+  #app:not(.discovery-mode) .topbar #location-coordinates {
+    display: none !important;
+  }
+}
+
+
+/* v495 — finition de l’en-tête sur ordinateur.
+   Le titre est centré dans la ligne des commandes (plus haute) : remonter
+   légèrement le lieu et ses coordonnées supprime le vide visuel sans déplacer
+   les boutons. Les tailles de texte reprennent celles de la présentation initiale. */
+@media screen and (min-width: 901px) {
+  #app.discovery-mode .topbar #location,
+  #app:not(.discovery-mode) .topbar #location {
+    position: relative !important;
+    top: -8px !important;
+    margin: 0 6px 0 0 !important;
+    font-size: inherit !important;
+    line-height: 1.2 !important;
+  }
+  #app.discovery-mode .topbar #location-coordinates,
+  #app:not(.discovery-mode) .topbar #location-coordinates {
+    position: relative !important;
+    top: -8px !important;
+    margin: 0 !important;
+    font-size: 0.72rem !important;
+    line-height: 1.25 !important;
+  }
+}

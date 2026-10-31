@@ -5,5 +5,5 @@
   "scripts": {
     "test": "node --test audit/tests/*.test.js"
   },
-  "version": "0.487.0"
+  "version": "0.495.0"
 }
