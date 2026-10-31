@@ -2967,7 +2967,7 @@ export function createUI({
             state.heading = norm360(Number(step.object.az));
             state.pitch = Math.max(-5, Math.min(22, Number(step.object.alt)));
             const card = $("object-card"); if (card) card.hidden = true;
-            collapseDiscoveryPanelAfterGuideStart();
+            panel.hidden = true;
             if (typeof drawSky === "function") drawSky();
           });
           item.append(title, note, show); list.append(item);
@@ -3000,6 +3000,14 @@ export function createUI({
         if (action === "evening-route") {
           buildDiscoveryEveningRoute();
           document.querySelectorAll("[data-discovery-action]").forEach(item => item.classList.toggle("is-active", item === button));
+          // « Ma soirée » se trouve plus bas que « Visible maintenant ».
+          // Revenir en haut pour conserver visibles l'en-tête et la poignée.
+          if (window.matchMedia("(max-width: 600px)").matches) {
+            window.requestAnimationFrame(() => {
+              discoveryPanel?.scrollTo({ top: 0, behavior: "auto" });
+              eveningRoutePanel?.scrollTo({ top: 0, behavior: "auto" });
+            });
+          }
         }
         if (action !== "search" && searchPanel) searchPanel.hidden = true;
         if (action !== "search") {
