@@ -1,0 +1,13 @@
+Limites des constellations
+
+Les limites officielles des constellations sont chargées à la demande depuis le jeu de données
+celestial_data de dieghernan :
+https://github.com/dieghernan/celestial_data
+
+Source astronomique : Catalogue of Constellation Boundary Data (Davenhall & Leggett, 1989),
+issu des limites reconnues par l'Union astronomique internationale (UAI).
+Référence UAI : https://www.iau.org/IAU/Astronomy-FAQs/Constellations.aspx
+
+Le fichier de données est chargé depuis GitHub Raw au premier affichage des limites ; une
+connexion Internet est donc nécessaire pour cette fonctionnalité si la ressource n'est pas
+mise en cache par le navigateur.

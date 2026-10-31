@@ -1,0 +1,7 @@
+Carte de fond de la Voie lactée
+
+Source : ESA/Gaia/DPAC, « Gaia’s all-sky view », publiée par l’Observatoire européen austral (ESO).
+Page de référence : https://eso.org/public/images/ESA_Gaia_DR2_AllSky_Brightness_Colour_black_bg_8k/
+Fichier image utilisé : https://cdn.eso.org/images/screen/ESA_Gaia_DR2_AllSky_Brightness_Colour_black_bg_8k.jpg
+
+La carte montre la luminosité et la couleur cumulées des étoiles observées par Gaia DR2. Elle est reprojetée dans Atlas Céleste à partir de coordonnées galactiques. Pour les conditions de réutilisation de l’image, consulter les conditions d’utilisation des images de l’ESO sur son site officiel.

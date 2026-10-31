@@ -1,0 +1,180 @@
+{
+  "objects": [
+    {
+      "id": "NGC 253",
+      "name": "Galaxie du Sculpteur",
+      "ra": 0.7931,
+      "dec": -25.2884,
+      "mag": 7.1,
+      "type": "galaxy"
+    },
+    {
+      "id": "NGC 457",
+      "name": "Amas de la Chouette",
+      "ra": 1.3194,
+      "dec": 58.3333,
+      "mag": 6.4,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 869/884",
+      "name": "Double Amas de Persée",
+      "ra": 2.3467,
+      "dec": 57.125,
+      "mag": 3.7,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 104",
+      "name": "47 Tucanae",
+      "ra": 0.4017,
+      "dec": -72.0813,
+      "mag": 4.0,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 1499",
+      "name": "Nébuleuse Californie",
+      "ra": 4.05,
+      "dec": 36.37,
+      "mag": 6.0,
+      "type": "nebula"
+    },
+    {
+      "id": "NGC 3372",
+      "name": "Nébuleuse de la Carène",
+      "ra": 10.75,
+      "dec": -59.867,
+      "mag": 1.0,
+      "type": "nebula"
+    },
+    {
+      "id": "NGC 4755",
+      "name": "Boîte à Bijoux",
+      "ra": 12.8833,
+      "dec": -60.3667,
+      "mag": 4.2,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 5139",
+      "name": "Oméga du Centaure",
+      "ra": 13.4333,
+      "dec": -47.4833,
+      "mag": 3.7,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 4565",
+      "name": "Galaxie de l’Aiguille",
+      "ra": 12.6056,
+      "dec": 25.9875,
+      "mag": 9.6,
+      "type": "galaxy"
+    },
+    {
+      "id": "NGC 7000",
+      "name": "Nébuleuse de l’Amérique du Nord",
+      "ra": 20.989,
+      "dec": 44.53,
+      "mag": 4.0,
+      "type": "nebula"
+    },
+    {
+      "id": "NGC 7293",
+      "name": "Nébuleuse de l’Hélice",
+      "ra": 22.4861,
+      "dec": -20.8333,
+      "mag": 7.3,
+      "type": "nebula"
+    },
+    {
+      "id": "NGC 6888",
+      "name": "Nébuleuse du Croissant",
+      "ra": 20.2,
+      "dec": 38.35,
+      "mag": 7.4,
+      "type": "nebula"
+    },
+    {
+      "id": "NGC 752",
+      "name": "Amas ouvert NGC 752",
+      "ra": 1.9567,
+      "dec": 37.6833,
+      "mag": 5.7,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 2451",
+      "name": "Amas ouvert NGC 2451",
+      "ra": 7.6833,
+      "dec": -37.9667,
+      "mag": 2.8,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 2516",
+      "name": "Amas de la Ruche australe",
+      "ra": 7.9833,
+      "dec": -60.8667,
+      "mag": 3.8,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 2547",
+      "name": "Amas ouvert NGC 2547",
+      "ra": 8.1833,
+      "dec": -49.2,
+      "mag": 4.7,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 3532",
+      "name": "Amas du Puits à souhaits",
+      "ra": 11.1,
+      "dec": -58.75,
+      "mag": 3.0,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 6231",
+      "name": "Amas ouvert NGC 6231",
+      "ra": 16.9,
+      "dec": -41.8167,
+      "mag": 2.6,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 6633",
+      "name": "Amas ouvert NGC 6633",
+      "ra": 18.45,
+      "dec": 6.5,
+      "mag": 4.6,
+      "type": "cluster"
+    },
+    {
+      "id": "NGC 2244",
+      "name": "Amas de la Rosette",
+      "ra": 6.5333,
+      "dec": 4.95,
+      "mag": 4.8,
+      "type": "cluster"
+    },
+    {
+      "id": "IC 1805",
+      "name": "Nébuleuse du Cœur",
+      "ra": 2.5333,
+      "dec": 61.45,
+      "mag": 6.5,
+      "type": "nebula"
+    },
+    {
+      "id": "B33",
+      "name": "Nébuleuse de la Tête de Cheval",
+      "ra": 5.6833,
+      "dec": -2.45,
+      "mag": 6.8,
+      "type": "nebula"
+    }
+  ]
+}

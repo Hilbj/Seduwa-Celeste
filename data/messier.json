@@ -1,0 +1,882 @@
+[
+  {
+    "id": "M1",
+    "name": "Nébuleuse du Crabe",
+    "ra": 5.5756,
+    "dec": 22.0145,
+    "mag": 8.4,
+    "type": "nebula"
+  },
+  {
+    "id": "M2",
+    "name": "Amas globulaire M2",
+    "ra": 21.558333,
+    "dec": -0.81667,
+    "mag": 6.5,
+    "type": "cluster"
+  },
+  {
+    "id": "M3",
+    "name": "Amas globulaire M3",
+    "ra": 13.7038,
+    "dec": 28.3773,
+    "mag": 5.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M4",
+    "name": "Amas globulaire M4",
+    "ra": 16.393333,
+    "dec": -26.53333,
+    "mag": 5.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M5",
+    "name": "Amas globulaire M5",
+    "ra": 15.31,
+    "dec": 2.08333,
+    "mag": 5.8,
+    "type": "cluster"
+  },
+  {
+    "id": "M6",
+    "name": "Amas du Papillon",
+    "ra": 17.6683,
+    "dec": -32.2167,
+    "mag": 4.2,
+    "type": "cluster"
+  },
+  {
+    "id": "M7",
+    "name": "Amas de Ptolémée",
+    "ra": 17.8975,
+    "dec": -34.7933,
+    "mag": 3.3,
+    "type": "cluster"
+  },
+  {
+    "id": "M8",
+    "name": "Nébuleuse de la Lagune",
+    "ra": 18.0633,
+    "dec": -24.3833,
+    "mag": 6.0,
+    "type": "nebula"
+  },
+  {
+    "id": "M9",
+    "name": "Amas globulaire M9",
+    "ra": 17.32,
+    "dec": -18.51667,
+    "mag": 7.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M10",
+    "name": "Amas globulaire M10",
+    "ra": 16.951667,
+    "dec": -4.1,
+    "mag": 6.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M11",
+    "name": "Amas du Canard sauvage",
+    "ra": 18.851667,
+    "dec": -6.26667,
+    "mag": 5.8,
+    "type": "cluster"
+  },
+  {
+    "id": "M12",
+    "name": "Amas globulaire M12",
+    "ra": 16.786667,
+    "dec": -1.95,
+    "mag": 6.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M13",
+    "name": "Grand Amas d'Hercule",
+    "ra": 16.695,
+    "dec": 36.467,
+    "mag": 5.8,
+    "type": "cluster"
+  },
+  {
+    "id": "M14",
+    "name": "Amas globulaire M14",
+    "ra": 17.626667,
+    "dec": -3.25,
+    "mag": 7.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M15",
+    "name": "Amas globulaire de Pégase",
+    "ra": 21.5,
+    "dec": 12.16667,
+    "mag": 6.4,
+    "type": "cluster"
+  },
+  {
+    "id": "M16",
+    "name": "Nébuleuse de l’Aigle",
+    "ra": 18.3133,
+    "dec": -13.7833,
+    "mag": 6.0,
+    "type": "nebula"
+  },
+  {
+    "id": "M17",
+    "name": "Nébuleuse Oméga",
+    "ra": 18.3467,
+    "dec": -16.1717,
+    "mag": 6.0,
+    "type": "nebula"
+  },
+  {
+    "id": "M18",
+    "name": "Amas ouvert M18",
+    "ra": 18.331667,
+    "dec": -17.13333,
+    "mag": 6.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M19",
+    "name": "Amas globulaire M19",
+    "ra": 17.043333,
+    "dec": -26.26667,
+    "mag": 7.2,
+    "type": "cluster"
+  },
+  {
+    "id": "M20",
+    "name": "Nébuleuse Trifide",
+    "ra": 18.043333,
+    "dec": -23.03333,
+    "mag": 8.5,
+    "type": "nebula"
+  },
+  {
+    "id": "M21",
+    "name": "Amas ouvert M21",
+    "ra": 18.076667,
+    "dec": -22.5,
+    "mag": 5.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M22",
+    "name": "Amas globulaire du Sagittaire",
+    "ra": 18.6067,
+    "dec": -23.9,
+    "mag": 5.1,
+    "type": "cluster"
+  },
+  {
+    "id": "M23",
+    "name": "Amas ouvert M23",
+    "ra": 17.9467,
+    "dec": -19.0167,
+    "mag": 5.5,
+    "type": "cluster"
+  },
+  {
+    "id": "M24",
+    "name": "Nuage stellaire du Sagittaire",
+    "ra": 18.2833,
+    "dec": -18.55,
+    "mag": 4.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M25",
+    "name": "Amas ouvert M25",
+    "ra": 18.5267,
+    "dec": -19.1167,
+    "mag": 4.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M26",
+    "name": "Amas ouvert M26",
+    "ra": 18.753333,
+    "dec": -9.4,
+    "mag": 8.0,
+    "type": "cluster"
+  },
+  {
+    "id": "M27",
+    "name": "Nébuleuse de l'Haltère",
+    "ra": 19.993,
+    "dec": 22.717,
+    "mag": 7.5,
+    "type": "nebula"
+  },
+  {
+    "id": "M28",
+    "name": "Amas globulaire M28",
+    "ra": 18.408333,
+    "dec": -24.86667,
+    "mag": 6.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M29",
+    "name": "Amas ouvert M29",
+    "ra": 20.398333,
+    "dec": 38.53333,
+    "mag": 6.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M30",
+    "name": "Amas globulaire M30",
+    "ra": 21.673333,
+    "dec": -23.18333,
+    "mag": 7.5,
+    "type": "cluster"
+  },
+  {
+    "id": "M31",
+    "name": "Galaxie d'Andromède",
+    "ra": 0.712,
+    "dec": 41.269,
+    "mag": 3.4,
+    "type": "galaxy"
+  },
+  {
+    "id": "M32",
+    "name": "Galaxie elliptique naine M32",
+    "ra": 0.711667,
+    "dec": 40.86666,
+    "mag": 8.2,
+    "type": "galaxy"
+  },
+  {
+    "id": "M33",
+    "name": "Galaxie du Triangle",
+    "ra": 1.565,
+    "dec": 30.65,
+    "mag": 5.7,
+    "type": "galaxy"
+  },
+  {
+    "id": "M34",
+    "name": "Amas ouvert M34",
+    "ra": 2.7017,
+    "dec": 42.7833,
+    "mag": 5.2,
+    "type": "cluster"
+  },
+  {
+    "id": "M35",
+    "name": "Amas ouvert M35",
+    "ra": 6.1483,
+    "dec": 24.3333,
+    "mag": 5.1,
+    "type": "cluster"
+  },
+  {
+    "id": "M36",
+    "name": "Amas du Moulinet",
+    "ra": 5.601666,
+    "dec": 34.13334,
+    "mag": 6.0,
+    "type": "cluster"
+  },
+  {
+    "id": "M37",
+    "name": "Amas ouvert M37",
+    "ra": 5.8725,
+    "dec": 32.55,
+    "mag": 5.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M38",
+    "name": "Amas de l’Étoile de mer",
+    "ra": 5.478333,
+    "dec": 35.83333,
+    "mag": 6.4,
+    "type": "cluster"
+  },
+  {
+    "id": "M39",
+    "name": "Amas ouvert M39",
+    "ra": 21.5333,
+    "dec": 48.4333,
+    "mag": 4.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M40",
+    "name": "Étoile double Winnecke 4",
+    "ra": 12.373333,
+    "dec": 58.08333,
+    "mag": 8.0,
+    "type": "cluster"
+  },
+  {
+    "id": "M41",
+    "name": "Amas ouvert M41",
+    "ra": 6.7667,
+    "dec": -20.7333,
+    "mag": 4.5,
+    "type": "cluster"
+  },
+  {
+    "id": "M42",
+    "name": "Grande Nébuleuse d'Orion",
+    "ra": 5.588,
+    "dec": -5.391,
+    "mag": 4.0,
+    "type": "nebula"
+  },
+  {
+    "id": "M43",
+    "name": "Nébuleuse de De Mairan",
+    "ra": 5.593333,
+    "dec": -5.26667,
+    "mag": 9.0,
+    "type": "nebula"
+  },
+  {
+    "id": "M44",
+    "name": "Amas de la Crèche",
+    "ra": 8.667,
+    "dec": 19.667,
+    "mag": 3.7,
+    "type": "cluster"
+  },
+  {
+    "id": "M45",
+    "name": "Pléiades",
+    "ra": 3.783,
+    "dec": 24.117,
+    "mag": 1.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M46",
+    "name": "Amas ouvert M46",
+    "ra": 7.696667,
+    "dec": -14.81667,
+    "mag": 6.1,
+    "type": "cluster"
+  },
+  {
+    "id": "M47",
+    "name": "Amas ouvert M47",
+    "ra": 7.6092,
+    "dec": -14.4833,
+    "mag": 4.4,
+    "type": "cluster"
+  },
+  {
+    "id": "M48",
+    "name": "Amas ouvert M48",
+    "ra": 8.2333,
+    "dec": -5.8,
+    "mag": 5.5,
+    "type": "cluster"
+  },
+  {
+    "id": "M49",
+    "name": "Galaxie elliptique M49",
+    "ra": 12.496667,
+    "dec": 8.0,
+    "mag": 8.4,
+    "type": "galaxy"
+  },
+  {
+    "id": "M50",
+    "name": "Amas du Cœur brisé",
+    "ra": 7.0333,
+    "dec": -8.35,
+    "mag": 5.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M51",
+    "name": "Galaxie du Tourbillon",
+    "ra": 13.498,
+    "dec": 47.195,
+    "mag": 8.4,
+    "type": "galaxy"
+  },
+  {
+    "id": "M52",
+    "name": "Amas ouvert M52",
+    "ra": 23.403333,
+    "dec": 61.58333,
+    "mag": 6.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M53",
+    "name": "Amas globulaire M53",
+    "ra": 13.215,
+    "dec": 18.16667,
+    "mag": 7.7,
+    "type": "cluster"
+  },
+  {
+    "id": "M54",
+    "name": "Amas globulaire M54",
+    "ra": 18.918333,
+    "dec": -30.48333,
+    "mag": 7.7,
+    "type": "cluster"
+  },
+  {
+    "id": "M55",
+    "name": "Amas globulaire M55",
+    "ra": 19.666667,
+    "dec": -30.96667,
+    "mag": 7.0,
+    "type": "cluster"
+  },
+  {
+    "id": "M56",
+    "name": "Amas globulaire M56",
+    "ra": 19.276667,
+    "dec": 30.18333,
+    "mag": 8.2,
+    "type": "cluster"
+  },
+  {
+    "id": "M57",
+    "name": "Nébuleuse de l'Anneau",
+    "ra": 18.893,
+    "dec": 33.033,
+    "mag": 8.8,
+    "type": "nebula"
+  },
+  {
+    "id": "M58",
+    "name": "Galaxie M58",
+    "ra": 12.628333,
+    "dec": 11.81667,
+    "mag": 9.8,
+    "type": "galaxy"
+  },
+  {
+    "id": "M59",
+    "name": "Galaxie elliptique M59",
+    "ra": 12.7,
+    "dec": 11.65,
+    "mag": 9.8,
+    "type": "galaxy"
+  },
+  {
+    "id": "M60",
+    "name": "Galaxie elliptique M60",
+    "ra": 12.728333,
+    "dec": 11.55,
+    "mag": 8.8,
+    "type": "galaxy"
+  },
+  {
+    "id": "M61",
+    "name": "Galaxie M61",
+    "ra": 12.365,
+    "dec": 4.46667,
+    "mag": 9.7,
+    "type": "galaxy"
+  },
+  {
+    "id": "M62",
+    "name": "Amas globulaire M62",
+    "ra": 17.02,
+    "dec": -30.11667,
+    "mag": 6.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M63",
+    "name": "Galaxie du Tournesol",
+    "ra": 13.263333,
+    "dec": 42.03333,
+    "mag": 8.6,
+    "type": "galaxy"
+  },
+  {
+    "id": "M64",
+    "name": "Galaxie de l’Œil noir",
+    "ra": 12.945,
+    "dec": 21.68333,
+    "mag": 8.5,
+    "type": "galaxy"
+  },
+  {
+    "id": "M65",
+    "name": "Galaxie M65",
+    "ra": 11.315,
+    "dec": 13.08333,
+    "mag": 9.3,
+    "type": "galaxy"
+  },
+  {
+    "id": "M66",
+    "name": "Galaxie M66",
+    "ra": 11.336667,
+    "dec": 12.98333,
+    "mag": 9.0,
+    "type": "galaxy"
+  },
+  {
+    "id": "M67",
+    "name": "Amas ouvert M67",
+    "ra": 8.84,
+    "dec": 11.81667,
+    "mag": 6.9,
+    "type": "cluster"
+  },
+  {
+    "id": "M68",
+    "name": "Amas globulaire M68",
+    "ra": 12.658333,
+    "dec": -26.75,
+    "mag": 8.2,
+    "type": "cluster"
+  },
+  {
+    "id": "M69",
+    "name": "Amas globulaire M69",
+    "ra": 18.523,
+    "dec": -32.35,
+    "mag": 7.7,
+    "type": "cluster"
+  },
+  {
+    "id": "M70",
+    "name": "Amas globulaire M70",
+    "ra": 18.72,
+    "dec": -32.3,
+    "mag": 8.1,
+    "type": "cluster"
+  },
+  {
+    "id": "M71",
+    "name": "Amas globulaire M71",
+    "ra": 19.896667,
+    "dec": 18.78333,
+    "mag": 8.3,
+    "type": "cluster"
+  },
+  {
+    "id": "M72",
+    "name": "Amas globulaire M72",
+    "ra": 20.891667,
+    "dec": -12.53333,
+    "mag": 9.4,
+    "type": "cluster"
+  },
+  {
+    "id": "M73",
+    "name": "Astérisme M73",
+    "ra": 20.981667,
+    "dec": -12.63333,
+    "mag": 5.0,
+    "type": "cluster"
+  },
+  {
+    "id": "M74",
+    "name": "Galaxie M74",
+    "ra": 1.611667,
+    "dec": 15.78333,
+    "mag": 9.2,
+    "type": "galaxy"
+  },
+  {
+    "id": "M75",
+    "name": "Amas globulaire M75",
+    "ra": 20.101667,
+    "dec": -21.91667,
+    "mag": 8.6,
+    "type": "cluster"
+  },
+  {
+    "id": "M76",
+    "name": "Petite Nébuleuse de l’Haltère",
+    "ra": 1.706667,
+    "dec": 51.56667,
+    "mag": 11.5,
+    "type": "nebula"
+  },
+  {
+    "id": "M77",
+    "name": "Galaxie de la Baleine",
+    "ra": 2.711667,
+    "dec": 0.01667,
+    "mag": 8.8,
+    "type": "galaxy"
+  },
+  {
+    "id": "M78",
+    "name": "Nébuleuse M78",
+    "ra": 5.778333,
+    "dec": 0.05,
+    "mag": 8.0,
+    "type": "nebula"
+  },
+  {
+    "id": "M79",
+    "name": "Amas globulaire M79",
+    "ra": 5.408333,
+    "dec": -24.55,
+    "mag": 8.0,
+    "type": "cluster"
+  },
+  {
+    "id": "M80",
+    "name": "Amas globulaire M80",
+    "ra": 16.283333,
+    "dec": -22.98333,
+    "mag": 7.2,
+    "type": "cluster"
+  },
+  {
+    "id": "M81",
+    "name": "Galaxie de Bode",
+    "ra": 9.926,
+    "dec": 69.066,
+    "mag": 6.9,
+    "type": "galaxy"
+  },
+  {
+    "id": "M82",
+    "name": "Galaxie du Cigare",
+    "ra": 9.932,
+    "dec": 69.679,
+    "mag": 8.4,
+    "type": "galaxy"
+  },
+  {
+    "id": "M83",
+    "name": "Galaxie du Moulinet austral",
+    "ra": 13.616667,
+    "dec": -29.86667,
+    "mag": 10.1,
+    "type": "galaxy"
+  },
+  {
+    "id": "M84",
+    "name": "Galaxie M84",
+    "ra": 12.418333,
+    "dec": 12.88333,
+    "mag": 9.3,
+    "type": "galaxy"
+  },
+  {
+    "id": "M85",
+    "name": "Galaxie M85",
+    "ra": 12.423333,
+    "dec": 18.18333,
+    "mag": 9.3,
+    "type": "galaxy"
+  },
+  {
+    "id": "M86",
+    "name": "Galaxie M86",
+    "ra": 12.436667,
+    "dec": 12.95,
+    "mag": 9.2,
+    "type": "galaxy"
+  },
+  {
+    "id": "M87",
+    "name": "Galaxie Virgo A",
+    "ra": 12.513333,
+    "dec": 12.4,
+    "mag": 8.6,
+    "type": "galaxy"
+  },
+  {
+    "id": "M88",
+    "name": "Galaxie M88",
+    "ra": 12.533333,
+    "dec": 14.41667,
+    "mag": 9.5,
+    "type": "galaxy"
+  },
+  {
+    "id": "M89",
+    "name": "Galaxie elliptique M89",
+    "ra": 12.595,
+    "dec": 12.55,
+    "mag": 9.8,
+    "type": "galaxy"
+  },
+  {
+    "id": "M90",
+    "name": "Galaxie M90",
+    "ra": 12.613333,
+    "dec": 13.16667,
+    "mag": 9.5,
+    "type": "galaxy"
+  },
+  {
+    "id": "M91",
+    "name": "Galaxie M91",
+    "ra": 12.59,
+    "dec": 14.5,
+    "mag": 10.2,
+    "type": "galaxy"
+  },
+  {
+    "id": "M92",
+    "name": "Amas globulaire M92",
+    "ra": 17.285,
+    "dec": 43.13334,
+    "mag": 6.5,
+    "type": "cluster"
+  },
+  {
+    "id": "M93",
+    "name": "Amas ouvert M93",
+    "ra": 7.743333,
+    "dec": -23.86667,
+    "mag": 6.2,
+    "type": "cluster"
+  },
+  {
+    "id": "M94",
+    "name": "Galaxie M94",
+    "ra": 12.848333,
+    "dec": 41.11666,
+    "mag": 8.1,
+    "type": "galaxy"
+  },
+  {
+    "id": "M95",
+    "name": "Galaxie M95",
+    "ra": 10.733333,
+    "dec": 11.7,
+    "mag": 9.7,
+    "type": "galaxy"
+  },
+  {
+    "id": "M96",
+    "name": "Galaxie M96",
+    "ra": 10.78,
+    "dec": 11.81667,
+    "mag": 9.2,
+    "type": "galaxy"
+  },
+  {
+    "id": "M97",
+    "name": "Nébuleuse du Hibou",
+    "ra": 11.246667,
+    "dec": 55.01667,
+    "mag": 11.2,
+    "type": "nebula"
+  },
+  {
+    "id": "M98",
+    "name": "Galaxie M98",
+    "ra": 12.23,
+    "dec": 14.9,
+    "mag": 10.1,
+    "type": "galaxy"
+  },
+  {
+    "id": "M99",
+    "name": "Galaxie M99",
+    "ra": 12.313333,
+    "dec": 14.41667,
+    "mag": 9.8,
+    "type": "galaxy"
+  },
+  {
+    "id": "M100",
+    "name": "Galaxie M100",
+    "ra": 12.381667,
+    "dec": 15.81667,
+    "mag": 9.4,
+    "type": "galaxy"
+  },
+  {
+    "id": "M101",
+    "name": "Galaxie du Moulinet",
+    "ra": 14.055,
+    "dec": 54.35,
+    "mag": 7.7,
+    "type": "galaxy"
+  },
+  {
+    "id": "M102",
+    "name": "Galaxie du Fuseau",
+    "ra": 15.108333,
+    "dec": 55.75,
+    "mag": 10.0,
+    "type": "galaxy"
+  },
+  {
+    "id": "M103",
+    "name": "Amas ouvert M103",
+    "ra": 1.553333,
+    "dec": 60.7,
+    "mag": 7.4,
+    "type": "cluster"
+  },
+  {
+    "id": "M104",
+    "name": "Galaxie du Sombrero",
+    "ra": 12.667,
+    "dec": -11.623,
+    "mag": 8.0,
+    "type": "galaxy"
+  },
+  {
+    "id": "M105",
+    "name": "Galaxie elliptique M105",
+    "ra": 10.796667,
+    "dec": 12.58333,
+    "mag": 9.3,
+    "type": "galaxy"
+  },
+  {
+    "id": "M106",
+    "name": "Galaxie M106",
+    "ra": 12.316667,
+    "dec": 47.3,
+    "mag": 8.3,
+    "type": "galaxy"
+  },
+  {
+    "id": "M107",
+    "name": "Amas globulaire M107",
+    "ra": 16.541667,
+    "dec": -13.05,
+    "mag": 8.1,
+    "type": "cluster"
+  },
+  {
+    "id": "M108",
+    "name": "Galaxie de la Planche de surf",
+    "ra": 11.191667,
+    "dec": 55.66667,
+    "mag": 10.0,
+    "type": "galaxy"
+  },
+  {
+    "id": "M109",
+    "name": "Galaxie M109",
+    "ra": 11.96,
+    "dec": 53.38334,
+    "mag": 9.8,
+    "type": "galaxy"
+  },
+  {
+    "id": "M110",
+    "name": "Galaxie elliptique naine M110",
+    "ra": 0.673333,
+    "dec": 41.68333,
+    "mag": 8.0,
+    "type": "galaxy"
+  }
+]
