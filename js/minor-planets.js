@@ -17,6 +17,30 @@ function julianDate(date) {
   return date.getTime() / DAY_MS + 2440587.5;
 }
 
+/**
+ * Résout l'équation de Kepler E - e·sin(E) = M pour M dans [0, 2π[.
+ * Newton protégé par une bissection : la fonction est strictement croissante, donc le
+ * résultat converge toujours, y compris pour les orbites très allongées (e proche de 1,
+ * comètes de longue période) où un Newton simple partant de E = M diverge.
+ */
+function solveKeplerEquation(meanAnomaly, e) {
+  let low = 0;
+  let high = 2 * Math.PI;
+  let E = e < 0.8
+    ? meanAnomaly
+    : Math.min(Math.max(meanAnomaly + 0.85 * e * (Math.sin(meanAnomaly) >= 0 ? 1 : -1), low), high);
+  for (let iteration = 0; iteration < 200; iteration++) {
+    const f = E - e * Math.sin(E) - meanAnomaly;
+    if (f > 0) high = E; else low = E;
+    if (Math.abs(f) < 1e-14) return E;
+    let next = E - f / (1 - e * Math.cos(E));
+    if (!(next > low && next < high)) next = (low + high) / 2;
+    if (Math.abs(next - E) < 1e-15) return next;
+    E = next;
+  }
+  return E;
+}
+
 function propagateHeliocentricEcliptic(body, jd, epochJD) {
   const a = Number(body.a);
   const e = Number(body.e);
@@ -29,14 +53,7 @@ function propagateHeliocentricEcliptic(body, jd, epochJD) {
   // n = k/a^(3/2), avec k exprimé en radians/jour.
   const meanMotion = AU_DAYS_CONSTANT / Math.pow(a, 1.5);
   const meanAnomaly = ((meanAnomaly0 + meanMotion * (jd - (Number(body.epochJD) || epochJD || EPOCH_JD_FALLBACK))) % (2 * Math.PI) + 2 * Math.PI) % (2 * Math.PI);
-  let eccentricAnomaly = meanAnomaly;
-  for (let iteration = 0; iteration < 12; iteration++) {
-    const denominator = 1 - e * Math.cos(eccentricAnomaly);
-    if (Math.abs(denominator) < 1e-12) break;
-    const delta = (eccentricAnomaly - e * Math.sin(eccentricAnomaly) - meanAnomaly) / denominator;
-    eccentricAnomaly -= delta;
-    if (Math.abs(delta) < 1e-12) break;
-  }
+  const eccentricAnomaly = solveKeplerEquation(meanAnomaly, e);
 
   const trueAnomaly = 2 * Math.atan2(
     Math.sqrt(1 + e) * Math.sin(eccentricAnomaly / 2),
