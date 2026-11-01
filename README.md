@@ -1,4 +1,4 @@
-Atlas Céleste Seduwa— version 495
+Atlas Céleste Seduwa— version 496
 
 La v467 conserve la synchronisation de la grille écliptique de la v464 et ajoute la mémorisation du dernier lieu d’observation choisi. Les coordonnées et le nom du lieu sont enregistrés localement sur l’appareil lorsque l’utilisateur choisit un lieu prédéfini ou récupère sa position GPS. Au lancement suivant, ce lieu est restauré. Si aucune position valide n’est enregistrée ou si le stockage local est indisponible, Paris reste le lieu par défaut.
 
