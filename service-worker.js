@@ -1,7 +1,7 @@
 
 "use strict";
 
-const CACHE_NAME = "atlas-celeste-v495";
+const CACHE_NAME = "atlas-celeste-v496";
 
 const MILKY_WAY_MAP_URL = "https://cdn.eso.org/images/screen/ESA_Gaia_DR2_AllSky_Brightness_Colour_black_bg_8k.jpg";
 
