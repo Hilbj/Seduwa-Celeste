@@ -1,4 +1,4 @@
-Atlas Céleste — version 470
+Atlas Céleste Seduwa— version 495
 
 La v467 conserve la synchronisation de la grille écliptique de la v464 et ajoute la mémorisation du dernier lieu d’observation choisi. Les coordonnées et le nom du lieu sont enregistrés localement sur l’appareil lorsque l’utilisateur choisit un lieu prédéfini ou récupère sa position GPS. Au lancement suivant, ce lieu est restauré. Si aucune position valide n’est enregistrée ou si le stockage local est indisponible, Paris reste le lieu par défaut.
 
@@ -12,15 +12,32 @@ La v468 améliore le confort d’interaction : retours visuels plus nets au touc
 
 La v469 rend les interactions plus explicites : bouton de fermeture de la fiche toujours visible, action principale plus contrastée et contours de focus clavier. La palette rouge de la vision nocturne est préservée. Aucun JavaScript ni code capteur n’est modifié.
 
+## v495
+- Textes externalisés dans js/ui-texts.js (5 blocs migrés depuis ui.js)
+- Doublons supprimés dans COMMON_STAR_NAMES (app.js)
+- JSDoc AppState ajouté (app.js)
 
-## v470 — Parcours de découverte et cohérence visuelle
+## v494
+- Icônes Unicode remplacées par des SVG monochromes harmonisés (index.html)
+- Format "HIP xxx" corrigé (displayStarName)
+- Alignement des bandeaux Expert / Découverte en desktop (style.css, v492 + v494)
+- Bug du parcours « Ma soirée en 3 étapes » sur mobile corrigé (scrollTop)
+
+## v493
+- Visée par défaut mobile à 25° (app.js, ligne 256)
+- Optimisation PWA pour iPhone/iPad (manifest, icônes Apple touch, meta tags).
+- Correction du bug du « Parcours du soir » sur mobile (le menu ne bloquait plus).
+- Visée par défaut ajustée à 25° sur mobile pour un meilleur confort.
+- Nouvelle icône réaliste et dynamique pour les comètes sur le canvas.
+
+## v492
 - Trois actions prioritaires : pointer le ciel, trouver un objet, balade guidée.
 - Les autres outils sont regroupés sous « Explorer davantage ».
 - Styles de boutons, focus clavier, états actifs, pictogrammes et contrastes harmonisés.
 - Fonctionnement astronomique, actions existantes et capteurs conservés.
 
 
-## v472 — Action principale et espace de carte
+## v491 
 - « Visible maintenant » remplace « Balade guidée » parmi les trois actions prioritaires du menu Découverte.
 - « Balade guidée » reste disponible dans « Explorer davantage ».
 - Le bloc titre et « Direction observée » sont remontés en mode Découverte, avec un ajustement spécifique au mobile pour libérer davantage de surface de carte.
