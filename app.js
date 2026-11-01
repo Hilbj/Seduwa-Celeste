@@ -3946,6 +3946,84 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
     drawLabel(mapLabel, point, color);
   }
 
+  /* v495 — rendu spécifique des comètes : noyau, chevelure et deux queues
+   orientées à l'opposé du Soleil (direction anti-solaire réelle). */
+  function drawCometObject(object, point, date) {
+    const dustColor = "rgba(232,194,127,.55)";   // queue de poussière (dorée, courbée)
+    const ionColor = "rgba(168,206,255,.75)";    // queue d'ions (bleutée, rectiligne)
+    const nucleusColor = "#eef4ff";
+    const labelColor = "#e8c27f";
+
+    // --- Direction des queues : toujours à l'opposé du Soleil ---
+    // Repli par défaut : queues vers le haut de l'écran (le Soleil est sous l'horizon la nuit).
+    let tailAngle = -Math.PI / 2;
+    const sunObj = typeof solarObjectsAt === "function"
+      ? solarObjectsAt(date).find(o => o.type === "sun" || o.name === "Soleil")
+      : null;
+    if (sunObj && Number.isFinite(Number(sunObj.az)) && Number.isFinite(Number(sunObj.alt))) {
+      // Le point anti-solaire est au-dessus de l'horizon quand le Soleil est dessous :
+      // sa projection reste fiable en observation nocturne.
+      const antiAz = (Number(sunObj.az) + 180) % 360;
+      const antiAlt = -Number(sunObj.alt);
+      let ref = project(antiAz, antiAlt);
+      let sign = 1;                        // les queues pointent vers le point anti-solaire
+      if (!ref) {
+        // Observation de jour : on inverse la direction Soleil → comète.
+        ref = project(Number(sunObj.az), Number(sunObj.alt));
+        sign = -1;
+      }
+      if (ref && Number.isFinite(ref.x) && Number.isFinite(ref.y)) {
+        const dx = (ref.x - point.x) * sign;
+        const dy = (ref.y - point.y) * sign;
+        if (Math.hypot(dx, dy) > 1) tailAngle = Math.atan2(dy, dx);
+      }
+    }
+
+    ctx.save();
+    ctx.translate(point.x, point.y);
+    ctx.rotate(tailAngle);   // l'axe +X local pointe maintenant dans la direction des queues
+    ctx.lineCap = "round";
+
+    // Queue de poussière : large et courbée (traîne derrière le mouvement orbital).
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.quadraticCurveTo(13, -3.5, 24, -9);
+    ctx.strokeStyle = dustColor;
+    ctx.lineWidth = 3;
+    ctx.stroke();
+
+    // Queue d'ions : fine et rectiligne (poussée par le vent solaire).
+    ctx.beginPath();
+    ctx.moveTo(0, 0);
+    ctx.lineTo(26, 0.5);
+    ctx.strokeStyle = ionColor;
+    ctx.lineWidth = 1.3;
+    ctx.stroke();
+
+    // Chevelure (coma) : halo diffus autour du noyau.
+    const coma = ctx.createRadialGradient(0, 0, 0, 0, 0, 5.5);
+    coma.addColorStop(0, "rgba(238,244,255,.85)");
+    coma.addColorStop(.45, "rgba(238,244,255,.3)");
+    coma.addColorStop(1, "rgba(238,244,255,0)");
+    ctx.fillStyle = coma;
+    ctx.beginPath();
+    ctx.arc(0, 0, 5.5, 0, TAU);
+    ctx.fill();
+
+    // Noyau brillant.
+    ctx.shadowColor = "#ffffff";
+    ctx.shadowBlur = 6;
+    ctx.fillStyle = nucleusColor;
+    ctx.beginPath();
+    ctx.arc(0, 0, 1.5, 0, TAU);
+    ctx.fill();
+
+    ctx.restore();
+
+    const mapLabel = object.name || object.designation || object.id || "Comète";
+    drawLabel(mapLabel, point, labelColor);
+  }
+
   function selectedPosition(date = (state.observationDate || new Date())) {
     if (!state.selected) {
       return null;
@@ -5374,7 +5452,9 @@ function renderSkyNow() {
       object.type === "moon"
     ) {
       drawSolarObject(object, point);
-    } else if (object.type === "minor-planet" || object.type === "dwarf-planet" || object.type === "comet") {
+    } else if (object.type === "comet") {
+      drawCometObject(object, point, date);
+    } else if (object.type === "minor-planet" || object.type === "dwarf-planet") {
       drawMinorPlanetObject(object, point);
     } else {
       drawDeepSkyObject(object, point);
