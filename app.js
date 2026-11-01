@@ -3921,7 +3921,134 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
      SÉLECTION DES OBJETS
      ========================================================== */
 
+  /* ----------------------------------------------------------
+     COMÈTES : tête (coma) + queue de gaz + queue de poussière.
+     La queue est toujours dirigée à l'opposé du Soleil (vent solaire) ;
+     sa longueur à l'écran est symbolique et croît quand la comète
+     s'approche du Soleil (distance héliocentrique en UA).
+     ---------------------------------------------------------- */
+  let cometSunCache = { second: -1, sun: null };
+  function currentSunHorizontal() {
+    const date = state.observationDate || new Date();
+    const second = Math.floor(date.getTime() / 1000);
+    if (cometSunCache.second !== second) {
+      let sun = null;
+      try { sun = solarObjectsAt(date).find(item => item && (item.type === "sun" || item.name === "Soleil")) || null; } catch { sun = null; }
+      cometSunCache = { second, sun };
+    }
+    return cometSunCache.sun;
+  }
+
+  // Direction (vecteur unitaire à l'écran) qui s'éloigne du Soleil, mesurée le long
+  // du grand cercle Soleil -> comète pour rester juste quelle que soit la projection.
+  function cometTailDirection(object, point) {
+    const fallback = { x: 0.6, y: -0.8 };
+    const sun = currentSunHorizontal();
+    if (!sun || !Number.isFinite(sun.az) || !Number.isFinite(sun.alt)) return fallback;
+    const D = Math.PI / 180;
+    const vec = (az, alt) => [Math.cos(alt * D) * Math.sin(az * D), Math.cos(alt * D) * Math.cos(az * D), Math.sin(alt * D)];
+    const c = vec(object.az, object.alt);
+    const sv = vec(sun.az, sun.alt);
+    const dot = c[0] * sv[0] + c[1] * sv[1] + c[2] * sv[2];
+    const t = [dot * c[0] - sv[0], dot * c[1] - sv[1], dot * c[2] - sv[2]];
+    const norm = Math.hypot(t[0], t[1], t[2]);
+    if (!(norm > 1e-6)) return fallback;
+    const eps = 0.8 * D;
+    const p = [c[0] + eps * t[0] / norm, c[1] + eps * t[1] / norm, c[2] + eps * t[2] / norm];
+    const pn = Math.hypot(p[0], p[1], p[2]);
+    const az2 = Math.atan2(p[0], p[1]) / D;
+    const alt2 = Math.asin(Math.max(-1, Math.min(1, p[2] / pn))) / D;
+    const q = projectDirectionToScreen(az2, alt2);
+    if (!q) return fallback;
+    const vx = q.x - point.x;
+    const vy = q.y - point.y;
+    const len = Math.hypot(vx, vy);
+    return len > 1e-6 ? { x: vx / len, y: vy / len } : fallback;
+  }
+
+  function drawCometObject(object, point) {
+    const rHelio = Number(object.heliocentricDistanceAU);
+    // Activité : nulle au-delà de ~3,5 UA du Soleil (la glace ne sublime plus), maximale près du Soleil.
+    const activity = Number.isFinite(rHelio) ? Math.min(1, Math.max(0, (3.5 - rHelio) / 3.5)) : 0.3;
+    const dir = cometTailDirection(object, point);
+    const nx = -dir.y;
+    const ny = dir.x;
+    const maxLength = Math.min(state.width, state.height) * 0.2;
+    const length = Math.min(maxLength, 16 + 46 * Math.pow(activity, 0.8));
+    const fade = 0.5 + 0.5 * activity;
+    const hx = point.x;
+    const hy = point.y;
+    const at = (along, side) => ({ x: hx + dir.x * along + nx * side, y: hy + dir.y * along + ny * side });
+    ctx.save();
+    ctx.lineJoin = "round";
+
+    // Queue de poussière : bande courbe, jaune pâle, qui part de la tête et s'effile.
+    const dustTip = at(length * 0.95, length * 0.22);
+    const dustGradient = ctx.createLinearGradient(hx, hy, dustTip.x, dustTip.y);
+    dustGradient.addColorStop(0, `rgba(255, 232, 186, ${0.6 * fade})`);
+    dustGradient.addColorStop(0.5, `rgba(255, 216, 152, ${0.26 * fade})`);
+    dustGradient.addColorStop(1, "rgba(255, 210, 140, 0)");
+    const dustHalfWidth = 3 + 5 * activity;
+    const dustMid = at(length * 0.5, length * 0.07);
+    const bend = (t, side) => {
+      const u = 1 - t;
+      const cx = u * u * hx + 2 * u * t * dustMid.x + t * t * dustTip.x;
+      const cy = u * u * hy + 2 * u * t * dustMid.y + t * t * dustTip.y;
+      const w = dustHalfWidth * Math.pow(u, 0.9) * side;
+      return { x: cx + nx * w, y: cy + ny * w };
+    };
+    ctx.fillStyle = dustGradient;
+    ctx.beginPath();
+    for (let i = 0; i <= 14; i++) {
+      const q = bend(i / 14, 1);
+      if (i === 0) ctx.moveTo(q.x, q.y); else ctx.lineTo(q.x, q.y);
+    }
+    for (let i = 14; i >= 0; i--) {
+      const q = bend(i / 14, -0.5);
+      ctx.lineTo(q.x, q.y);
+    }
+    ctx.closePath();
+    ctx.fill();
+
+    // Queue de gaz (ionique) : fine, rectiligne, bleutée.
+    const ionLength = length * 1.1;
+    const ionTip = at(ionLength, 0);
+    const ionGradient = ctx.createLinearGradient(hx, hy, ionTip.x, ionTip.y);
+    ionGradient.addColorStop(0, `rgba(170, 224, 255, ${0.85 * fade})`);
+    ionGradient.addColorStop(0.6, `rgba(120, 190, 255, ${0.3 * fade})`);
+    ionGradient.addColorStop(1, "rgba(110, 180, 255, 0)");
+    const ionWidth = 1.2 + 1.3 * activity;
+    const ionA = at(0, ionWidth);
+    const ionB = at(0, -ionWidth);
+    ctx.fillStyle = ionGradient;
+    ctx.beginPath();
+    ctx.moveTo(ionA.x, ionA.y);
+    ctx.lineTo(ionTip.x, ionTip.y);
+    ctx.lineTo(ionB.x, ionB.y);
+    ctx.closePath();
+    ctx.fill();
+
+    // Tête : halo diffus (coma) puis noyau brillant.
+    const comaRadius = 6 + 3 * activity;
+    const coma = ctx.createRadialGradient(hx, hy, 0, hx, hy, comaRadius);
+    coma.addColorStop(0, "rgba(255, 255, 255, 0.95)");
+    coma.addColorStop(0.25, "rgba(214, 240, 255, 0.7)");
+    coma.addColorStop(1, "rgba(150, 205, 255, 0)");
+    ctx.fillStyle = coma;
+    ctx.beginPath();
+    ctx.arc(hx, hy, comaRadius, 0, TAU);
+    ctx.fill();
+    ctx.fillStyle = "#ffffff";
+    ctx.beginPath();
+    ctx.arc(hx, hy, 1.5, 0, TAU);
+    ctx.fill();
+    ctx.restore();
+
+    drawLabel(object.name || object.proper_name || object.designation || "Comète", point, "#bfe6ff");
+  }
+
   function drawMinorPlanetObject(object, point) {
+    if (object.type === "comet") { drawCometObject(object, point); return; }
     const color = "#e8c27f";
     ctx.save();
     ctx.strokeStyle = color;
@@ -3944,84 +4071,6 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
     ctx.restore();
     const mapLabel = object.dwarfPlanet ? (object.name || object.proper_name || "Planète naine") : `${object.id ? `${object.id} ` : ""}${object.name || object.designation || "Planète mineure"}`;
     drawLabel(mapLabel, point, color);
-  }
-
-  /* v495 — rendu spécifique des comètes : noyau, chevelure et deux queues
-   orientées à l'opposé du Soleil (direction anti-solaire réelle). */
-  function drawCometObject(object, point, date) {
-    const dustColor = "rgba(232,194,127,.55)";   // queue de poussière (dorée, courbée)
-    const ionColor = "rgba(168,206,255,.75)";    // queue d'ions (bleutée, rectiligne)
-    const nucleusColor = "#eef4ff";
-    const labelColor = "#e8c27f";
-
-    // --- Direction des queues : toujours à l'opposé du Soleil ---
-    // Repli par défaut : queues vers le haut de l'écran (le Soleil est sous l'horizon la nuit).
-    let tailAngle = -Math.PI / 2;
-    const sunObj = typeof solarObjectsAt === "function"
-      ? solarObjectsAt(date).find(o => o.type === "sun" || o.name === "Soleil")
-      : null;
-    if (sunObj && Number.isFinite(Number(sunObj.az)) && Number.isFinite(Number(sunObj.alt))) {
-      // Le point anti-solaire est au-dessus de l'horizon quand le Soleil est dessous :
-      // sa projection reste fiable en observation nocturne.
-      const antiAz = (Number(sunObj.az) + 180) % 360;
-      const antiAlt = -Number(sunObj.alt);
-      let ref = project(antiAz, antiAlt);
-      let sign = 1;                        // les queues pointent vers le point anti-solaire
-      if (!ref) {
-        // Observation de jour : on inverse la direction Soleil → comète.
-        ref = project(Number(sunObj.az), Number(sunObj.alt));
-        sign = -1;
-      }
-      if (ref && Number.isFinite(ref.x) && Number.isFinite(ref.y)) {
-        const dx = (ref.x - point.x) * sign;
-        const dy = (ref.y - point.y) * sign;
-        if (Math.hypot(dx, dy) > 1) tailAngle = Math.atan2(dy, dx);
-      }
-    }
-
-    ctx.save();
-    ctx.translate(point.x, point.y);
-    ctx.rotate(tailAngle);   // l'axe +X local pointe maintenant dans la direction des queues
-    ctx.lineCap = "round";
-
-    // Queue de poussière : large et courbée (traîne derrière le mouvement orbital).
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.quadraticCurveTo(13, -3.5, 24, -9);
-    ctx.strokeStyle = dustColor;
-    ctx.lineWidth = 3;
-    ctx.stroke();
-
-    // Queue d'ions : fine et rectiligne (poussée par le vent solaire).
-    ctx.beginPath();
-    ctx.moveTo(0, 0);
-    ctx.lineTo(26, 0.5);
-    ctx.strokeStyle = ionColor;
-    ctx.lineWidth = 1.3;
-    ctx.stroke();
-
-    // Chevelure (coma) : halo diffus autour du noyau.
-    const coma = ctx.createRadialGradient(0, 0, 0, 0, 0, 5.5);
-    coma.addColorStop(0, "rgba(238,244,255,.85)");
-    coma.addColorStop(.45, "rgba(238,244,255,.3)");
-    coma.addColorStop(1, "rgba(238,244,255,0)");
-    ctx.fillStyle = coma;
-    ctx.beginPath();
-    ctx.arc(0, 0, 5.5, 0, TAU);
-    ctx.fill();
-
-    // Noyau brillant.
-    ctx.shadowColor = "#ffffff";
-    ctx.shadowBlur = 6;
-    ctx.fillStyle = nucleusColor;
-    ctx.beginPath();
-    ctx.arc(0, 0, 1.5, 0, TAU);
-    ctx.fill();
-
-    ctx.restore();
-
-    const mapLabel = object.name || object.designation || object.id || "Comète";
-    drawLabel(mapLabel, point, labelColor);
   }
 
   function selectedPosition(date = (state.observationDate || new Date())) {
@@ -5452,9 +5501,7 @@ function renderSkyNow() {
       object.type === "moon"
     ) {
       drawSolarObject(object, point);
-    } else if (object.type === "comet") {
-      drawCometObject(object, point, date);
-    } else if (object.type === "minor-planet" || object.type === "dwarf-planet") {
+    } else if (object.type === "minor-planet" || object.type === "dwarf-planet" || object.type === "comet") {
       drawMinorPlanetObject(object, point);
     } else {
       drawDeepSkyObject(object, point);
