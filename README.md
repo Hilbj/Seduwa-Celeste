@@ -29,7 +29,7 @@ Hale-Bopp est stable lui aussi, autour de 51,3 à 51,5 UA. Son périhélie sort 
 
 Ces deux comètes sont de toute façon invisibles (magnitude de 26 à 27, très au-delà des télescopes amateurs). La correction évite surtout de fausses positions et de fausses magnitudes dans leurs fiches, la recherche et les listes.
 
-Limites : le modèle reste képlérien simplifié, sans perturbations planétaires. Je n’ai pas pu comparer avec des éphémérides externes (pas d’accès réseau). Les planètes de solar-system-orbits.js ont aussi une boucle de Newton, mais leurs excentricités sont faibles et elle converge bien, donc je n’y ai pas touché.
+Limites : le modèle reste képlérien simplifié, sans perturbations planétaires. Les planètes de solar-system-orbits.js ont aussi une boucle de Newton, mais leurs excentricités sont faibles et elle converge bien.
 
 ## v495
 - Textes externalisés dans js/ui-texts.js (5 blocs migrés depuis ui.js)
