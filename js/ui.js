@@ -1665,10 +1665,10 @@ export function createUI({
     { date: "2026-12-14", title: "Maximum des Géminides", type: "Essaim météoritique", detail: "Un des essaims annuels les plus actifs ; observez largement autour du radiant." },
     { date: "2026-12-22", title: "Maximum des Ursides", type: "Essaim météoritique", detail: "Essaim hivernal plus modeste, associé à la Petite Ourse." },
     { date: "2027-01-04", title: "Maximum des Quadrantides", type: "Essaim météoritique", detail: "Maximum bref : les heures autour du pic comptent particulièrement." },
-    { date: "2027-02-06", title: "Éclipse annulaire de Soleil", type: "Éclipse solaire", detail: "Non visible comme éclipse depuis les Pays-Bas. Ne regardez jamais le Soleil sans filtre solaire certifié." },
+    { date: "2027-02-06", title: "Éclipse annulaire de Soleil", type: "Éclipse solaire", detail: "Ne regardez jamais le Soleil sans filtre solaire certifié." },
     { date: "2027-02-21", title: "Éclipse pénombrale de Lune", type: "Éclipse lunaire", detail: "Assombrissement subtil de la Lune ; la visibilité dépend de l’horizon et de l’heure locale." },
     { date: "2027-04-23", title: "Maximum des Lyrides", type: "Essaim météoritique", detail: "Essaim printanier observable en seconde partie de nuit." },
-    { date: "2027-05-06", title: "Maximum des Êta-Aquarides", type: "Essaim météoritique", detail: "Meilleure visibilité généralement avant l’aube ; radiant bas depuis les Pays-Bas." },
+    { date: "2027-05-06", title: "Maximum des Êta-Aquarides", type: "Essaim météoritique", detail: "Meilleure visibilité généralement avant l’aube." },
     { date: "2027-08-02", title: "Éclipse totale de Soleil", type: "Éclipse solaire", detail: "Une éclipse totale se produit sur une bande géographique limitée ; la phase visible dépend de votre lieu." },
     { date: "2027-08-12", title: "Maximum des Perséides", type: "Essaim météoritique", detail: "À observer après la tombée de la nuit et jusqu’à l’aube, loin des lumières." }
   ];
