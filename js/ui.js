@@ -26,7 +26,6 @@ export function createUI({
   getVisibleNowObjects,
   getCatalogObjects,
   getStarPosition,
-  onLocationChange,
   onObservationDateChange,
   selectTarget,
   resizeCanvas,
@@ -1666,10 +1665,10 @@ export function createUI({
     { date: "2026-12-14", title: "Maximum des Géminides", type: "Essaim météoritique", detail: "Un des essaims annuels les plus actifs ; observez largement autour du radiant." },
     { date: "2026-12-22", title: "Maximum des Ursides", type: "Essaim météoritique", detail: "Essaim hivernal plus modeste, associé à la Petite Ourse." },
     { date: "2027-01-04", title: "Maximum des Quadrantides", type: "Essaim météoritique", detail: "Maximum bref : les heures autour du pic comptent particulièrement." },
-    { date: "2027-02-06", title: "Éclipse annulaire de Soleil", type: "Éclipse solaire", detail: "Non visible comme éclipse depuis les Pays-Bas. Ne regardez jamais le Soleil sans filtre solaire certifié." },
+    { date: "2027-02-06", title: "Éclipse annulaire de Soleil", type: "Éclipse solaire", detail: "Ne regardez jamais le Soleil sans filtre solaire certifié." },
     { date: "2027-02-21", title: "Éclipse pénombrale de Lune", type: "Éclipse lunaire", detail: "Assombrissement subtil de la Lune ; la visibilité dépend de l’horizon et de l’heure locale." },
     { date: "2027-04-23", title: "Maximum des Lyrides", type: "Essaim météoritique", detail: "Essaim printanier observable en seconde partie de nuit." },
-    { date: "2027-05-06", title: "Maximum des Êta-Aquarides", type: "Essaim météoritique", detail: "Meilleure visibilité généralement avant l’aube ; radiant bas depuis les Pays-Bas." },
+    { date: "2027-05-06", title: "Maximum des Êta-Aquarides", type: "Essaim météoritique", detail: "Meilleure visibilité généralement avant l’aube." },
     { date: "2027-08-02", title: "Éclipse totale de Soleil", type: "Éclipse solaire", detail: "Une éclipse totale se produit sur une bande géographique limitée ; la phase visible dépend de votre lieu." },
     { date: "2027-08-12", title: "Maximum des Perséides", type: "Essaim météoritique", detail: "À observer après la tombée de la nuit et jusqu’à l’aube, loin des lumières." }
   ];
@@ -2212,8 +2211,8 @@ export function createUI({
     }
     const skyWalks = {
       polaris: { title: "Trouver l’étoile Polaire", constellation: "ursa major", overlay: { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }, { from: "Dubhe", to: "Polaris", dashed: true }], target: "Polaris" }, stepOverlays: [
-        { color: "#ff514d", segments: [{ from: "Dubhe", to: "Merak" }, { from: "Merak", to: "Phecda" }, { from: "Phecda", to: "Megrez" }, { from: "Megrez", to: "Dubhe" }, { from: "Megrez", to: "Alioth" }, { from: "Alioth", to: "Mizar" }, { from: "Mizar", to: "Alkaid" }], target: "Dubhe" },
-        { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }], target: "Dubhe" },
+        { color: "#ff514d", segments: [{ from: "Dubhe", to: "Merak" }, { from: "Merak", to: "Phecda" }, { from: "Phecda", to: "Megrez" }, { from: "Megrez", to: "Dubhe" }], target: "Dubhe" },
+        { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }, { from: "Dubhe", to: "Polaris", dashed: true }], target: "Dubhe" },
         { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }, { from: "Dubhe", to: "Polaris", dashed: true }], target: "Polaris" }
       ], intro: "La Grande Ourse sert de panneau indicateur. Tu n’as pas besoin de connaître les étoiles par leur nom pour commencer.", steps: [
         "Repère la Grande Ourse : elle ressemble à une grande casserole avec un manche.",
@@ -2968,7 +2967,7 @@ export function createUI({
             state.heading = norm360(Number(step.object.az));
             state.pitch = Math.max(-5, Math.min(22, Number(step.object.alt)));
             const card = $("object-card"); if (card) card.hidden = true;
-            collapseDiscoveryPanelAfterGuideStart();
+            panel.hidden = true;
             if (typeof drawSky === "function") drawSky();
           });
           item.append(title, note, show); list.append(item);
@@ -3001,6 +3000,14 @@ export function createUI({
         if (action === "evening-route") {
           buildDiscoveryEveningRoute();
           document.querySelectorAll("[data-discovery-action]").forEach(item => item.classList.toggle("is-active", item === button));
+          // « Ma soirée » se trouve plus bas que « Visible maintenant ».
+          // Revenir en haut pour conserver visibles l'en-tête et la poignée.
+          if (window.matchMedia("(max-width: 600px)").matches) {
+            window.requestAnimationFrame(() => {
+              discoveryPanel?.scrollTo({ top: 0, behavior: "auto" });
+              eveningRoutePanel?.scrollTo({ top: 0, behavior: "auto" });
+            });
+          }
         }
         if (action !== "search" && searchPanel) searchPanel.hidden = true;
         if (action !== "search") {
@@ -3446,7 +3453,6 @@ export function createUI({
       state.longitude = place.longitude;
       state.locationName = place.name;
       state.locationReady = true;
-      if (typeof onLocationChange === "function") onLocationChange();
       try {
         localStorage.setItem("atlas-celeste-last-observation-location", JSON.stringify({
           latitude: state.latitude,
