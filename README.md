@@ -1,6 +1,8 @@
 Atlas Céleste Seduwa— version 496
 
 ## v496
+De 15 minutes avant le lever du Soleil jusqu’à 15 minutes après son coucher, la carte s’ouvre centrée sur l’azimut du Soleil ; le reste du temps elle reste pointée au Nord
+
 Correction d'un bug : il touchait en fait deux comètes, C/2020 F3 NEOWISE et C/1995 O1 Hale-Bopp. Le correctif est dans js/minor-planets.js.
 
 La cause : pour retrouver la position d’une comète sur son orbite, le code résolvait l’équation de Kepler avec quelques itérations de Newton. Pour les orbites très allongées (excentricité proche de 1), cette méthode diverge. 
