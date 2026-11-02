@@ -3,19 +3,13 @@ Atlas Céleste Seduwa— version 496
 ## v496
 De 15 minutes avant le lever du Soleil jusqu’à 15 minutes après son coucher, la carte s’ouvre centrée sur l’azimut du Soleil ; le reste du temps elle reste pointée au Nord
 
-Correction d'un bug : il touchait en fait deux comètes, C/2020 F3 NEOWISE et C/1995 O1 Hale-Bopp. Le correctif est dans js/minor-planets.js.
+Correction d'un bug : il touchait deux comètes, C/2020 F3 NEOWISE et C/1995 O1 Hale-Bopp.
 
-La cause : pour retrouver la position d’une comète sur son orbite, le code résolvait l’équation de Kepler avec quelques itérations de Newton. Pour les orbites très allongées (excentricité proche de 1), cette méthode diverge. 
-
-Sur plusieurs dates entre fin 2025 et 2033 :
-La position de NEOWISE (excentricité 0,9992) était fausse dans 47 % des cas ;
-La position de Hale-Bopp (0,9951) l’était dans 15 % des cas, avec des erreurs de plusieurs ordres de grandeur.
-
+Cause : pour retrouver la position d’une comète sur son orbite, le code résolvait l’équation de Kepler avec quelques itérations de Newton. Pour les orbites très allongées (excentricité proche de 1), cette méthode diverge. 
 Correction : un solveur qui converge toujours (Newton protégé par une bissection). 
-
 Résultats :
 NEOWISE est maintenant stable, de 18,84 UA le 1ᵉʳ novembre 2026 à 19,23 UA en janvier 2027. Au périhélie, le calcul donne 0,295 UA, qui est la valeur du catalogue.
-Hale-Bopp est stable lui aussi, autour de 51,3 à 51,5 UA. Son périhélie sort à 0,914 UA, comme dans le catalogue.
+Hale-Bopp est stable aussi, autour de 51,3 à 51,5 UA. Son périhélie sort à 0,914 UA, valeur catalogue.
 
 Ces deux comètes sont de toute façon invisibles (magnitude de 26 à 27, très au-delà des télescopes amateurs). La correction évite surtout de fausses positions et de fausses magnitudes dans leurs fiches, la recherche et les listes.
 
