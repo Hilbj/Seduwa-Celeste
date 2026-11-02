@@ -477,8 +477,10 @@ import { createUI } from "./js/ui.js";
     setImmersive,
     enterFinder,
     exitFinder,
+    onLocationChange: () => refreshAutoHeading(),
     onObservationDateChange: date => {
       state.observationDate = date;
+      refreshAutoHeading();
       syncObservationModeVisuals();
       const label = $("observation-mode");
       if (label) label.textContent = date ? "Date choisie" : "Temps réel";
@@ -636,6 +638,7 @@ import { createUI } from "./js/ui.js";
       return;
     }
     state.observationDate = parsed;
+    refreshAutoHeading();
     syncObservationModeVisuals();
     const label = $("observation-mode");
     if (label) label.textContent = "Date choisie";
@@ -677,6 +680,7 @@ import { createUI } from "./js/ui.js";
   if (liveTimeButton) {
     liveTimeButton.addEventListener("click", () => {
       state.observationDate = null;
+      refreshAutoHeading();
       syncObservationModeVisuals();
       if (observationInput) observationInput.value = formatLocalDateTime(new Date());
       const label = $("observation-mode");
@@ -3922,6 +3926,40 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
      ========================================================== */
 
   /* ----------------------------------------------------------
+     CAP PAR DÉFAUT : vers le Soleil de (lever − 15 min) à (coucher + 15 min),
+     plein Nord le reste du temps. Appliqué au démarrage et quand l'utilisateur
+     change la date, l'heure ou le lieu ; jamais par-dessus un cap qu'il a lui-même
+     réglé (glissement, guidage, capteurs).
+     ---------------------------------------------------------- */
+  const AUTO_HEADING_MARGIN_MS = 15 * 60 * 1000;
+  // Altitude apparente (réfraction incluse, comme dans solarObjectsAt) du centre du Soleil
+  // à l'instant exact du lever ou du coucher : ≈ -0,22° (mesuré avec Astronomy Engine).
+  const SUN_RISE_SET_ALTITUDE = -0.22;
+  let lastAutoHeading = null;
+  function defaultSkyHeading(date) {
+    const sunAt = at => {
+      try { return solarObjectsAt(at).find(item => item && (item.type === "sun" || item.name === "Soleil")) || null; }
+      catch { return null; }
+    };
+    const now = sunAt(date);
+    if (!now || !Number.isFinite(now.az) || !Number.isFinite(now.alt)) return 0;
+    const before = sunAt(new Date(date.getTime() - AUTO_HEADING_MARGIN_MS));
+    const after = sunAt(new Date(date.getTime() + AUTO_HEADING_MARGIN_MS));
+    // « 15 min après le coucher » : le Soleil était levé il y a 15 min.
+    // « 15 min avant le lever » : il le sera dans 15 min.
+    const daylight = [now, before, after].some(sun => sun && Number.isFinite(sun.alt) && sun.alt > SUN_RISE_SET_ALTITUDE);
+    return daylight ? norm360(now.az) : 0;
+  }
+  function refreshAutoHeading() {
+    if (state.sensorActive) return;
+    const untouched = lastAutoHeading === null || Math.abs(norm180(state.heading - lastAutoHeading)) < 1e-6;
+    if (!untouched) return;
+    const heading = defaultSkyHeading(state.observationDate || new Date());
+    state.heading = heading;
+    lastAutoHeading = heading;
+  }
+
+  /* ----------------------------------------------------------
      COMÈTES : tête (coma) + queue de gaz + queue de poussière.
      La queue est toujours dirigée à l'opposé du Soleil (vent solaire) ;
      sa longueur à l'écran est symbolique et croît quand la comète
@@ -4751,6 +4789,7 @@ function locateUser() {
       state.longitude = longitude;
       state.locationName = "Position GPS";
       state.locationReady = true;
+      refreshAutoHeading();
       persistLastObservationLocation();
 
       ui.updateLocationLabel();
@@ -6069,6 +6108,9 @@ function renderSkyNow() {
   /*
    * Rafraîchissement de l'horloge et des positions.
    */
+  refreshAutoHeading();
+  drawSky();
+
   window.setInterval(() => {
     ui.updateClock();
     drawSky();
