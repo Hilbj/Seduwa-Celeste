@@ -194,7 +194,7 @@ export function createUI({
       // pas une position GPS confirmée.
       const label = state.locationName || (state.locationReady
         ? coordinates
-        : "Position par défaut");
+        : t("ui.defaultPosition"));
 
       setText("location", label);
       setText("location-coordinates", coordinates);
@@ -204,11 +204,11 @@ export function createUI({
 
   function locate() {
     if (typeof locateUser !== "function") {
-      showToast("Module de géolocalisation indisponible.");
+      showToast(t("ui.geolocationModuleUnavailable"));
       return;
     }
 
-    safely("Géolocalisation", () => locateUser());
+    safely(t("ui.geolocation"), () => locateUser());
   }
 
   /* ==========================================================
@@ -223,12 +223,12 @@ export function createUI({
       button.classList.toggle("active", active);
       const label = sensorActivationPending
         ? "Autorisation de la boussole…"
-        : active ? "Désactiver la boussole" : "Activer la boussole";
+        : active ? t("ui.disableCompass") : t("ui.activateCompass");
       button.setAttribute("aria-label", label);
       button.setAttribute("title", label);
       const spans = button.querySelectorAll("span");
       if (button.id === "orientation-btn" && spans.length > 1) {
-        spans[1].textContent = sensorActivationPending ? "Autorisation…" : active ? "Arrêter boussole" : "Boussole";
+        spans[1].textContent = sensorActivationPending ? "Autorisation…" : active ? t("ui.stopCompass") : t("ui.compass");
       }
       button.disabled = sensorActivationPending;
     }
@@ -273,7 +273,7 @@ export function createUI({
 
   function stopSensors() {
     if (typeof sensors?.stopListening === "function") {
-      safely("Arrêt des capteurs", () => {
+      safely(t("ui.stopSensors"), () => {
         sensors.stopListening();
       });
     }
@@ -322,7 +322,7 @@ export function createUI({
      FICHE OBJET
      ========================================================== */
 
-  function displayObjectName(value, fallback = "Objet céleste") {
+  function displayObjectName(value, fallback = t("ui.celestialObject")) {
     // Les catalogues peuvent fournir un nom imbriqué dans un objet. Chercher
     // récursivement une vraie chaîne et refuser explicitement la conversion
     // générique « [object Object] ».
@@ -350,7 +350,7 @@ export function createUI({
       }
       return "";
     };
-    return read(value) || read(fallback) || "Objet céleste";
+    return read(value) || read(fallback) || t("ui.celestialObject");
   }
 
   function updateObjectCard(object) {
@@ -359,16 +359,16 @@ export function createUI({
       return;
     }
 
-    const name = displayObjectName(object.name) !== "Objet céleste"
+    const name = displayObjectName(object.name) !== t("ui.celestialObject")
       ? displayObjectName(object.name)
       : displayObjectName(object.proper_name, displayObjectName(object.id, displayObjectName(object.designation)));
     const typeNames = {
-      star: "Étoile", planet: "Planète", sun: "Soleil", moon: "Lune",
-      galaxy: "Galaxie", nebula: "Nébuleuse", cluster: "Amas stellaire",
-      "deep-sky": "Objet du ciel profond", "minor-planet": "Planète mineure", "dwarf-planet": "Planète naine", comet: "Comète"
+      star: t("ui.star"), planet: t("ui.planet"), sun: t("ui.sun"), moon: t("ui.moon"),
+      galaxy: t("ui.galaxy"), nebula: t("ui.nebula"), cluster: t("ui.starCluster"),
+      "deep-sky": t("ui.deepSkyObject"), "minor-planet": t("ui.minorPlanet"), "dwarf-planet": t("ui.dwarfPlanet"), comet: t("ui.comet")
     };
     setText("object-name", name);
-    const objectTypeLabel = typeNames[object.type] || object.type || "Objet céleste";
+    const objectTypeLabel = typeNames[object.type] || object.type || t("ui.celestialObject");
     setText("object-type", objectTypeLabel);
     const discoveryMode = Boolean($("app")?.classList.contains("discovery-mode"));
 
@@ -386,7 +386,7 @@ export function createUI({
     if (discoveryMode) {
       detail.push(objectTypeLabel);
       if (constellationLabel) detail.push(`Dans la constellation ${constellationLabel}`);
-      setText("object-detail", detail.join(" · ") || "Une nouvelle étape pour explorer le ciel.");
+      setText("object-detail", detail.join(" · ") || t("ui.newStepToExploreSky"));
     } else {
       if (Number.isFinite(object.mag)) detail.push(`Magnitude apparente ${object.mag.toFixed(2)}`);
       if (object.catalogue) detail.push(`Catalogue ${object.catalogue}`);
@@ -447,32 +447,32 @@ export function createUI({
       const observingAdvice = uiTexts.observingAdvice;
       // Placer le conseil en premier pour qu'il soit visible plus tôt sur les petits écrans.
       add("Conseil d’observation", observingAdvice[object.type] || observingAdvice["deep-sky"]);
-      add("Description", description);
+      add(t("ui.description"), description);
 
       const discoveryFacts = uiTexts.discoveryFacts;
       const fact = discoveryFacts[id] || discoveryFacts[normalizedName] || "";
       const discoveryChallenges = uiTexts.discoveryChallenges;
-      add("Petit défi", discoveryChallenges[object.type] || discoveryChallenges["deep-sky"]);
+      add(t("ui.smallChallenge"), discoveryChallenges[object.type] || discoveryChallenges["deep-sky"]);
 
       const viewingModes = {
-        star: ["Œil nu : étoiles brillantes et motifs de constellations.", "Jumelles : davantage d’étoiles dans le champ ; elles restent ponctuelles.", "Télescope : l’étoile reste généralement un point, sauf effets optiques ou étoiles doubles séparées.", "Photo : l’exposition peut révéler des étoiles bien plus faibles que l’œil."],
-        planet: ["Œil nu : aspect de point très brillant, souvent stable par rapport aux étoiles.", "Jumelles : la planète reste souvent un point ou un petit disque difficile à discerner.", "Télescope : un disque et parfois des détails selon la planète, le grossissement et la turbulence.", "Photo : les vidéos et traitements peuvent faire ressortir des détails invisibles à l’œil."],
-        moon: ["Œil nu : phase et silhouette générale.", "Jumelles : cratères et contrastes près de la limite jour/nuit.", "Télescope : reliefs et petits cratères, surtout près du terminateur.", "Photo : les prises de vue peuvent augmenter netteté et contraste."],
+        star: [t("ui.eyeStars"), "Jumelles : davantage d’étoiles dans le champ ; elles restent ponctuelles.", "Télescope : l’étoile reste généralement un point, sauf effets optiques ou étoiles doubles séparées.", "Photo : l’exposition peut révéler des étoiles bien plus faibles que l’œil."],
+        planet: [t("ui.eyePlanet"), t("ui.binocularsPlanet"), t("ui.telescopePlanet"), "Photo : les vidéos et traitements peuvent faire ressortir des détails invisibles à l’œil."],
+        moon: [t("ui.eyeMoon"), t("ui.binocularsMoon"), t("ui.telescopeMoon"), t("ui.photoMoon")],
         sun: ["Œil nu : jamais sans protection solaire certifiée et adaptée à l’observation directe.", "Jumelles : uniquement avec des filtres solaires certifiés conçus pour l’instrument et montés à l’avant.", "Télescope : uniquement avec un filtre solaire certifié placé à l’avant ; jamais de filtre d’oculaire.", "Photo : appareil et instrument doivent disposer d’une filtration solaire adaptée ; ne jamais viser le Soleil sans protection correcte."],
-        galaxy: ["Œil nu : seules quelques galaxies sont accessibles sous un ciel très sombre.", "Jumelles : tache diffuse souvent sans détails fins.", "Télescope : forme et noyau parfois visibles, selon le diamètre et le ciel.", "Photo : les longues poses accumulent la lumière et montrent des couleurs et détails généralement invisibles à l’œil."],
-        nebula: ["Œil nu : seules les nébuleuses les plus brillantes sont accessibles dans de bonnes conditions.", "Jumelles : certaines apparaissent comme une faible tache diffuse.", "Télescope : la structure dépend du type de nébuleuse, du filtre et du ciel.", "Photo : les longues poses et filtres peuvent révéler des couleurs et extensions peu perceptibles visuellement."],
-        cluster: ["Œil nu : les amas les plus brillants peuvent former une tache ou un motif d’étoiles.", "Jumelles : très adaptées aux amas ouverts ; de nombreuses étoiles se détachent.", "Télescope : les amas globulaires peuvent être partiellement ou largement résolus.", "Photo : les poses révèlent les étoiles les plus faibles et les couleurs."],
-        "deep-sky": ["Œil nu : dépend fortement de la luminosité de l’objet et de l’obscurité du ciel.", "Jumelles : champ large utile pour les objets étendus.", "Télescope : le diamètre, le grossissement et la qualité du ciel changent l’aspect visible.", "Photo : une image traitée ne représente pas exactement ce que l’œil perçoit en direct."]
+        galaxy: [t("ui.eyeGalaxy"), t("ui.binocularsGalaxy"), t("ui.telescopeGalaxy"), "Photo : les longues poses accumulent la lumière et montrent des couleurs et détails généralement invisibles à l’œil."],
+        nebula: [t("ui.eyeNebula"), t("ui.binocularsNebula"), t("ui.telescopeNebula"), t("ui.photoNebula")],
+        cluster: ["Œil nu : les amas les plus brillants peuvent former une tache ou un motif d’étoiles.", t("ui.binocularsCluster"), t("ui.telescopeCluster"), t("ui.photoCluster")],
+        "deep-sky": ["Œil nu : dépend fortement de la luminosité de l’objet et de l’obscurité du ciel.", t("ui.binocularsDeepSky"), "Télescope : le diamètre, le grossissement et la qualité du ciel changent l’aspect visible.", "Photo : une image traitée ne représente pas exactement ce que l’œil perçoit en direct."]
       };
       const modes = viewingModes[object.type] || viewingModes["deep-sky"];
       const modeCard = document.createElement("details"); modeCard.className = "object-viewing-modes";
-      const modeTitle = document.createElement("summary"); modeTitle.textContent = "À quoi s’attendre selon l’instrument ?";
+      const modeTitle = document.createElement("summary"); modeTitle.textContent = t("ui.whatToExpectByInstrument");
       const modeList = document.createElement("ul");
       for (const text of modes) { const li = document.createElement("li"); li.textContent = text; modeList.append(li); }
       modeCard.append(modeTitle, modeList);
       modeCard.open = modesWereOpen;
       const terms = document.createElement("details"); terms.className = "object-terms-help";
-      const summary = document.createElement("summary"); summary.textContent = "Comprendre les données de la fiche";
+      const summary = document.createElement("summary"); summary.textContent = t("ui.understandSheetData");
       const termText = document.createElement("p"); termText.textContent = "Magnitude apparente : éclat apparent (plus le nombre est petit, plus l’objet est brillant). AD et déclinaison : coordonnées qui repèrent l’objet sur la sphère céleste. Azimut : direction sur l’horizon, comptée depuis le nord vers l’est. Altitude : hauteur au-dessus de l’horizon (0° à l’horizon, 90° au zénith). Seeing (turbulence) : agitation de l’atmosphère qui floute les détails. Transparence : clarté du ciel ; brume, poussières et humidité atténuent les objets faibles.";
       terms.append(summary, termText);
 
@@ -492,15 +492,15 @@ export function createUI({
         (Number.isFinite(approximateDistancesLy[id]) ? approximateDistancesLy[id] : NaN);
       if (Number.isFinite(distance) && distance > 0) {
         const approx = !Number.isFinite(object.distanceLightYears) && !Number.isFinite(object.distance_ly);
-        add("Distance", `${approx ? "environ " : ""}${Math.round(distance).toLocaleString("fr-FR")} années-lumière`);
+        add(t("ui.distance"), `${approx ? "environ " : ""}${Math.round(distance).toLocaleString("fr-FR")} années-lumière`);
         if (!approx && Number.isFinite(object.mag)) {
           const distanceParsecs = distance / 3.26156;
           const absoluteMag = object.mag - 5 * (Math.log10(distanceParsecs) - 1);
-          add("Magnitude absolue estimée", absoluteMag.toFixed(2));
+          add(t("ui.absoluteMagnitude"), absoluteMag.toFixed(2));
         }
       } else if (object.type === "planet" || object.type === "moon" || object.type === "sun") {
         const distKm = getSolarDistanceKm(object);
-        if (Number.isFinite(distKm)) add("Distance", `${Math.round(distKm).toLocaleString("fr-FR")} km`);
+        if (Number.isFinite(distKm)) add(t("ui.distance"), `${Math.round(distKm).toLocaleString("fr-FR")} km`);
       }
 
       const angularSizes = {
@@ -527,25 +527,25 @@ export function createUI({
       if (object.type === "star") {
         const spectral = object.spectralType || object.spectral_type || inferSpectralType(object.teff_gspphot);
         add("Type spectral", spectral);
-        if (Number.isFinite(object.teff_gspphot)) add("Température de surface", `${Math.round(object.teff_gspphot).toLocaleString("fr-FR")} K`);
-        else if (Number.isFinite(object.temperatureK)) add("Température de surface", `${Math.round(object.temperatureK).toLocaleString("fr-FR")} K`);
+        if (Number.isFinite(object.teff_gspphot)) add(t("ui.surfaceTemperature"), `${Math.round(object.teff_gspphot).toLocaleString("fr-FR")} K`);
+        else if (Number.isFinite(object.temperatureK)) add(t("ui.surfaceTemperature"), `${Math.round(object.temperatureK).toLocaleString("fr-FR")} K`);
         if (object.gaia_astrometry_status === "needs_review") {
-          add("Contrôle astrométrique", "À vérifier — association Gaia conservée provisoirement");
-          add("Motif du contrôle", object.gaia_astrometry_review_reason || "Résidu astrométrique à examiner");
+          add(t("ui.astrometricCheck"), t("ui.toVerifyGaiaAssociation"));
+          add(t("ui.checkReason"), object.gaia_astrometry_review_reason || t("ui.astrometricResidualToExamine"));
           if (Number.isFinite(object.gaia_astrometry_review_residual_arcsec)) {
-            add("Résidu de position", `${object.gaia_astrometry_review_residual_arcsec.toFixed(3).replace(".", ",")}″`);
+            add(t("ui.positionResidual"), `${object.gaia_astrometry_review_residual_arcsec.toFixed(3).replace(".", ",")}″`);
           }
         }
         if (object.gaia_source_id) add("Identifiant Gaia DR3", object.gaia_source_id);
-        if (Number.isFinite(object.gaia_reference_epoch)) add("Époque de référence Gaia", object.gaia_reference_epoch.toFixed(1));
-        if (Number.isFinite(object.astrometry_epoch)) add("Époque des coordonnées du catalogue", object.astrometry_epoch.toFixed(1));
+        if (Number.isFinite(object.gaia_reference_epoch)) add(t("ui.gaiaReferenceEpoch"), object.gaia_reference_epoch.toFixed(1));
+        if (Number.isFinite(object.astrometry_epoch)) add(t("ui.catalogueCoordinatesEpoch"), object.astrometry_epoch.toFixed(1));
         const hasPmRa = Number.isFinite(object.pm_ra_cosdec_mas_yr);
         const hasPmDec = Number.isFinite(object.pm_dec_mas_yr);
         if (hasPmRa && hasPmDec) {
           add("Mouvement propre en AD", `${object.pm_ra_cosdec_mas_yr.toFixed(2).replace(".", ",")} mas/an`);
-          add("Mouvement propre en déclinaison", `${object.pm_dec_mas_yr.toFixed(2).replace(".", ",")} mas/an`);
+          add(t("ui.properMotionDeclination"), `${object.pm_dec_mas_yr.toFixed(2).replace(".", ",")} mas/an`);
         } else if (object.gaia_source_id) {
-          add("Mouvement propre Gaia", "Non disponible dans les données importées");
+          add(t("ui.gaiaProperMotion"), t("ui.notAvailableInImportedData"));
         }
       }
 
@@ -568,9 +568,9 @@ export function createUI({
         "SOLEIL": "Diamètre : environ 1,39 million de km. Étoile de type G2 V, température photosphérique proche de 5 780 K.",
         "LUNE": "Diamètre : environ 3 475 km. Sa surface conserve de nombreux cratères d’impact."
       };
-      if (physical[name.toLocaleUpperCase("fr-FR")]) add("Informations physiques", physical[name.toLocaleUpperCase("fr-FR")]);
+      if (physical[name.toLocaleUpperCase("fr-FR")]) add(t("ui.physicalInfo"), physical[name.toLocaleUpperCase("fr-FR")]);
       else if (object.type === "galaxy" || object.type === "nebula" || object.type === "cluster") {
-        add("Nature", object.type === "galaxy" ? "Étoiles, gaz et poussières liés par la gravitation." : object.type === "nebula" ? "Gaz et poussières interstellaires ; la nature exacte dépend de la nébuleuse." : "Amas d’étoiles ; il peut être ouvert ou globulaire selon sa structure.");
+        add(t("ui.nature"), object.type === "galaxy" ? t("ui.starsGasDustGravitationallyBound") : object.type === "nebula" ? t("ui.interstellarGasDust") : "Amas d’étoiles ; il peut être ouvert ou globulaire selon sa structure.");
       }
 
       const events = calculateRiseTransitSet(object);
@@ -580,18 +580,18 @@ export function createUI({
         add("Coucher", events.set);
       }
       const maximumAltitude = theoreticalMaximumAltitude(object);
-      if (Number.isFinite(maximumAltitude)) add("Hauteur maximale théorique", `${maximumAltitude.toFixed(1).replace(".", ",")}° (au passage au méridien)`);
+      if (Number.isFinite(maximumAltitude)) add(t("ui.maximumTheoreticalAltitude"), `${maximumAltitude.toFixed(1).replace(".", ",")}° (au passage au méridien)`);
       if (Number.isFinite(object.alt)) {
-        add("État du ciel", object.alt > 0 ? `Au-dessus de l’horizon (${object.alt.toFixed(1).replace(".", ",")}°)` : `Sous l’horizon (${object.alt.toFixed(1).replace(".", ",")}°)`);
+        add(t("ui.skyState"), object.alt > 0 ? `Au-dessus de l’horizon (${object.alt.toFixed(1).replace(".", ",")}°)` : `Sous l’horizon (${object.alt.toFixed(1).replace(".", ",")}°)`);
       }
 
       const nearby = findNearbyObjects(object);
-      if (nearby.length) add("Objets proches", nearby);
+      if (nearby.length) add(t("ui.nearbyObjects"), nearby);
 
-      if (object.type === "planet") add("Éphéméride", "Position calculée pour la date sélectionnée.");
-      if (object.type === "sun" || object.type === "moon") add("Position", "Calculée pour la date sélectionnée.");
+      if (object.type === "planet") add(t("ui.ephemeris"), t("ui.positionCalculatedForSelectedDate"));
+      if (object.type === "sun" || object.type === "moon") add(t("ui.position"), t("ui.calculatedForSelectedDate"));
 
-      const discoveryLabels = new Set(["Constellation", "Objets proches"]);
+      const discoveryLabels = new Set(["Constellation", t("ui.nearbyObjects")]);
       const visibleRows = discoveryMode ? rows.filter(([label]) => discoveryLabels.has(label)) : rows;
       const recognitionWasOpen = Boolean(extra.querySelector(".discovery-recognition-help")?.open);
       extra.replaceChildren();
@@ -619,35 +619,35 @@ export function createUI({
         // déjà utilisée ailleurs, sans présenter la visibilité comme garantie.
         const altitude = Number(object.alt);
         const difficulty = assessObservingDifficulty(object, "all");
-        let visibilityLabel = "Visibilité incertaine";
+        let visibilityLabel = t("ui.uncertainVisibility");
         let visibilityLevel = "medium";
-        let visibilityExplanation = "Cet objet est peut-être visible, mais cela dépend de sa luminosité et des conditions du ciel.";
+        let visibilityExplanation = t("ui.maybeVisibleDependsOnConditions");
         if (object.type === "sun") {
           visibilityLabel = "Protection solaire indispensable";
           visibilityLevel = "warning";
-          visibilityExplanation = "Ne regarde jamais le Soleil sans filtre solaire certifié, adapté à l’instrument et placé à l’avant.";
+          visibilityExplanation = t("ui.neverLookAtSunWithoutFilter");
         } else if (Number.isFinite(altitude) && altitude < 0) {
           visibilityLabel = "Pas encore visible";
           visibilityLevel = "low";
-          visibilityExplanation = "Cet objet est sous l’horizon pour l’heure sélectionnée.";
+          visibilityExplanation = t("ui.objectBelowHorizonForSelectedTime");
         } else if (Number.isFinite(altitude) && altitude < 10) {
-          visibilityLabel = "Très bas sur l’horizon";
+          visibilityLabel = t("ui.veryLowOnHorizon");
           visibilityLevel = "low";
-          visibilityExplanation = "L’atmosphère gêne davantage l’observation près de l’horizon ; attendre qu’il monte peut aider.";
+          visibilityExplanation = t("ui.atmosphereInterferesNearHorizon");
         } else if (Number.isFinite(altitude) && altitude < 20) {
           visibilityLabel = "Assez bas sur l’horizon";
           visibilityLevel = "low";
-          visibilityExplanation = "La cible sera généralement plus facile à observer lorsqu’elle sera plus haute.";
+          visibilityExplanation = t("ui.targetEasierToObserveWhenHigher");
         } else if (difficulty.level === "easy") {
-          visibilityLabel = "Facile à repérer";
+          visibilityLabel = t("ui.easyToSpot");
           visibilityLevel = "easy";
           visibilityExplanation = "Sa position est favorable, mais les nuages, la transparence et la pollution lumineuse comptent aussi.";
         } else if (difficulty.level === "challenging" || difficulty.level === "low") {
-          visibilityLabel = "Difficile à repérer";
+          visibilityLabel = t("ui.hardToSpot");
           visibilityLevel = "low";
-          visibilityExplanation = "Cette cible peut demander un ciel sombre ou un instrument adapté.";
+          visibilityExplanation = t("ui.targetMayRequireDarkSkyOrInstrument");
         } else if (!Number.isFinite(altitude)) {
-          visibilityLabel = "Visibilité non estimée";
+          visibilityLabel = t("ui.visibilityNotEstimated");
           visibilityLevel = "medium";
           visibilityExplanation = "La hauteur actuelle de cet objet n’est pas disponible.";
         }
@@ -666,24 +666,24 @@ export function createUI({
         const levelText = document.createElement("p");
         const rawLevel = String(difficulty.level || "variable");
         let beginnerLevel = "intermediate";
-        let beginnerLabel = "Niveau 2 · Intermédiaire";
-        let beginnerExplanation = "Prévois un ciel sombre et prends le temps de comparer les repères sur la carte.";
+        let beginnerLabel = t("ui.level2Intermediate");
+        let beginnerExplanation = t("ui.planForDarkSkyAndCompareLandmarks");
         if (Number.isFinite(altitude) && altitude < 0) {
           beginnerLevel = "unavailable";
-          beginnerLabel = "À revoir plus tard";
-          beginnerExplanation = "L’objet est sous l’horizon à l’heure choisie. Il ne fait pas partie des cibles à essayer maintenant.";
+          beginnerLabel = t("ui.reviewLater");
+          beginnerExplanation = t("ui.objectBelowHorizonNotATargetNow");
         } else if (object.type === "sun") {
           beginnerLevel = "warning";
-          beginnerLabel = "Observation spécialisée";
-          beginnerExplanation = "Le Soleil ne s’observe qu’avec une protection solaire certifiée et adaptée. Ne le regarde jamais directement.";
+          beginnerLabel = t("ui.specializedObservation");
+          beginnerExplanation = t("ui.sunOnlyWithCertifiedProtection");
         } else if (rawLevel === "easy") {
           beginnerLevel = "easy";
           beginnerLabel = "Niveau 1 · Facile";
-          beginnerExplanation = "Un bon premier objectif : essaie de le retrouver à l’œil nu si le ciel est dégagé.";
+          beginnerExplanation = t("ui.goodFirstTargetTryNakedEye");
         } else if (rawLevel === "challenging" || rawLevel === "low") {
           beginnerLevel = "challenge";
-          beginnerLabel = "Niveau 3 · Défi";
-          beginnerExplanation = "Cette cible peut demander un ciel sombre, des jumelles ou un télescope selon sa nature.";
+          beginnerLabel = t("ui.level3Challenge");
+          beginnerExplanation = t("ui.targetMayRequireDarkSkyBinocularsOrTelescope");
         }
         level.className = `discovery-object-level is-${beginnerLevel}`;
         levelTitle.textContent = beginnerLabel;
@@ -695,7 +695,7 @@ export function createUI({
         recognition.className = "discovery-recognition-help";
         recognition.open = recognitionWasOpen;
         const summary = document.createElement("summary");
-        summary.textContent = "Que suis-je en train de regarder ? Découvrez ce qui rend cet objet particulier.";
+        summary.textContent = t("ui.whatAmILookingAt");
         const explanation = document.createElement("p");
         explanation.textContent = description;
         recognition.append(summary, explanation);
@@ -712,16 +712,16 @@ export function createUI({
       for (const [label, value] of visibleRows) {
         const row = document.createElement("div");
         row.className = "object-extra-row";
-        if (["Description", "Informations physiques", "Nature", "Objets proches", "Conseil d’observation", "Le savais-tu ?", "Petit défi"].includes(label)) row.classList.add("is-long");
-        if (label === "Le savais-tu ?") row.classList.add("is-discovery-fact");
-        if (label === "Petit défi") row.classList.add("is-discovery-challenge");
+        if ([t("ui.description"), t("ui.physicalInfo"), t("ui.nature"), t("ui.nearbyObjects"), "Conseil d’observation", t("ui.didYouKnow"), t("ui.smallChallenge")].includes(label)) row.classList.add("is-long");
+        if (label === t("ui.didYouKnow")) row.classList.add("is-discovery-fact");
+        if (label === t("ui.smallChallenge")) row.classList.add("is-discovery-challenge");
         if (label === "Conseil d’observation") {
           row.classList.add("is-observing-advice");
           if (object.type === "sun") row.classList.add("is-solar-safety");
         }
         const key = document.createElement("span");
         key.textContent = label;
-        if (label === "Objets proches" && Array.isArray(value)) {
+        if (label === t("ui.nearbyObjects") && Array.isArray(value)) {
           const list = document.createElement("div");
           list.className = "nearby-object-list";
           for (const nearbyObject of value) {
@@ -758,8 +758,8 @@ export function createUI({
   }
 
   function inferSpectralType(temp) {
-    if (!Number.isFinite(temp)) return "Non renseigné";
-    if (temp >= 30000) return "O (très chaude)";
+    if (!Number.isFinite(temp)) return t("ui.notSpecified");
+    if (temp >= 30000) return t("ui.spectralClassO");
     if (temp >= 10000) return "B (bleue-blanche)";
     if (temp >= 7500) return "A (blanche)";
     if (temp >= 6000) return "F (blanche-jaune)";
@@ -875,7 +875,7 @@ export function createUI({
 
   function openFinder() {
     if (!state.selected) {
-      showToast("Sélectionne d'abord un objet sur la carte.");
+      showToast(t("ui.selectObjectOnMapFirst"));
       return;
     }
 
@@ -1050,7 +1050,7 @@ export function createUI({
       content.className = "visible-now-card-content";
       const title = document.createElement("h3");
       const commonName = object.catalogue === "Hipparcos" ? searchStarName(object) : "";
-      const displayName = commonName && commonName !== object.name ? commonName : (object.name || object.proper_name || "Objet céleste");
+      const displayName = commonName && commonName !== object.name ? commonName : (object.name || object.proper_name || t("ui.celestialObject"));
       title.textContent = `${object.id ? `${object.id} · ` : ""}${displayName}`;
       const meta = document.createElement("p");
       const altitude = Number(object.alt);
@@ -1213,9 +1213,9 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       const empty = document.createElement("p");
       empty.className = "visible-now-empty";
       empty.textContent = sourceTargets.length
-        ? "Aucune cible ne correspond à ces filtres. Essaie une altitude minimale plus basse ou un autre équipement."
+        ? t("ui.noTargetMatchesFilters")
         : (mode === "tonight"
-          ? "Aucune recommandation ne correspond à ces critères pour ce moment. Essaie un autre équipement ou consulte toutes les cibles."
+          ? t("ui.noRecommendationMatches")
           : "Aucune cible avec une magnitude renseignée n’est actuellement au-dessus de l’horizon. Vérifie le lieu ou la date d’observation.");
       list.append(empty);
       return;
@@ -1227,13 +1227,13 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       content.className = "visible-now-card-content";
       const title = document.createElement("h3");
       const commonStarName = object.catalogue === "Hipparcos" ? getSearchCommonStarName(object) : "";
-      title.textContent = commonStarName || object.name || object.proper_name || object.id || "Objet céleste";
+      title.textContent = commonStarName || object.name || object.proper_name || object.id || t("ui.celestialObject");
       const rank = document.createElement("span");
       rank.className = "visible-now-rank";
       rank.textContent = sort === "recommended" ? `${t("ui.priority")} ${targetIndex + 1}` : `${t("ui.position")} ${targetIndex + 1}`;
       const meta = document.createElement("p");
-      const typeNames = { planet: "Planète", sun: "Soleil", moon: "Lune", "minor-planet": "Planète mineure", "dwarf-planet": "Planète naine", comet: "Comète", galaxy: "Galaxie", nebula: "Nébuleuse", cluster: "Amas", star: "Étoile", "deep-sky": "Ciel profond" };
-      const type = typeNames[object.type] || (object.catalogue === "NGC" ? "Objet NGC" : object.catalogue === "Messier" ? "Objet Messier" : object.type || "Objet céleste");
+      const typeNames = { planet: t("ui.planet"), sun: t("ui.sun"), moon: t("ui.moon"), "minor-planet": t("ui.minorPlanet"), "dwarf-planet": t("ui.dwarfPlanet"), comet: t("ui.comet"), galaxy: t("ui.galaxy"), nebula: t("ui.nebula"), cluster: "Amas", star: t("ui.star"), "deep-sky": t("ui.deepSky") };
+      const type = typeNames[object.type] || (object.catalogue === "NGC" ? t("ui.ngcObject") : object.catalogue === "Messier" ? t("ui.messierObject") : object.type || t("ui.celestialObject"));
       const parts = [type];
       if (object.id) parts.push(object.id);
       if (Number.isFinite(Number(object.mag))) parts.push(`mag. ${Number(object.mag).toFixed(1)}`);
@@ -1477,9 +1477,9 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     const status = $("constellations-status");
     if (status) {
       const parts = [];
-      if (state.showConstellations) parts.push("Figures des constellations activées");
-      if (state.showConstellationBoundaries) parts.push("limites UAI activées");
-      status.textContent = parts.length ? parts.join(" · ") + "." : "Lignes et limites des constellations désactivées.";
+      if (state.showConstellations) parts.push(t("ui.constellationFiguresActivated"));
+      if (state.showConstellationBoundaries) parts.push(t("ui.iauBoundariesActivated"));
+      status.textContent = parts.length ? parts.join(" · ") + "." : t("ui.constellationLinesAndBoundariesDeactivated");
     }
     safely("Affichage des limites des constellations", () => drawSky());
   }
@@ -1537,7 +1537,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     }
 
     if (typeof handleCanvasTap !== "function") {
-      console.warn("[Atlas] Sélection du canvas indisponible.");
+      console.warn(t("ui.canvasSelectionUnavailable"));
       return;
     }
 
@@ -1648,13 +1648,13 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       }
 
       if (!cancelled && wasOnlyPointer && eclipticTapCandidate && !wasMoved) {
-        showToast("L’écliptique est la trajectoire apparente annuelle du Soleil dans le ciel. La Lune et les planètes se trouvent généralement à proximité.");
+        showToast(t("ui.eclipticExplanation"));
         eclipticTapCandidate = false;
         return;
       }
       eclipticTapCandidate = false;
       if (!cancelled && wasOnlyPointer && !wasMoved) {
-        safely("Sélection de l'objet", () => handleCanvasTap(event));
+        safely(t("ui.objectSelection"), () => handleCanvasTap(event));
       }
     }
 
@@ -1699,7 +1699,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
   function generatedLunarEvents(fromDate = new Date(), days = 120) {
     const synodicMonth = 29.530588853;
     const referenceNewMoon = Date.UTC(2000, 0, 6, 18, 14);
-    const phaseNames = ["Nouvelle Lune", "Premier quartier", "Pleine Lune", "Dernier quartier"];
+    const phaseNames = [t("moon.newMoon"), t("moon.firstQuarter"), t("moon.fullMoon"), t("moon.lastQuarter")];
     const phaseDetails = [
       "L’éclairement lunaire est minimal : période généralement favorable au ciel profond si la météo est bonne.",
       "La Lune est éclairée à moitié et devient plus gênante au fil de la nuit.",
@@ -1806,7 +1806,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       const normalizedTitle = item.title.toLocaleLowerCase("fr-FR");
       let linkedTargets = [];
       if (/lune|lunaire/.test(`${normalizedTitle} ${item.type}`.toLocaleLowerCase("fr-FR"))) {
-        const moon = findEventTarget("Lune") || findEventTarget("Moon");
+        const moon = findEventTarget(t("ui.moon")) || findEventTarget("Moon");
         if (moon) linkedTargets.push({ target: moon, label: "Voir la Lune" });
       }
       if (/mars.*jupiter|jupiter.*mars/.test(normalizedTitle)) {
@@ -1885,7 +1885,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     detail.textContent = t("conditions.lightPollutionDetail");
     const frame = document.createElement("iframe");
     frame.className = "light-pollution-map-frame";
-    frame.title = "Carte interactive de pollution lumineuse pour le lieu sélectionné";
+    frame.title = t("ui.interactiveLightPollutionMap");
     frame.loading = "lazy";
     frame.referrerPolicy = "strict-origin-when-cross-origin";
     frame.allowFullscreen = true;
@@ -1918,7 +1918,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(state.latitude)}&longitude=${encodeURIComponent(state.longitude)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,cloud_cover,wind_speed_10m,visibility&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,precipitation_probability,cloud_cover,wind_speed_10m,visibility&forecast_days=7&timezone=auto`;
       const response = await fetch(url);
-      if (!response.ok) throw new Error("Prévisions indisponibles");
+      if (!response.ok) throw new Error(t("ui.forecastsUnavailable"));
       const data = await response.json();
       const sessionDate = $("session-date")?.value || "";
       const sessionTime = $("session-start")?.value || "21:00";
@@ -1956,7 +1956,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       if (score === null) { qualityValue.textContent = t("conditions.unavailable"); qualityDetail.textContent = t("conditions.noIndexData"); }
       else {
         qualityValue.textContent = `${score}/100`;
-        const rating = score >= 80 ? "Très favorable" : score >= 60 ? "Plutôt favorable" : score >= 40 ? "Mitigé" : "Défavorable";
+        const rating = score >= 80 ? t("ui.veryFavorable") : score >= 60 ? t("ui.ratherFavorable") : score >= 40 ? t("ui.mixed") : t("ui.unfavorable");
         qualityDetail.textContent = `${rating} · ${t("conditions.indexBasis")}`;
         quality.dataset.quality = score >= 60 ? "good" : score >= 40 ? "mixed" : "poor";
       }
@@ -2038,12 +2038,12 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     // Elles utilisent le toast existant, disparaissent seules et sont mémorisées pour l’onglet.
     let activeDiscoveryHint = "";
     const discoveryHintMessages = {
-      free: "Oriente ton téléphone vers la portion du ciel que tu veux explorer.",
-      search: "Saisis un nom courant, par exemple Véga, Andromède ou Saturne.",
-      start: "Choisis une cible pour la mettre en évidence sur la carte.",
-      orient: "Active la boussole, puis tourne doucement le téléphone.",
+      free: t("ui.pointPhoneToSkyPortion"),
+      search: t("ui.enterCommonName"),
+      start: t("ui.chooseTargetToHighlight"),
+      orient: t("ui.activateCompassThenTurnPhone"),
       constellations: "Choisis une constellation pour faire ressortir sa forme sur la carte.",
-      walks: "Choisis une balade, puis avance étape par étape."
+      walks: t("ui.chooseWalkThenAdvanceStepByStep")
     };
     const dismissDiscoveryHint = key => {
       if (key && activeDiscoveryHint !== key) return;
@@ -2072,7 +2072,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       if (discoveryMapGuideToggle) {
         discoveryMapGuideToggle.hidden = !$("app")?.classList.contains("discovery-mode");
         discoveryMapGuideToggle.setAttribute("aria-expanded", String(Boolean(visible)));
-        const label = visible ? "Masquer la légende" : "Lire la carte";
+        const label = visible ? t("ui.hideLegend") : t("ui.readMap");
         discoveryMapGuideToggle.setAttribute("aria-label", label);
         discoveryMapGuideToggle.setAttribute("title", label);
         discoveryMapGuideToggle.innerHTML = '<span aria-hidden="true">ⓘ</span>';
@@ -2127,7 +2127,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       const discoveryCompassToggle = $("discovery-compass-toggle");
       if (discoveryCompassToggle) syncSensorButton();
       if (modeSwitch) {
-        const label = active ? "Passer en mode Expert" : "Passer en mode Découverte";
+        const label = active ? t("ui.switchToExpertMode") : t("ui.switchToDiscoveryMode");
         modeSwitch.setAttribute("aria-pressed", String(active));
         modeSwitch.setAttribute("aria-label", label);
         modeSwitch.title = label;
@@ -2236,8 +2236,8 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }, { from: "Dubhe", to: "Polaris", dashed: true }], target: "Dubhe" },
         { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }, { from: "Dubhe", to: "Polaris", dashed: true }], target: "Polaris" }
       ], intro: "La Grande Ourse sert de panneau indicateur. Tu n’as pas besoin de connaître les étoiles par leur nom pour commencer.", steps: [
-        "Repère la Grande Ourse : elle ressemble à une grande casserole avec un manche.",
-        "Trouve les deux étoiles du bord opposé au manche : Mérak et Dubhé. Prolonge la ligne de Mérak vers Dubhé, puis continue au-delà de Dubhé sur environ cinq fois leur écartement.",
+        t("walk.polarisStep1"),
+        t("walk.polarisStep2"),
         "Tu arrives près de l’étoile Polaire. Elle marque approximativement le nord céleste et se trouve au bout du manche de la Petite Ourse, plus discrète."
       ], tip: "La Grande Ourse et la Polaire sont circumpolaires depuis la France métropolitaine : elles restent généralement au-dessus de l’horizon.", search: ["grande ourse", "ursa major"] },
       summer: { title: "Le triangle d’été", constellation: "lyra", overlay: { color: "#ff514d", segments: [{ from: "Vega", to: "Deneb" }, { from: "Deneb", to: "Altair" }, { from: "Altair", to: "Vega" }], target: "Vega" }, stepOverlays: [
@@ -2245,26 +2245,26 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         { color: "#ff514d", segments: [{ from: "Vega", to: "Deneb", dashed: true }], target: "Deneb" },
         { color: "#ff514d", segments: [{ from: "Vega", to: "Deneb" }, { from: "Deneb", to: "Altair" }, { from: "Altair", to: "Vega" }], target: "Altair" }
       ], intro: "Trois étoiles très brillantes dessinent un grand triangle dans le ciel des soirées de printemps avancé et d’été.", steps: [
-        "Cherche Véga, très brillante et presque blanc-bleuté. Elle se trouve dans la petite constellation de la Lyre.",
-        "Repère Deneb plus loin vers le nord-est, dans le Cygne, dont les étoiles dessinent une grande croix.",
+        t("walk.summerStep1"),
+        t("walk.summerStep2"),
         "Trouve Altaïr vers le sud du triangle, dans l’Aigle. Véga, Deneb et Altaïr forment ensemble le triangle d’été."
       ], tip: "Le triangle est surtout pratique en été et au début de l’automne ; sa hauteur dépend de l’heure et de la saison.", search: ["lyre", "lyra"] },
-      orion: { title: "Reconnaître Orion", constellation: "orion", overlay: { color: "#ff514d", segments: [{ from: "Mintaka", to: "Alnilam" }, { from: "Alnilam", to: "Alnitak" }], target: "Betelgeuse" }, stepOverlays: [
+      orion: { title: t("ui.recognizeOrion"), constellation: "orion", overlay: { color: "#ff514d", segments: [{ from: "Mintaka", to: "Alnilam" }, { from: "Alnilam", to: "Alnitak" }], target: "Betelgeuse" }, stepOverlays: [
         { color: "#ff514d", segments: [{ from: "Mintaka", to: "Alnilam" }, { from: "Alnilam", to: "Alnitak" }], target: "Mintaka" },
         { color: "#ff514d", segments: [{ from: "Mintaka", to: "Alnilam" }, { from: "Alnilam", to: "Alnitak" }], target: "Betelgeuse" },
         { color: "#ff514d", segments: [{ from: "Mintaka", to: "Alnilam" }, { from: "Alnilam", to: "Alnitak" }], target: "Rigel" }
       ], intro: "Orion est l’une des silhouettes les plus faciles à apprendre, surtout lors des soirées d’hiver.", steps: [
         "Repère trois étoiles assez rapprochées et presque alignées : c’est la ceinture d’Orion.",
-        "Au-dessus et à gauche de la ceinture, cherche Bételgeuse, souvent reconnaissable à sa teinte orangée.",
+        t("walk.orionStep2"),
         "De l’autre côté, Rigel brille d’un éclat blanc-bleuté. La ceinture, Bételgeuse et Rigel permettent de retrouver la silhouette du chasseur."
       ], tip: "Orion est surtout visible le soir pendant l’automne avancé et l’hiver.", search: ["orion"] },
-      pleiades: { title: "Repérer les Pléiades (M45)", constellation: "taurus", overlay: { color: "#ff514d", segments: [{ from: "Aldebaran", to: "Alcyone", dashed: true }], targetObject: "M45" }, stepOverlays: [
+      pleiades: { title: t("ui.spotPleiades"), constellation: "taurus", overlay: { color: "#ff514d", segments: [{ from: "Aldebaran", to: "Alcyone", dashed: true }], targetObject: "M45" }, stepOverlays: [
         { color: "#ff514d", segments: [], target: "Aldebaran" },
         { color: "#ff514d", segments: [{ from: "Aldebaran", to: "Alcyone", dashed: true }], targetObject: "M45" },
         { color: "#ff514d", segments: [{ from: "Aldebaran", to: "Alcyone", dashed: true }], targetObject: "M45" }
       ], intro: "Les Pléiades sont un petit groupe serré d’étoiles qui ressemble à une minuscule louche ou à un petit nuage scintillant.", steps: [
         "Commence par repérer la constellation du Taureau ou la brillante Aldébaran, à l’aspect orangé.",
-        "Cherche un peu plus loin un petit paquet compact de plusieurs étoiles bleutées : ce sont les Pléiades, aussi appelées les Sept Sœurs.",
+        t("walk.pleiadesStep2"),
         "Observe-les d’abord à l’œil nu. Avec des jumelles, beaucoup plus d’étoiles apparaissent dans le même champ."
       ], tip: "Les Pléiades sont particulièrement faciles à observer les soirs d’automne et d’hiver. Elles restent un objet étendu : évite de les chercher avec un fort grossissement.", search: ["taureau", "taurus"] },
       winterhex: { title: "Le grand hexagone d’hiver", constellation: "orion", overlay: { color: "#ff514d", segments: [{ from: "Sirius", to: "Rigel" }, { from: "Rigel", to: "Aldebaran" }, { from: "Aldebaran", to: "Capella" }, { from: "Capella", to: "Pollux" }, { from: "Pollux", to: "Procyon" }, { from: "Procyon", to: "Sirius" }], target: "Sirius" }, stepOverlays: [
@@ -2537,7 +2537,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       if (zoomIndicator) zoomIndicator.textContent = `${(45 / state.fov).toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}×`;
       if (state.sensorActive && typeof sensors?.stopListening === "function") {
         sensors.stopListening();
-        showToast("Carte cadrée sur les repères de la balade. Réactive les capteurs pour retrouver la visée réelle.");
+        showToast(t("ui.mapFramedOnWalkLandmarks"));
       }
     };
     const activateSkyWalkMap = walk => {
@@ -2877,7 +2877,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         list.append(empty);
         return;
       }
-      const typeLabels = { moon: "Lune", planet: "Planète", star: "Étoile", cluster: "Amas d’étoiles" };
+      const typeLabels = { moon: t("ui.moon"), planet: t("ui.planet"), star: t("ui.star"), cluster: "Amas d’étoiles" };
       const allVisible = typeof getCatalogObjects === "function" ? getCatalogObjects().filter(candidate => Number(candidate.alt) > 0) : [...(Array.isArray(state.visibleObjects) ? state.visibleObjects : []), ...(typeof getVisibleNowObjects === "function" ? getVisibleNowObjects() : [])];
       for (const [index, object] of candidates.entries()) {
         const card = document.createElement("article");
@@ -2885,10 +2885,10 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const copy = document.createElement("div");
         copy.className = "discovery-start-copy";
         const title = document.createElement("h4");
-        title.textContent = object.name || object.proper_name || object.id || "Objet céleste";
+        title.textContent = object.name || object.proper_name || object.id || t("ui.celestialObject");
         const meta = document.createElement("p");
         const altitude = Number(object.alt);
-        const type = typeLabels[String(object.type || (object.catalogue === "Hipparcos" ? "star" : "")).toLowerCase()] || "Objet céleste";
+        const type = typeLabels[String(object.type || (object.catalogue === "Hipparcos" ? "star" : "")).toLowerCase()] || t("ui.celestialObject");
         meta.textContent = `${type} · ${altitude.toFixed(0)}° au-dessus de l’horizon${Number.isFinite(Number(object.mag)) ? ` · mag. ${Number(object.mag).toFixed(1)}` : ""}`;
         // Même sélection de repères nommés que la recherche Découverte : étoiles/planètes
         // brillantes, au-dessus de l’horizon, entre 2° et 30° de la cible.
@@ -2897,7 +2897,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         referenceLine.className = "discovery-start-references";
         referenceLine.textContent = references.length
           ? `${t("ui.nearbyLandmarks")}: ${references.map(item => item.object.discoveryLabel || item.object.name || item.object.proper_name || item.object.id || t("ui.anchorStar")).join(" · ")}`
-          : "Repères proches : aucune étoile brillante proche identifiée dans le catalogue.";
+          : t("ui.noNearbyBrightStar");
         const advice = document.createElement("p");
         advice.className = "discovery-start-advice";
         advice.textContent = altitude < 15
@@ -3293,7 +3293,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           if (zoomIndicator) zoomIndicator.textContent = `${(45 / state.fov).toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })}×`;
           if (state.sensorActive && typeof sensors?.stopListening === "function") {
             sensors.stopListening();
-            showToast("Carte centrée sur la constellation. Les capteurs d’orientation ont été suspendus ; réactive-les pour retrouver la visée réelle.");
+            showToast(t("ui.mapCenteredOnConstellation"));
           }
         }
         // Schéma didactique local : coordonnées équatoriales simplifiées, sans prétendre être une projection de la voûte céleste.
@@ -4243,7 +4243,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const midpoint = new Date((start.getTime() + end.getTime()) / 2);
         const angle = ((A.MoonPhase(midpoint) % 360) + 360) % 360;
         const illumination = Math.round((1 - Math.cos(angle * Math.PI / 180)) * 50);
-        const phases = ["Nouvelle Lune", "Premier croissant", "Premier quartier", "Lune gibbeuse croissante", "Pleine Lune", "Lune gibbeuse décroissante", "Dernier quartier", "Dernier croissant"];
+        const phases = [t("moon.newMoon"), t("moon.firstCrescent"), t("moon.firstQuarter"), t("moon.waxingGibbous"), t("moon.fullMoon"), t("moon.waningGibbous"), t("moon.lastQuarter"), t("moon.lastCrescent")];
         const phase = phases[Math.round(angle / 45) % 8];
         const observer = new A.Observer(Number(state.latitude), Number(state.longitude), 0);
         let moonAboveHorizon = false;
@@ -4259,21 +4259,21 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           if (horizon.altitude > 0) { moonAboveHorizon = true; break; }
         }
         const presence = !validAltitude ? "présence non déterminée faute de données d’horizon" : moonAboveHorizon ? "présente au-dessus de l’horizon pendant au moins une partie de la session" : "sous l’horizon pendant la session";
-        let impact = "Son influence sur le ciel profond devrait rester limitée";
+        let impact = t("session.moonLimitedImpact");
         let level = "low";
         if (moonAboveHorizon && illumination >= 70) {
           impact = "Attention : très éclairée et au-dessus de l’horizon, elle peut fortement réduire le contraste des galaxies, nébuleuses et météores faibles";
           level = "high";
         } else if (moonAboveHorizon && illumination >= 35) {
-          impact = "À noter : son éclairage peut réduire le contraste des objets faibles, surtout près de la Lune";
+          impact = t("session.moonModerateImpact");
           level = "moderate";
         } else if (moonAboveHorizon && illumination >= 15) {
-          impact = "Influence généralement modérée ; privilégiez les objets brillants et observez les objets faibles loin de la Lune";
+          impact = t("session.moonModerateImpact2");
           level = "moderate";
         } else if (!moonAboveHorizon) {
           impact = "Même si elle est éclairée, elle ne devrait pas gêner directement pendant cette session si elle reste sous l’horizon";
         } else if (illumination < 15) {
-          impact = "Peu éclairée : conditions lunaires plutôt favorables au ciel profond";
+          impact = t("session.moonFavorable");
         }
         // Indice de favorabilité lunaire : 100 si la Lune est sous l’horizon,
         // sinon il diminue avec l’illumination, sur la même échelle que la météo.
@@ -4335,7 +4335,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const suggestion = sessionSuggestions[$("session-goal")?.value] || sessionSuggestions["Découverte du ciel"];
       notes.value = notes.value.trim() ? `${notes.value.trim()}\n\nSuggestion : ${suggestion}` : `Suggestion : ${suggestion}`;
       saveSession(false);
-      showToast("Suggestion ajoutée aux notes de terrain.");
+      showToast(t("session.suggestionAdded"));
     });
     $("session-notes")?.addEventListener("input", () => saveSession(false));
     sessionChecks.forEach(el => el.addEventListener("change", () => saveSession(false)));
@@ -4344,7 +4344,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       sessionChecks.forEach(el => { el.checked = false; });
       if ($("session-notes")) $("session-notes").value = "";
       saveSession(false);
-      showToast("Liste et notes de terrain réinitialisées.");
+      showToast(t("session.reset"));
     });
 
     // Fiche lunaire : réutilise les éphémérides de la bibliothèque Astronomy Engine.
@@ -4361,7 +4361,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       }
     };
     const toLocalDateTimeValue = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}T${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}:${String(date.getSeconds()).padStart(2,"0")}`;
-    const moonPhaseNames = ["Nouvelle Lune", "Premier croissant", "Premier quartier", "Lune gibbeuse croissante", "Pleine Lune", "Lune gibbeuse décroissante", "Dernier quartier", "Dernier croissant"];
+    const moonPhaseNames = [t("moon.newMoon"), t("moon.firstCrescent"), t("moon.firstQuarter"), t("moon.waxingGibbous"), t("moon.fullMoon"), t("moon.waningGibbous"), t("moon.lastQuarter"), t("moon.lastCrescent")];
     const moonSvgElement = (id) => document.getElementById(id);
     const updateMoonSheet = () => {
       if (!moonDateInput || !moonDateInput.value) return;
@@ -4370,7 +4370,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const A = window.Astronomy;
       const put = (id, value) => { const el = $(id); if (el) el.textContent = value; };
       if (!A || typeof A.MoonPhase !== "function" || typeof A.Equator !== "function" || typeof A.Observer !== "function" || typeof A.Horizon !== "function" || !A.Body) {
-        put("moon-phase-name", "Éphémérides indisponibles"); put("moon-observation-note", "La bibliothèque astronomique n’est pas disponible. Réessayez après le chargement de l’application."); return;
+        put("moon-phase-name", t("moon.ephemerisUnavailable")); put("moon-observation-note", "La bibliothèque astronomique n’est pas disponible. Réessayez après le chargement de l’application."); return;
       }
       try {
         const angle = ((A.MoonPhase(date) % 360) + 360) % 360;
@@ -4381,7 +4381,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const horizontal = equ && Number.isFinite(equ.ra) && Number.isFinite(equ.dec) ? A.Horizon(date, observer, equ.ra, equ.dec, "normal") : null;
         const illuminationRounded = Math.round(illumination);
         put("moon-phase-name", moonPhaseNames[phaseIndex]);
-        put("moon-phase-trend", angle < 180 ? "Phase croissante · la partie éclairée augmente" : angle > 180 ? "Phase décroissante · la partie éclairée diminue" : "Pleine Lune");
+        put("moon-phase-trend", angle < 180 ? t("moon.waxingPhase") : angle > 180 ? t("moon.waningPhase") : t("moon.fullMoon"));
         put("moon-illumination-value", `${illuminationRounded} %`);
         const bar = $("moon-illumination-bar"); if (bar) bar.style.width = `${illumination}%`;
         const age = (angle / 360) * 29.530588853; put("moon-age", `${age.toFixed(1).replace(".", ",")} jours`);
@@ -4421,7 +4421,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         put("moon-orbit-explanation", "Faites glisser la Lune ou utilisez ←/→ pour explorer les phases. « Maintenant » active le suivi en direct, actualisé chaque seconde. Schéma non à l’échelle ; l’inclinaison réelle de l’orbite n’est pas représentée.");
         put("moon-observation-note", horizontal && Number.isFinite(horizontal.altitude) ? (horizontal.altitude > 0 ? `À cette heure, la Lune est au-dessus de l’horizon à ${horizontal.altitude.toFixed(1).replace(".", ",")}°. Son influence sur le ciel profond dépend aussi de son illumination, de la transparence et de la pollution lumineuse.` : "À cette heure, la Lune est sous l’horizon local ; elle ne gêne pas directement l’observation du ciel à cet instant.") : "La position locale n’a pas pu être calculée pour cette date.");
       } catch (error) {
-        put("moon-phase-name", "Calcul lunaire indisponible"); put("moon-observation-note", "Impossible de calculer la phase pour cette date. Vérifiez la date et réessayez.");
+        put("moon-phase-name", t("moon.calculationUnavailable")); put("moon-observation-note", t("moon.cannotCalculatePhase"));
       }
     };
     const closeMoonSheet = () => { if (moonDialog) moonDialog.hidden = true; };
@@ -4538,7 +4538,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       if (jupiterMoonsNowButton) {
         jupiterMoonsNowButton.textContent = jupiterMoonsLiveMode ? "En direct ●" : "Maintenant";
         jupiterMoonsNowButton.setAttribute("aria-pressed", String(jupiterMoonsLiveMode));
-        jupiterMoonsNowButton.title = jupiterMoonsLiveMode ? "Les positions suivent l'heure réelle" : "Afficher les positions à l'heure actuelle";
+        jupiterMoonsNowButton.title = jupiterMoonsLiveMode ? t("jupiterMoons.livePositions") : t("jupiterMoons.showCurrentPositions");
       }
     };
     const setJupiterMoonsPlaying = active => {
@@ -4546,7 +4546,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       if (jupiterMoonsPlayButton) {
         jupiterMoonsPlayButton.textContent = jupiterMoonsPlaying ? "Ⅱ Pause" : "▶ Animer";
         jupiterMoonsPlayButton.setAttribute("aria-pressed", String(jupiterMoonsPlaying));
-        jupiterMoonsPlayButton.title = jupiterMoonsPlaying ? "Mettre l'animation en pause" : "Accélérer le temps pour observer le déplacement des lunes";
+        jupiterMoonsPlayButton.title = jupiterMoonsPlaying ? t("jupiterMoons.pauseAnimation") : t("jupiterMoons.speedUpTime");
       }
       if (jupiterMoonsPlaying) jupiterMoonsLastTick = Date.now();
     };
@@ -4585,7 +4585,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const projectedPole = unit3(subtract3(poleUnit, multiply3(lineOfSight, dot3(poleUnit, lineOfSight))));
         if (!projectedPole) throw new Error("Projection du plan orbital de Jupiter impossible");
         const horizontalAxis = unit3(cross3(projectedPole, lineOfSight));
-        if (!horizontalAxis) throw new Error("Axe apparent du système jovien indisponible");
+        if (!horizontalAxis) throw new Error(t("jupiterMoons.axisUnavailable"));
         const moons = A.JupiterMoons(time);
         const radiusAu = (Number(A.JUPITER_MEAN_RADIUS_KM) || 69911) / (Number(A.KM_PER_AU) || 149597870.7);
         const centerX = 320, centerY = 155, xScale = 7.2, verticalScale = xScale * 6;
@@ -4599,7 +4599,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           const yRj = verticalAu / radiusAu;
           const depthRj = depthAu / radiusAu;
           return { ...info, index, xRj, yRj, depthRj, px: centerX + xRj * xScale, py: centerY - yRj * verticalScale,
-            projectedRadius: Math.hypot(xRj, yRj), side: xRj < 0 ? "à gauche de Jupiter" : "à droite de Jupiter" };
+            projectedRadius: Math.hypot(xRj, yRj), side: xRj < 0 ? t("jupiterMoons.leftOfJupiter") : t("jupiterMoons.rightOfJupiter") };
         });
         [behindLayer, frontLayer, labelsLayer].forEach(layer => layer?.replaceChildren());
         if (details) details.replaceChildren();
@@ -4607,7 +4607,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           if (!layer) return;
           const isInsideDisc = moon.projectedRadius <= 1;
           const isOcculted = isInsideDisc && moon.depthRj > 0;
-          const group = svgElement("g", { "aria-label": `${moon.name}${isOcculted ? ", derrière Jupiter" : isInsideDisc ? ", devant Jupiter" : ""}` });
+          const group = svgElement("g", { "aria-label": `${moon.name}${isOcculted ? t("jupiterMoons.behindJupiter") : isInsideDisc ? t("jupiterMoons.inFrontOfJupiter") : ""}` });
           if (isOcculted) {
             group.append(svgElement("circle", { cx: moon.px, cy: moon.py, r: 5.3, fill: "none", stroke: moon.color, "stroke-width": 1.6, "stroke-dasharray": "2.5 2", opacity: 0.9 }));
           } else {
@@ -4641,13 +4641,13 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
             heading.append(swatch, document.createTextNode(moon.name));
             const position = document.createElement("p");
             let positionText;
-            if (moon.projectedRadius <= 1 && moon.depthRj > 0) positionText = "Derrière le disque de Jupiter (occultation).";
-            else if (moon.projectedRadius <= 1 && moon.depthRj <= 0) positionText = "Devant le disque de Jupiter (transit).";
+            if (moon.projectedRadius <= 1 && moon.depthRj > 0) positionText = t("jupiterMoons.occultation");
+            else if (moon.projectedRadius <= 1 && moon.depthRj <= 0) positionText = t("jupiterMoons.transit");
             else positionText = `${moon.side}, à ${Math.abs(moon.xRj).toFixed(1).replace(".", ",")} Rj du centre.`;
             position.textContent = positionText;
             const depth = document.createElement("p");
             if (moon.projectedRadius > 1) depth.textContent = moon.depthRj > 0 ? "Plus loin que Jupiter." : "Entre la Terre et Jupiter.";
-            else depth.textContent = moon.depthRj > 0 ? "Vue cachée par le disque." : "Vue au premier plan.";
+            else depth.textContent = moon.depthRj > 0 ? t("jupiterMoons.hiddenByDisc") : t("jupiterMoons.inForeground");
             card.append(heading, position, depth);
             details.append(card);
           }
@@ -4820,7 +4820,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       }
       updateSolarPlanetInfo(solarSelectedId, positions);
       solarFormatDate(date);
-      solarSetText("solar-system-position-mode", solarHasManualDate ? "Simulation ajustée par déplacement : la date a été recalculée et les huit planètes restent cohérentes. « Retour à la date de départ » annule le déplacement manuel." : "Positions orbitales calculées pour la date choisie.");
+      solarSetText("solar-system-position-mode", solarHasManualDate ? t("solarSystem.manualSimulation") : t("solarSystem.calculatedPositions"));
     };
     const updateSolarPlanetInfo = (planetId, positions = calculateSolarOrbitPositions(solarDateValue())) => {
       const planet = positions.find(item => item.id === planetId) || SOLAR_PLANETS.find(item => item.id === planetId);
@@ -4891,10 +4891,10 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     const universeStage = $("universe-journey-stage");
     const universeRange = $("universe-zoom-range");
     const universeLevels = [
-      { title: "Notre Système solaire", pointer: "✦ Notre Système solaire", description: "Le Système solaire s’étend sur environ 100 unités astronomiques (UA) dans ce repère pédagogique. Une UA correspond à la distance moyenne entre la Terre et le Soleil, soit environ 149,6 millions de kilomètres. Les huit planètes orbitent autour du Soleil, mais les distances sont trop grandes pour être représentées fidèlement à cette échelle.", note: "Repère retenu : environ 100 UA, soit 14,96 milliards de kilomètres. La limite du Système solaire dépend de ce que l’on considère (orbites planétaires, régions lointaines ou influence du Soleil) ; le dessin reste schématique." },
-      { title: "Les étoiles les plus proches", pointer: "✦ Le Soleil, notre étoile", description: "Le Soleil appartient à un voisinage d’étoiles. Proxima du Centaure, l’étoile connue la plus proche après le Soleil, se trouve à environ 4,24 années-lumière. Les distances entre étoiles dépassent largement les dimensions des systèmes planétaires.", note: "Les étoiles sont dessinées pour être visibles ; leurs tailles et espacements sont schématiques." },
-      { title: "Notre galaxie : la Voie lactée", pointer: "✦ Notre position dans la Voie lactée", description: "Le Soleil se situe dans le disque de la Voie lactée, dans le bras local dit bras d’Orion, à environ 26 000 années-lumière du centre galactique. La galaxie contient des centaines de milliards d’étoiles.", note: "Vue schématique du dessus : les bras spiraux sont des structures complexes et non des rails fixes." },
-      { title: "Le Groupe local", pointer: "✦ Notre galaxie, la Voie lactée", description: "La Voie lactée fait partie du Groupe local, un ensemble de dizaines de galaxies dominé par la Voie lactée et la galaxie d’Andromède. Andromède est à environ 2,5 millions d’années-lumière.", note: "Les tailles et distances entre galaxies sont comprimées pour tenir dans la vue." },
+      { title: "Notre Système solaire", pointer: t("universe.solarSystemPointer"), description: "Le Système solaire s’étend sur environ 100 unités astronomiques (UA) dans ce repère pédagogique. Une UA correspond à la distance moyenne entre la Terre et le Soleil, soit environ 149,6 millions de kilomètres. Les huit planètes orbitent autour du Soleil, mais les distances sont trop grandes pour être représentées fidèlement à cette échelle.", note: "Repère retenu : environ 100 UA, soit 14,96 milliards de kilomètres. La limite du Système solaire dépend de ce que l’on considère (orbites planétaires, régions lointaines ou influence du Soleil) ; le dessin reste schématique." },
+      { title: "Les étoiles les plus proches", pointer: t("universe.sunPointer"), description: "Le Soleil appartient à un voisinage d’étoiles. Proxima du Centaure, l’étoile connue la plus proche après le Soleil, se trouve à environ 4,24 années-lumière. Les distances entre étoiles dépassent largement les dimensions des systèmes planétaires.", note: "Les étoiles sont dessinées pour être visibles ; leurs tailles et espacements sont schématiques." },
+      { title: "Notre galaxie : la Voie lactée", pointer: t("universe.milkyWayPointer"), description: "Le Soleil se situe dans le disque de la Voie lactée, dans le bras local dit bras d’Orion, à environ 26 000 années-lumière du centre galactique. La galaxie contient des centaines de milliards d’étoiles.", note: "Vue schématique du dessus : les bras spiraux sont des structures complexes et non des rails fixes." },
+      { title: "Le Groupe local", pointer: t("universe.localGroupPointer"), description: "La Voie lactée fait partie du Groupe local, un ensemble de dizaines de galaxies dominé par la Voie lactée et la galaxie d’Andromède. Andromède est à environ 2,5 millions d’années-lumière.", note: "Les tailles et distances entre galaxies sont comprimées pour tenir dans la vue." },
       { title: "La toile cosmique et l’Univers observable", pointer: "✦ Notre région, parmi d’innombrables amas", description: "À très grande échelle, les galaxies se regroupent en amas et s’organisent en filaments séparés par d’immenses vides. L’Univers est âgé d’environ 13,8 milliards d’années. Comme l’espace s’est dilaté pendant que la lumière voyageait, le diamètre de l’Univers observable est aujourd’hui estimé à environ 93 milliards d’années-lumière.", note: "Schéma didactique, non une carte réelle ni à l’échelle : les filaments et amas sont volontairement espacés pour rendre la structure lisible." }
     ];
     const universeNS = "http://www.w3.org/2000/svg";
@@ -4911,10 +4911,10 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         [40,72,106,145,185,225].forEach((r,i)=>out+=universeEl("circle",{cx,cy,r,fill:"none",stroke:"#415777","stroke-width":1,"stroke-dasharray":i%2?"3 4":"none",opacity:.8}));
         out+=universeCircle(cx,cy,14,"#ffca55",{stroke:"#fff0ad","stroke-width":2});
         [[490,242,"Mercure"],[515,218,"Vénus"],[548,272,"Terre"],[591,227,"Mars"],[635,303,"Jupiter"],[390,65,"Saturne"],[270,360,"Uranus"],[234,143,"Neptune"]].forEach((p,i)=>{out+=universeCircle(p[0],p[1],i===4?6:4,["#aaa9a5","#d5b18a","#64b7e7","#c76e50","#d5b68c","#d9c6a0","#83d7dc","#5e8be0"][i]); out+=universeText(p[0]+8,p[1]-7,p[2],"minor-label");});
-        out+=universeMarker(450,250,474,390,"Soleil");
+        out+=universeMarker(450,250,474,390,t("ui.sun"));
       } else if (level === 1) {
-        const stars=[[180,155,"Proxima du Centaure", "4,24 al"],[270,310,"Alpha Centauri A/B","4,37 al"],[620,120,"Étoile de Barnard","5,96 al"],[690,340,"Sirius","8,6 al"],[435,75,"Wolf 359","7,9 al"],[510,385,"Lalande 21185","8,3 al"],[350,220,"Soleil",""]];
-        for(const [x,y,n,d] of stars){out+=universeCircle(x,y,n==="Soleil"?8:4,n==="Soleil"?"#ffd75b":"#b8d6ff",n==="Soleil"?{stroke:"#fff0ad","stroke-width":2}:{});out+=universeText(x+10,y-8,n,"minor-label");}
+        const stars=[[180,155,"Proxima du Centaure", "4,24 al"],[270,310,"Alpha Centauri A/B","4,37 al"],[620,120,"Étoile de Barnard","5,96 al"],[690,340,"Sirius","8,6 al"],[435,75,"Wolf 359","7,9 al"],[510,385,"Lalande 21185","8,3 al"],[350,220,t("ui.sun"),""]];
+        for(const [x,y,n,d] of stars){out+=universeCircle(x,y,n===t("ui.sun")?8:4,n===t("ui.sun")?"#ffd75b":"#b8d6ff",n===t("ui.sun")?{stroke:"#fff0ad","stroke-width":2}:{});out+=universeText(x+10,y-8,n,"minor-label");}
         out+=universeMarker(350,220,375,275,"Notre Système solaire");
       } else if (level === 2) {
         // Voie lactée plus lisible : halo diffus, noyau lumineux, bras spiraux texturés et poussières.
@@ -4933,7 +4933,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         out+=universeEl("ellipse",{cx,cy,rx:70,ry:48,fill:"url(#galaxy-core)",opacity:.95});
         out+=universeCircle(cx,cy,13,"#ffe6a4",{opacity:.95});out+=universeText(cx-105,cy-30,"Centre galactique");
         // Le Soleil est placé dans le bras local, à distance du noyau.
-        out+=universeCircle(572,224,5,"#ffd75b",{class:"sun-marker",stroke:"#fff2b8","stroke-width":2});out+=universeMarker(572,224,610,198,"Soleil");
+        out+=universeCircle(572,224,5,"#ffd75b",{class:"sun-marker",stroke:"#fff2b8","stroke-width":2});out+=universeMarker(572,224,610,198,t("ui.sun"));
       } else if (level === 3) {
         out+=universeEl("ellipse",{cx:350,cy:260,rx:150,ry:95,fill:"#5c8fc2",opacity:.08,stroke:"#6c9fda","stroke-width":1.5,"stroke-dasharray":"5 5"});
         out+=universeEl("ellipse",{cx:350,cy:260,rx:100,ry:57,fill:"none",stroke:"#426a98","stroke-width":1,opacity:.7});
@@ -5155,14 +5155,14 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     on("setting-star-labels", "change", () => {
       const input = $("setting-star-labels");
       state.showStarLabels = Boolean(input && input.checked);
-      safely("Affichage des noms d’étoiles", () => drawSky());
+      safely(t("ui.displayStarNames"), () => drawSky());
     });
     on("setting-ecliptic-grid", "change", () => {
       const input = $("setting-ecliptic-grid");
       state.showEclipticGrid = Boolean(input && input.checked);
       try { localStorage.setItem("atlas-celeste-ecliptic-grid", String(state.showEclipticGrid)); }
       catch { /* Le réglage reste utilisable sans stockage local. */ }
-      safely("Affichage de la grille écliptique", () => drawSky());
+      safely(t("ui.displayEclipticGrid"), () => drawSky());
     });
     for (const [key, id] of Object.entries(mapCategoryInputs)) {
       on(id, "change", () => {
@@ -5171,7 +5171,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         state.displayCategories[key] = Boolean(input && input.checked);
         try { localStorage.setItem("atlas-celeste-display-categories", JSON.stringify(state.displayCategories)); }
         catch { /* Les préférences de rendu restent utilisables sans stockage local. */ }
-        safely("Paramètres des objets affichés", () => drawSky());
+        safely(t("ui.displayedObjectSettings"), () => drawSky());
       });
     }
 
@@ -5182,8 +5182,8 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const active = !app.classList.contains("night-vision");
       app.classList.toggle("night-vision", active);
       nightButton.setAttribute("aria-pressed", String(active));
-      nightButton.setAttribute("aria-label", active ? "Désactiver la vision nocturne rouge" : "Activer la vision nocturne rouge");
-      nightButton.setAttribute("title", active ? "Désactiver la vision nocturne rouge" : "Activer la vision nocturne rouge");
+      nightButton.setAttribute("aria-label", active ? t("ui.disableRedNightVision") : t("ui.activateRedNightVision"));
+      nightButton.setAttribute("title", active ? t("ui.disableRedNightVision") : t("ui.activateRedNightVision"));
       const theme = document.querySelector('meta[name="theme-color"]');
       if (theme) theme.setAttribute("content", active ? "#180000" : "#050914");
     });
@@ -5197,8 +5197,8 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       reviewToggle?.classList.toggle("is-active", state.reviewStarsOnly);
       if (typeof drawSky === "function") drawSky();
       showToast(state.reviewStarsOnly
-        ? "Filtre actif : seules les étoiles à vérifier sont affichées parmi les étoiles du catalogue."
-        : "Filtre désactivé : toutes les étoiles sont affichées.");
+        ? t("ui.activeFilterOnlyStarsToVerify")
+        : t("ui.filterDeactivatedAllStarsDisplayed"));
     });
     if (reviewToggle) {
       const count = state.stars.filter(star => star.gaia_astrometry_status === "needs_review").length;
@@ -5225,7 +5225,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     refreshReadout();
     syncSensorButton();
 
-    console.info("[Atlas] Boutons de l'interface initialisés.");
+    console.info(t("ui.interfaceButtonsInitialized"));
   }
 
   function updateUI() {

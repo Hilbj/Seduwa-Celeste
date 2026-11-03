@@ -128,7 +128,7 @@ import { createUI } from "./js/ui.js";
           latitude: saved.latitude,
           longitude: saved.longitude,
           locationName: typeof saved.locationName === "string" && saved.locationName.trim()
-            ? saved.locationName.trim() : "Position enregistrée"
+            ? saved.locationName.trim() : t("ui.savedPosition")
         };
       }
     } catch { /* Stockage indisponible : Paris reste le lieu de repli. */ }
@@ -139,7 +139,7 @@ import { createUI } from "./js/ui.js";
       localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify({
         latitude: state.latitude,
         longitude: state.longitude,
-        locationName: state.locationName || "Position enregistrée"
+        locationName: state.locationName || t("ui.savedPosition")
       }));
     } catch { /* La position reste utilisable même sans stockage local. */ }
   }
@@ -484,7 +484,7 @@ import { createUI } from "./js/ui.js";
       refreshAutoHeading();
       syncObservationModeVisuals();
       const label = $("observation-mode");
-      if (label) label.textContent = date ? "Date choisie" : "Temps réel";
+      if (label) label.textContent = date ? t("ui.dateChosen") : t("ui.realtime");
       horizontalPositionCache.key = null;
       drawSky();
       ui?.updateClock();
@@ -2897,7 +2897,7 @@ function drawMilkyWay(date) {
       if (geojson.type === "FeatureCollection") geojson.features.forEach(f => collect(f.geometry));
       else if (geojson.type === "Feature") collect(geojson.geometry);
       else collect(geojson);
-      if (!lines.length) throw new Error("Géométrie des frontières non reconnue");
+      if (!lines.length) throw new Error(t("ui.boundaryGeometryUnrecognized"));
       state.constellationBoundaryLines = lines;
     } catch (error) {
       console.warn("Atlas : limites des constellations indisponibles", error);
@@ -3008,7 +3008,7 @@ function drawMilkyWay(date) {
     }
     ctx.setLineDash([]);
     if (eclipticLabelPoint) {
-      const label = "Écliptique";
+      const label = t("ui.ecliptic");
       ctx.save();
       const fontSize = Math.max(12, Math.min(15, state.width * 0.018));
       ctx.font = `600 ${fontSize}px Inter, system-ui, sans-serif`;
@@ -3946,7 +3946,7 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
   let lastAutoHeading = null;
   function defaultSkyHeading(date) {
     const sunAt = at => {
-      try { return solarObjectsAt(at).find(item => item && (item.type === "sun" || item.name === "Soleil")) || null; }
+      try { return solarObjectsAt(at).find(item => item && (item.type === "sun" || item.name === t("ui.sun"))) || null; }
       catch { return null; }
     };
     const now = sunAt(date);
@@ -3979,7 +3979,7 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
     const second = Math.floor(date.getTime() / 1000);
     if (cometSunCache.second !== second) {
       let sun = null;
-      try { sun = solarObjectsAt(date).find(item => item && (item.type === "sun" || item.name === "Soleil")) || null; } catch { sun = null; }
+      try { sun = solarObjectsAt(date).find(item => item && (item.type === "sun" || item.name === t("ui.sun"))) || null; } catch { sun = null; }
       cometSunCache = { second, sun };
     }
     return cometSunCache.sun;
@@ -4090,7 +4090,7 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
     ctx.fill();
     ctx.restore();
 
-    drawLabel(object.name || object.proper_name || object.designation || "Comète", point, "#bfe6ff");
+    drawLabel(object.name || object.proper_name || object.designation || t("ui.comet"), point, "#bfe6ff");
   }
 
   function drawMinorPlanetObject(object, point) {
@@ -4312,10 +4312,10 @@ function updateSkyGuide(target, camera, distance, nx, ny, message = "") {
   const eyebrow = $("sky-guide-eyebrow");
   const modeToggle = $("sky-guide-mode-toggle");
   const freeMode = state.skyGuideMode === "free";
-  if (eyebrow) eyebrow.textContent = freeMode ? "MODE LIBRE" : "GUIDAGE CÉLESTE";
+  if (eyebrow) eyebrow.textContent = freeMode ? t("ui.freeMode") : t("ui.celestialGuidance");
   if (modeToggle) modeToggle.textContent = freeMode ? t("ui.targetedGuidance") : t("ui.freeMode");
   if (name) name.textContent = freeMode
-    ? (target?._freeGuideLabel || (target?.type === "star" ? "Étoile dans le champ" : target?.name || target?.id) || "Balaye doucement le ciel")
+    ? (target?._freeGuideLabel || (target?.type === "star" ? t("ui.starInField") : target?.name || target?.id) || t("ui.scanSkyGentlyShort"))
     : (target?.name || target?.id || "Cible");
   const commonName = skyGuideCommonName(target);
   if (commonNameLabel) {
@@ -4349,7 +4349,7 @@ function updateSkyGuide(target, camera, distance, nx, ny, message = "") {
     panel.querySelectorAll("[data-guide-ring]").forEach(ring => ring.classList.remove("acquired"));
     state.skyGuideProgress = 0;
     if (progress) progress.textContent = t("ui.circlesAcquired");
-    if (status) status.textContent = message || "Balaye doucement le ciel pour repérer un objet.";
+    if (status) status.textContent = message || t("ui.scanSkyGently");
     return;
   }
 
@@ -4402,9 +4402,9 @@ function updateSkyGuide(target, camera, distance, nx, ny, message = "") {
   if (commonNameLabel) commonNameLabel.hidden = !(commonName && freeMode && acquiredCount >= 2);
   if (progress) progress.textContent = `${state.skyGuideProgress} / 3 cercles acquis`;
   if (status) status.textContent = message || (state.skyGuideProgress >= 3
-    ? "Objet repéré ! Les trois cercles sont acquis."
+    ? t("ui.objectSpottedThreeCircles")
     : Number.isFinite(distance) ? `${t("ui.deviationFromCenter")}: ${distance.toFixed(1).replace(".", ",")}° · ${t("ui.gentlyPointPhone")}`
-    : "Active la boussole et vérifie les autorisations pour commencer.");
+    : t("ui.activateCompassAndCheckPermissions"));
 }
 
 function updateFinder(date = new Date()) {
@@ -4456,7 +4456,7 @@ function updateFinder(date = new Date()) {
   // En mode libre, l'absence de cible est normale : on attend qu'un objet
   // entre dans le champ central de découverte.
   if (!target && state.skyGuideMode === "free") {
-    updateSkyGuide(null, null, NaN, NaN, NaN, "Balaye doucement le ciel pour repérer un objet.");
+    updateSkyGuide(null, null, NaN, NaN, NaN, t("ui.scanSkyGently"));
     if (horizontal) horizontal.textContent = "—";
     if (vertical) vertical.textContent = "—";
     if (instruction) instruction.textContent = t("ui.freeModeInstruction");
@@ -4474,7 +4474,7 @@ function updateFinder(date = new Date()) {
 
     if (sensor) {
       sensor.textContent =
-        "Sélectionne un objet dont la position est connue.";
+        t("ui.selectObjectWithKnownPosition");
     }
 
     return;
@@ -4506,13 +4506,13 @@ function updateFinder(date = new Date()) {
 
   if (!fresh) {
     showUnavailable(
-      "Active la boussole et vérifie les autorisations."
+      t("ui.activateCompassAndCheckPermissionsShort")
     );
 
     if (sensor) {
       sensor.textContent = !headingFresh
-        ? "Guidage suspendu : aucun cap absolu récent et fiable."
-        : "Guidage suspendu : aucune inclinaison récente et fiable.";
+        ? t("ui.guidanceSuspendedNoReliableHeading")
+        : t("ui.guidanceSuspendedNoReliablePitch");
     }
 
     return;
@@ -4563,7 +4563,7 @@ function updateFinder(date = new Date()) {
 
     if (instruction) {
       instruction.textContent =
-        "La cible est derrière toi. Tourne-toi pour lui faire face.";
+        t("ui.targetIsBehindYou");
     }
 
     resetMarker();
@@ -4608,7 +4608,7 @@ function updateFinder(date = new Date()) {
   if (horizontal) {
     horizontal.textContent =
       Math.abs(horizontalError) < 0.5
-        ? "Centré"
+        ? t("ui.centered")
         : `${horizontalError > 0 ? "Droite" : "Gauche"} ` +
           `${Math.abs(horizontalError).toFixed(1)}°`;
   }
@@ -4617,7 +4617,7 @@ function updateFinder(date = new Date()) {
   if (vertical) {
     vertical.textContent =
       Math.abs(verticalError) < 0.5
-        ? "Centré"
+        ? t("ui.centered")
         : `${verticalError > 0 ? "Monter" : "Descendre"} ` +
           `${Math.abs(verticalError).toFixed(1)}°`;
   }
@@ -4655,13 +4655,13 @@ function updateFinder(date = new Date()) {
   if (instruction) {
     if (locked) {
       instruction.textContent =
-        "Cible verrouillée ! Garde le téléphone stable.";
+        t("ui.targetLockedKeepPhoneStable");
     } else if (!insideField) {
       instruction.textContent =
         "La cible est hors du champ. Suis les indications pour la retrouver.";
     } else {
       instruction.textContent =
-        "Déplace doucement le téléphone pour amener la cible au centre.";
+        t("ui.movePhoneGentlyToCenterTarget");
     }
   }
 
@@ -4678,7 +4678,7 @@ function updateFinder(date = new Date()) {
     function enterFinder(options = {}) {
       const startFree = options?.free === true;
       if (!state.selected && !startFree) {
-        ui.showToast("Sélectionne d'abord un objet sur la carte.");
+        ui.showToast(t("ui.selectObjectOnMapFirst"));
         return;
       }
       state.finderLocked = false;
@@ -4700,7 +4700,7 @@ function updateFinder(date = new Date()) {
       ui?.collapseDiscoveryMenuForGuidance?.();
       if (card) card.hidden = true;
       updateSkyGuide(startFree ? null : selectedPosition(state.observationDate || new Date()), null, NaN, NaN, NaN,
-        startFree ? "Balaye doucement le ciel pour repérer un objet." : "Active la boussole et oriente le téléphone vers la cible.");
+        startFree ? t("ui.scanSkyGently") : t("ui.activateCompassAndPointToTarget"));
       updateFinder();
     }
 
@@ -4715,7 +4715,7 @@ function toggleSkyGuideMode() {
     state.selected = null;
     state.skyGuideFreeTargetId = "";
     state.skyGuideMode = "free";
-    updateSkyGuide(null, null, NaN, NaN, NaN, "Balaye doucement le ciel pour repérer un objet.");
+    updateSkyGuide(null, null, NaN, NaN, NaN, t("ui.scanSkyGently"));
   } else {
     state.skyGuideMode = "targeted";
     state.skyGuideFreeTargetId = "";
@@ -4727,7 +4727,7 @@ function toggleSkyGuideMode() {
     state.skyGuideSavedSelection = null;
     state.skyGuideSavedConstellations = null;
     if (state.selected) updateSkyGuide(selectedPosition(state.observationDate || new Date()), null, NaN, NaN, NaN,
-      "Guidage ciblé réactivé.");
+      t("ui.targetedGuidanceReactivated"));
   }
   drawSky();
 }
@@ -4767,7 +4767,7 @@ function exitFinder() {
 function locateUser() {
   if (!navigator.geolocation) {
     ui.showToast(
-      "Géolocalisation indisponible dans ce navigateur."
+      t("ui.geolocationUnavailableInBrowser")
     );
     console.error("[Atlas] navigator.geolocation indisponible.");
     return;
@@ -4789,7 +4789,7 @@ function locateUser() {
         longitude < -180 ||
         longitude > 180
       ) {
-        ui.showToast("Coordonnées GPS invalides.");
+        ui.showToast(t("ui.invalidGpsCoordinates"));
         return;
       }
 
@@ -4809,9 +4809,9 @@ function locateUser() {
     },
     error => {
       const messages = {
-        1: "Autorise la localisation dans les réglages.",
-        2: "Position indisponible. Vérifie le GPS.",
-        3: "Délai GPS dépassé. Réessaie."
+        1: t("ui.allowLocationInSettings"),
+        2: t("ui.positionUnavailableCheckGps"),
+        3: t("ui.gpsTimeoutTryAgain")
       };
 
       console.error("[Atlas] Erreur GPS :", {
@@ -4821,7 +4821,7 @@ function locateUser() {
 
       ui.showToast(
         messages[error.code] ||
-        "Impossible de récupérer la position."
+        t("ui.unableToRetrievePosition")
       );
     },
     {
@@ -4991,7 +4991,7 @@ if (skyRenderDiagnostics) {
       screenOrientationAngle: window.screen?.orientation?.angle ?? window.orientation ?? null,
       records: log.records || [],
       droppedRecords: log.dropped || 0,
-      note: "Journal local des événements d’orientation et de gyroscope."
+      note: t("ui.localOrientationGyroLog")
     };
     const blob = new Blob([JSON.stringify(payload, null, 2)], { type: "application/json;charset=utf-8" });
     const url = URL.createObjectURL(blob);
@@ -5492,12 +5492,12 @@ function renderSkyNow() {
         ctx.textAlign = candidate.align; ctx.textBaseline = candidate.dy < 0 ? "bottom" : "top";
         const labelX = sx + (candidate.align === "right" ? -3 : 3);
         const labelY = sy + (candidate.dy < 0 ? -5 : 5);
-        const labelWidth = ctx.measureText("À repérer").width + 10;
+        const labelWidth = ctx.measureText(t("ui.toSpot")).width + 10;
         ctx.fillStyle = "rgba(5, 13, 29, .88)";
         ctx.beginPath(); ctx.roundRect(labelX + (candidate.align === "right" ? -labelWidth : 0), labelY - 12, labelWidth, 17, 5); ctx.fill();
         ctx.fillStyle = "#ffe5a6";
         ctx.shadowColor = "rgba(3, 10, 24, .95)"; ctx.shadowBlur = 3;
-        ctx.fillText("À repérer", labelX, labelY);
+        ctx.fillText(t("ui.toSpot"), labelX, labelY);
         ctx.restore();
       }
       if (object.gaia_astrometry_status === "needs_review") {
@@ -5603,7 +5603,7 @@ function renderSkyNow() {
             ? project(Number(currentReference.az), Number(currentReference.alt)) : null);
         if (point) {
           drawDiscoveryReferenceMarker(point, index);
-          if (discoveryTargetPanelOpen) drawDiscoveryMarkerLabel(point, currentReference.discoveryLabel || currentReference.common_name || currentReference.name || currentReference.proper_name || currentReference.id || "Repère", "#75e6ff");
+          if (discoveryTargetPanelOpen) drawDiscoveryMarkerLabel(point, currentReference.discoveryLabel || currentReference.common_name || currentReference.name || currentReference.proper_name || currentReference.id || t("ui.landmark"), "#75e6ff");
         }
       });
     }
@@ -5791,7 +5791,7 @@ function renderSkyNow() {
     } else {
       state.minorPlanets = [];
       console.warn("Catalogue des planètes mineures indisponible :", results[3].reason);
-      ui.showToast("Catalogue des planètes mineures indisponible.");
+      ui.showToast(t("ui.minorPlanetsCatalogUnavailable"));
     }
     persistDisplayCategoryPreferences(state.displayCategories);
 
@@ -5912,7 +5912,7 @@ function renderSkyNow() {
           state.pitch = Math.max(-5, Math.min(85, currentPos.alt));
           drawSky();
         } else {
-          ui.showToast("Cette étoile est sous l’horizon : sa fiche est ouverte, mais elle n’est pas dessinée artificiellement sur la carte.");
+          ui.showToast(t("ui.starBelowHorizonNotDrawn"));
         }
         reviewPanel.hidden = false;
       });
@@ -5971,7 +5971,7 @@ function renderSkyNow() {
     indicator.classList.toggle("is-offline", !online);
     indicator.setAttribute("aria-label", online
       ? "Connexion Internet disponible"
-      : "Hors ligne : la météo en direct est indisponible");
+      : t("ui.offlineLiveWeatherUnavailable"));
   };
   window.addEventListener("online", updateConnectionStatus);
   window.addEventListener("offline", updateConnectionStatus);
@@ -6138,6 +6138,6 @@ function renderSkyNow() {
   }, 1000);
 
   console.info(
-    "Atlas Céleste : initialisation terminée."
+    t("ui.initializationComplete")
   );
 })();
