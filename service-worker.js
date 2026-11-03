@@ -26,6 +26,8 @@ const APP_FILES = [
   "./js/tonight-recommendations.js",
   "./js/observing-difficulty.js",
   "./js/star-hop-route.js",
+  "./i18n/fr.json",
+  "./i18n/en.json",
 
   // Icônes de l’application
   "./icons/icon.svg",
