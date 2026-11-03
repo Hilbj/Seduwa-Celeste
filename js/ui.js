@@ -392,7 +392,7 @@ export function createUI({
       if (object.catalogue) detail.push(`Catalogue ${object.catalogue}`);
       else if (object.id && /^(M\d+|NGC\s?\d+)/i.test(object.id)) detail.push(object.id);
       if (Number.isFinite(object.ra)) detail.push(`AD ${formatHours(object.ra)}`);
-      if (Number.isFinite(object.dec)) detail.push(`Déc. ${formatDegrees(object.dec)}`);
+      if (Number.isFinite(object.dec)) detail.push(`${t("ui.decLabel")} ${formatDegrees(object.dec)}`);
       setText("object-detail", detail.join(" · ") || "Informations disponibles ci-dessous");
     }
     $("object-card")?.classList.toggle("is-discovery-card", discoveryMode);
@@ -492,7 +492,7 @@ export function createUI({
         (Number.isFinite(approximateDistancesLy[id]) ? approximateDistancesLy[id] : NaN);
       if (Number.isFinite(distance) && distance > 0) {
         const approx = !Number.isFinite(object.distanceLightYears) && !Number.isFinite(object.distance_ly);
-        add(t("ui.distance"), `${approx ? "environ " : ""}${Math.round(distance).toLocaleString("fr-FR")} années-lumière`);
+        add(t("ui.distance"), `${approx ? t("ui.approximately") : ""}${Math.round(distance).toLocaleString("fr-FR")} ${t("ui.lightYears")}`);
         if (!approx && Number.isFinite(object.mag)) {
           const distanceParsecs = distance / 3.26156;
           const absoluteMag = object.mag - 5 * (Math.log10(distanceParsecs) - 1);
@@ -580,7 +580,7 @@ export function createUI({
         add("Coucher", events.set);
       }
       const maximumAltitude = theoreticalMaximumAltitude(object);
-      if (Number.isFinite(maximumAltitude)) add(t("ui.maximumTheoreticalAltitude"), `${maximumAltitude.toFixed(1).replace(".", ",")}° (au passage au méridien)`);
+      if (Number.isFinite(maximumAltitude)) add(t("ui.maximumTheoreticalAltitude"), `${maximumAltitude.toFixed(1).replace(".", ",")}° ${t("ui.atMeridian")}`);
       if (Number.isFinite(object.alt)) {
         add(t("ui.skyState"), object.alt > 0 ? `Au-dessus de l’horizon (${object.alt.toFixed(1).replace(".", ",")}°)` : `Sous l’horizon (${object.alt.toFixed(1).replace(".", ",")}°)`);
       }
@@ -732,7 +732,7 @@ export function createUI({
             const separation = Number(nearbyObject.separation);
             const separationLabel = Number.isFinite(separation) ? `${separation.toFixed(1).replace(".", ",")}°` : "";
             button.textContent = separationLabel ? `${nearbyName} · ${separationLabel}` : nearbyName;
-            button.setAttribute("aria-label", separationLabel ? `Ouvrir la fiche de ${nearbyName}, à ${separationLabel.replace("°", t("ui.degrees"))}` : `Ouvrir la fiche de ${nearbyName}`);
+            button.setAttribute("aria-label", separationLabel ? `${t("ui.openSheetOf")} ${nearbyName}, ${t("ui.at")} ${separationLabel.replace("°", t("ui.degrees"))}` : `${t("ui.openSheetOf")} ${nearbyName}`);
             button.addEventListener("click", () => {
               // Sélectionner l’objet sans lancer le mode chercheur : l’utilisateur
               // reste dans la fiche et peut poursuivre sa navigation de proche en proche.
@@ -840,7 +840,7 @@ export function createUI({
     const maxAltitude = theoreticalMaximumAltitude(object);
     const parts = [];
     if (events?.transit && !/Sous l’horizon/.test(events.transit)) parts.push(`Culmination ${events.transit}`);
-    if (Number.isFinite(maxAltitude)) parts.push(`Hauteur max. théorique ${Math.round(maxAltitude)}°`);
+    if (Number.isFinite(maxAltitude)) parts.push(`${t("ui.maxTheoreticalAltitude")} ${Math.round(maxAltitude)}°`);
     return parts.join(" · ");
   }
 
@@ -1319,7 +1319,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     });
     renderVisibleNowList();
     const summary = $("visible-now-summary");
-    if (summary) { const count = Math.min(8, tonightSelectionTargets.length); summary.textContent = `Sélection indicative pour le ${visibleNowDateDescription()} · jusqu’à ${count} piste${count > 1 ? "s" : ""} à explorer, selon l’équipement choisi`; }
+    if (summary) { const count = Math.min(8, tonightSelectionTargets.length); summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescription()} ${t("ui.tonightSummaryUpTo")} ${count} ${count > 1 ? t("ui.pistes") : t("ui.piste")} ${t("ui.tonightSummarySuffix")}`; }
   });
 
   function calculateSunsetForDate(date) {
@@ -1360,7 +1360,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     const time = sunset.toLocaleTimeString("fr-FR", { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
     const place = state.locationName || "lieu d’observation initial";
     note.textContent = clamped
-      ? `Départ au coucher du Soleil : ${time} · ${place}`
+      ? `${t("ui.sunsetDeparture")} ${time} · ${place}`
       : `Coucher du Soleil : ${time} · ${place}`;
   }
 
@@ -2352,7 +2352,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       $("discovery-walk-title").textContent = walk.title;
       $("discovery-walk-intro").textContent = walk.intro;
       const mobileWalk = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 600px)").matches;
-      $("discovery-walk-step-count").textContent = mobileWalk ? "" : `Étape ${activeSkyWalkStep + 1} sur ${walk.steps.length}`;
+      $("discovery-walk-step-count").textContent = mobileWalk ? "" : `${t("ui.step")} ${activeSkyWalkStep + 1} ${t("ui.of")} ${walk.steps.length}`;
       $("discovery-walk-step-text").textContent = walk.steps[activeSkyWalkStep];
       const mobileText = $("discovery-walk-mobile-text");
       if (mobileText) {
@@ -3362,7 +3362,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         state.discoveryConstellationTargetStarId = "";
       }
       if (hint) hint.textContent = selected
-        ? `${selected.name_fr || selected.name} : commencez par l’étoile entourée en doré. Utilisez « Suivante » pour découvrir les étoiles principales une à une ; les pointillés montrent comment elles forment la figure.`
+        ? `${selected.name_fr || selected.name} : ${t("ui.constellationWalkIntro")}`
         : t("constellation.intro");
 
       if (details) details.hidden = !selected;
@@ -3398,7 +3398,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           .filter((star, index, all) => all.findIndex(item => item.name === star.name) === index)
           .slice(0, 4);
         if (starsText) starsText.textContent = namedStars.length
-          ? `Étoiles à repérer : ${namedStars.map(star => star.name).join(" · ")}.`
+          ? `${t("ui.starsToSpot")} ${namedStars.map(star => star.name).join(" · ")}.`
           : t("constellation.tip");
 
         const shapeTips = {
@@ -3424,7 +3424,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           (currentStar?.name && !/^HIP[_\s-]*\d+$/i.test(String(currentStar.name)) ? currentStar.name : "");
         if (stepControls) stepControls.hidden = sequence.length === 0;
         if (stepLabel) stepLabel.textContent = sequence.length
-          ? `Repère ${currentIndex + 1} sur ${sequence.length}${currentName ? ` · ${currentName}` : t("constellation.followArrow")}`
+          ? `${t("ui.landmark")} ${currentIndex + 1} ${t("ui.of")} ${sequence.length}${currentName ? ` · ${currentName}` : t("constellation.followArrow")}`
           : t("constellation.noStarToGuide");
         if (prevButton) prevButton.disabled = sequence.length < 2 || currentIndex <= 0;
         if (nextButton) nextButton.disabled = sequence.length < 2 || currentIndex >= sequence.length - 1;
@@ -3591,7 +3591,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const match = String(star?.id ?? star?.name ?? "").match(/^HIP[_\s-]*(\d+)$/i);
       return match ? Number(match[1]) : NaN;
     };
-    const starHopName = star => starHopCommonNames.get(starHopHip(star)) || star?.proper_name || star?.properName || (star?.name && !/^HIP\s*\d+$/i.test(star.name) ? star.name : (star?.hip ? `Étoile non nommée (HIP ${star.hip})` : t("starHop.anchorStar")));
+    const starHopName = star => starHopCommonNames.get(starHopHip(star)) || star?.proper_name || star?.properName || (star?.name && !/^HIP\s*\d+$/i.test(star.name) ? star.name : (star?.hip ? `${t("ui.unnamedStar")} (HIP ${star.hip})` : t("starHop.anchorStar")));
     const starHopHasCommonName = star => Boolean(starHopCommonNames.has(starHopHip(star)) || star?.proper_name || star?.properName || (star?.name && !/^HIP\s*\d+$/i.test(star.name)));
     const starHopAboveHorizon = object => {
       if (!object) return false;
@@ -3632,7 +3632,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       }
       const anchorHorizontal = typeof getStarPosition === "function" ? getStarPosition(anchor) : null;
       if (!Number.isFinite(anchorHorizontal?.alt) || anchorHorizontal.alt <= 0) {
-        starHopResult.textContent = `L’étoile de départ ${starHopName(anchor)} est sous l’horizon local. Choisis une étoile repère actuellement visible pour construire un parcours praticable.`;
+        starHopResult.textContent = `${t("starHop.anchorBelowHorizonStart")} ${starHopName(anchor)} ${t("starHop.anchorBelowHorizonEnd")}`;
         if (starHopRouteList) {
           starHopRouteList.replaceChildren();
           const item = document.createElement("li");
@@ -3667,10 +3667,10 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const neighbor = starHopNearbyNamed(anchor);
         const clues = [];
         clues.push(constellationName ? `Constellation : ${constellationName}.` : t("starHop.constellationNotIdentified"));
-        clues.push(`Luminosité : ${starHopBrightness(anchor)} (magnitude ${Number.isFinite(Number(anchor.mag)) ? Number(anchor.mag).toFixed(1) : "inconnue"}).`);
+        clues.push(`${t("starHop.brightnessLabel")} ${starHopBrightness(anchor)} (${t("starHop.magnitude")} ${Number.isFinite(Number(anchor.mag)) ? Number(anchor.mag).toFixed(1) : t("starHop.unknown")}).`);
         if (neighbor) {
           const neighborDistance = neighbor.distance < 1 ? `${(neighbor.distance * 60).toFixed(0)} minutes d’arc` : `${neighbor.distance.toFixed(1)}°`;
-          clues.push(`Repère voisin : ${starHopName(neighbor.star)}, à environ ${neighborDistance} sur la sphère céleste.`);
+          clues.push(`${t("starHop.neighborLandmark")} ${starHopName(neighbor.star)}, ${t("starHop.atAbout")} ${neighborDistance} ${t("starHop.onCelestialSphere")}`);
         } else {
           clues.push(t("starHop.useSchema"));
         }
@@ -3728,24 +3728,24 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         }
         starHopResult.textContent = route.complete
           ? finalGuide
-            ? `Parcours calculé de ${anchorName} à ${guideName}, repère nommé le plus proche de ${targetName} parmi les étoiles de magnitude ≤ 4,0 à portée d’un saut de ${maxRouteHopDeg.toFixed(1)}°. ${route.legs.length} saut(s), limite de ${route.maxHopDeg.toFixed(1)}° par saut. Depuis ${guideName}, chercher ${targetName} à ${guideDistanceText} vers le ${guideCompass}. La cible diffuse n’est pas nécessairement visible à l’œil nu.`
+            ? `${t("starHop.routeComputedFrom")} ${anchorName} ${t("starHop.routeTo")} ${guideName}, ${t("starHop.nearestNamedLandmarkOf")} ${targetName} ${t("starHop.amongStarsWithinHop")} ${maxRouteHopDeg.toFixed(1)}°. ${route.legs.length} ${t("starHop.hopsLimit")} ${route.maxHopDeg.toFixed(1)}${t("starHop.perHopSince")} ${guideName}, ${t("starHop.lookFor")} ${targetName} ${t("ui.at")} ${guideDistanceText} ${t("starHop.towardThe")} ${guideCompass}. ${t("starHop.faintTargetNote")}`
             : anchorIsFinalGuide
-              ? `Le repère de départ ${anchorName} est déjà l’étoile nommée la plus proche de ${targetName}. Chercher la cible à ${distance} vers le ${compass}. La cible diffuse n’est pas nécessairement visible à l’œil nu.`
-              : `Parcours calculé de ${anchorName} vers ${targetName} : ${route.legs.length} étape(s). Aucun repère nommé suffisamment proche n’a été trouvé ; l’arrivée reste moins précise. Les distances sont angulaires et la visibilité dépend de l’objet et du ciel.`
-          : `Aucun parcours continu par étoiles repères n’a été trouvé avec des sauts de ${route.maxHopDeg.toFixed(1)}° maximum. La direction directe depuis ${anchorName} reste indicative (${distance}, ${compass}).`;
+              ? `${t("starHop.startLandmark")} ${anchorName} ${t("starHop.alreadyNearestNamed")} ${targetName}. ${t("starHop.seekTargetAt")} ${distance} ${t("starHop.towardThe")} ${compass}. ${t("starHop.faintTargetNote")}`
+              : `${t("starHop.routeComputedFrom")} ${anchorName} ${t("starHop.routeToward")} ${targetName} : ${route.legs.length} ${t("starHop.stepsCount")} ${t("starHop.noNamedLandmarkFound")}`
+          : `${t("starHop.noContinuousRouteFound")} ${route.maxHopDeg.toFixed(1)}${t("starHop.maxHopsDirectFrom")} ${anchorName} ${t("starHop.remainsIndicative")} (${distance}, ${compass}).`;
       }
       if (starHopRouteList) {
         starHopRouteList.replaceChildren();
         if (!route.complete) {
           const item = document.createElement("li");
-          item.textContent = `Aucun parcours fiable trouvé avec des sauts de ${maxRouteHopDeg.toFixed(1)}° maximum. La ligne pointillée montre seulement la direction directe indicative, pas un itinéraire validé.`;
+          item.textContent = `${t("starHop.noReliableRouteFound")} ${maxRouteHopDeg.toFixed(1)}${t("starHop.maxHopsDottedLine")}`;
           starHopRouteList.append(item);
         }
         (route.complete ? route.legs : []).forEach((leg, index) => {
           const item = document.createElement("li");
           const routeStarName = star => star?.common_name
             ? starHopName(star)
-            : star?.hip ? `Étoile intermédiaire (HIP ${star.hip})` : t("starHop.intermediateStar");
+            : star?.hip ? `${t("starHop.intermediateStarLabel")} (HIP ${star.hip})` : t("starHop.intermediateStar");
           const fromName = leg.from.kind === "anchor" ? anchorName : routeStarName(leg.from.object);
           const toName = leg.to.kind === "target" && !finalGuide ? targetName : routeStarName(leg.to.object);
           const mag = Number(leg.to.object?.mag);
@@ -3761,9 +3761,9 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           if (stepStar) {
             if (stepConstellation) stepClues.push(stepConstellation);
             if (Number.isFinite(mag)) stepClues.push(starHopBrightness(stepStar));
-            if (stepNeighbor) stepClues.push(`près de ${starHopName(stepNeighbor.star)}`);
+            if (stepNeighbor) stepClues.push(`${t("starHop.near")} ${starHopName(stepNeighbor.star)}`);
           }
-          detail.textContent = `${separationText}${magnitudeNote}${leg.to.kind === "target" && !finalGuide ? t("starHop.targetZone") : leg.to.kind === "star" && !leg.to.object.common_name ? t("starHop.intermediateStar") : t("starHop.anchorStarLabel")}${stepClues.length ? ` · ${stepClues.join(" ; ")}` : ""}`;
+          detail.textContent = `${separationText}${magnitudeNote}${leg.to.kind === "target" && !finalGuide ? t("starHop.targetZone") : leg.to.kind === "star" && !leg.to.object.common_name ? t("starHop.intermediateStar") : t("starHop.anchorStarLabel")}${stepClues.length ? `${t("ui.dotSeparator")} ${stepClues.join(t("ui.listSeparator"))}` : ""}`;
           item.append(strong, detail);
           starHopRouteList.append(item);
         });
@@ -4258,11 +4258,11 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           validAltitude = true;
           if (horizon.altitude > 0) { moonAboveHorizon = true; break; }
         }
-        const presence = !validAltitude ? t("session.session.moonPresenceUnknown") : moonAboveHorizon ? t("session.session.moonAboveHorizon") : "sous l’horizon pendant la session";
+        const presence = !validAltitude ? t("session.moonPresenceUnknown") : moonAboveHorizon ? t("session.moonAboveHorizon") : "sous l’horizon pendant la session";
         let impact = t("session.moonLimitedImpact");
         let level = "low";
         if (moonAboveHorizon && illumination >= 70) {
-          impact = t("session.session.moonStrongImpact");
+          impact = t("session.moonStrongImpact");
           level = "high";
         } else if (moonAboveHorizon && illumination >= 35) {
           impact = t("session.moonModerateImpact");
@@ -4271,7 +4271,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           impact = t("session.moonModerateImpact2");
           level = "moderate";
         } else if (!moonAboveHorizon) {
-          impact = t("session.session.moonBelowNoImpact");
+          impact = t("session.moonBelowNoImpact");
         } else if (illumination < 15) {
           impact = t("session.moonFavorable");
         }
@@ -4280,7 +4280,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const lunarScore = moonAboveHorizon ? 100 - illumination : 100;
         summary.textContent = `${lunarScore}/100`;
         panel.dataset.level = lunarScore >= 80 ? "good" : lunarScore >= 60 ? "favorable" : lunarScore >= 40 ? "moderate" : "high";
-        panel.title = `${phase} · ${illumination} % éclairée · Lune ${presence}. ${impact}.`;
+        panel.title = `${phase} · ${illumination} % ${t("session.illuminated")} · ${t("session.moonWord")} ${presence}. ${impact}.`;
       } catch (error) {
         summary.textContent = "—/100";
         panel.dataset.level = "unknown";
@@ -4296,7 +4296,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       sessionFields.forEach(id => { const el = $(id); if (el) data[id] = el.value; });
       data.checks = Object.fromEntries(sessionChecks.map(el => [el.dataset.sessionCheck, el.checked]));
       try { localStorage.setItem(sessionStorageKey, JSON.stringify(data)); } catch { /* stockage indisponible : la session reste utilisable en mémoire */ }
-      if (notify) showToast(t("session.session.saved"));
+      if (notify) showToast(t("session.saved"));
     };
     const storedSession = readSession();
     if (storedSession) {
@@ -4357,7 +4357,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       if (moonNowButton) {
         moonNowButton.textContent = moonLiveMode ? "En direct ●" : "Maintenant";
         moonNowButton.setAttribute("aria-pressed", String(moonLiveMode));
-        moonNowButton.title = moonLiveMode ? t("moon.moon.liveTracking") : "Afficher l’heure actuelle et suivre la phase en direct";
+        moonNowButton.title = moonLiveMode ? t("moon.liveTracking") : "Afficher l’heure actuelle et suivre la phase en direct";
       }
     };
     const toLocalDateTimeValue = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}T${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}:${String(date.getSeconds()).padStart(2,"0")}`;
@@ -4370,7 +4370,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const A = window.Astronomy;
       const put = (id, value) => { const el = $(id); if (el) el.textContent = value; };
       if (!A || typeof A.MoonPhase !== "function" || typeof A.Equator !== "function" || typeof A.Observer !== "function" || typeof A.Horizon !== "function" || !A.Body) {
-        put("moon-phase-name", t("moon.ephemerisUnavailable")); put("moon-observation-note", t("moon.moon.libraryNotAvailable")); return;
+        put("moon-phase-name", t("moon.ephemerisUnavailable")); put("moon-observation-note", t("moon.libraryNotAvailable")); return;
       }
       try {
         const angle = ((A.MoonPhase(date) % 360) + 360) % 360;
@@ -4406,7 +4406,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const moonPosition = $("moon-orbit-position"); if (moonPosition) {
           moonPosition.setAttribute("transform", `translate(${orbitX} ${orbitY})`);
           moonPosition.setAttribute("aria-valuenow", String(Math.round(angle) % 360));
-          moonPosition.setAttribute("aria-valuetext", `${moonPhaseNames[phaseIndex]}, ${illuminationRounded} % éclairée`);
+          moonPosition.setAttribute("aria-valuetext", `${moonPhaseNames[phaseIndex]}, ${illuminationRounded} % ${t("session.illuminated")}`);
         }
         // Même géométrie de phase pour le petit disque placé sur l'orbite.
         const miniR = 8, miniCx = 0, miniCy = 0, miniRx = Math.abs(Math.cos(rad) * miniR);
@@ -4418,8 +4418,8 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         else miniPath = `M ${miniCx} ${miniCy-miniR} A ${miniR} ${miniR} 0 0 0 ${miniCx} ${miniCy+miniR} A ${miniRx} ${miniR} 0 0 ${angle < 270 ? 0 : 1} ${miniCx} ${miniCy-miniR} Z`;
         const miniShape = $("moon-orbit-lit-shape"); if (miniShape) miniShape.setAttribute("d", miniPath);
         put("moon-phase-angle-note", `${angle.toFixed(2).replace(".", ",")}°`);
-        put("moon-orbit-explanation", t("moon.moon.orbitExplanation"));
-        put("moon-observation-note", horizontal && Number.isFinite(horizontal.altitude) ? (horizontal.altitude > 0 ? `À cette heure, la Lune est au-dessus de l’horizon à ${horizontal.altitude.toFixed(1).replace(".", ",")}°. Son influence sur le ciel profond dépend aussi de son illumination, de la transparence et de la pollution lumineuse.` : t("moon.belowHorizon")) : t("moon.positionNotCalculated"));
+        put("moon-orbit-explanation", t("moon.orbitExplanation"));
+        put("moon-observation-note", horizontal && Number.isFinite(horizontal.altitude) ? (horizontal.altitude > 0 ? `${t("moon.aboveHorizonPrefix")} ${horizontal.altitude.toFixed(1).replace(".", ",")}°. ${t("moon.aboveHorizonSuffix")}` : t("moon.belowHorizon")) : t("moon.positionNotCalculated"));
       } catch (error) {
         put("moon-phase-name", t("moon.calculationUnavailable")); put("moon-observation-note", t("moon.cannotCalculatePhase"));
       }
@@ -4643,7 +4643,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
             let positionText;
             if (moon.projectedRadius <= 1 && moon.depthRj > 0) positionText = t("jupiterMoons.occultation");
             else if (moon.projectedRadius <= 1 && moon.depthRj <= 0) positionText = t("jupiterMoons.transit");
-            else positionText = `${moon.side}, à ${Math.abs(moon.xRj).toFixed(1).replace(".", ",")} Rj du centre.`;
+            else positionText = `${moon.side}, ${t("jupiterMoons.at")} ${Math.abs(moon.xRj).toFixed(1).replace(".", ",")} ${t("jupiterMoons.rjFromCenter")}`;
             position.textContent = positionText;
             const depth = document.createElement("p");
             if (moon.projectedRadius > 1) depth.textContent = moon.depthRj > 0 ? "Plus loin que Jupiter." : "Entre la Terre et Jupiter.";
@@ -4652,7 +4652,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
             details.append(card);
           }
         });
-        if (status) status.textContent = `Positions apparentes calculées pour le ${date.toLocaleString("fr-FR", { dateStyle: "long", timeStyle: "medium" })}.`;
+        if (status) status.textContent = `${t("jupiterMoons.positionsCalculated")} ${date.toLocaleString(getLocale(), { dateStyle: "long", timeStyle: "medium" })}.`;
         updateLocalizedDateTimeDisplay("jupiter-moons-datetime", "jupiter-moons-datetime-display");
       } catch (error) {
         console.error("Atlas Céleste : calcul des lunes de Jupiter impossible", error);
@@ -4799,7 +4799,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         solarOrbits.append(solarMakeSvg("circle", { cx: 360, cy: 260, r: radius, fill: "none", stroke: planet.id === solarSelectedId ? "#7189a8" : "#3c506b", "stroke-width": planet.id === solarSelectedId ? 1.5 : 1, "stroke-dasharray": planet.id === "earth" ? "none" : "2 4", opacity: planet.id === solarSelectedId ? .95 : .72 }));
         const longitude = planet.longitude;
         const point = solarOrbitPoint(planet, longitude);
-        const group = solarMakeSvg("g", { class: `solar-system-planet${planet.id === solarSelectedId ? " is-selected" : ""}`, tabindex: 0, role: "button", "aria-label": `${planet.name}, sélectionner ou déplacer sur l’orbite`, "data-planet-id": planet.id, transform: `translate(${point.x} ${point.y})` });
+        const group = solarMakeSvg("g", { class: `solar-system-planet${planet.id === solarSelectedId ? " is-selected" : ""}`, tabindex: 0, role: "button", "aria-label": `${planet.name}${t("solarSystem.selectOrMove")}`, "data-planet-id": planet.id, transform: `translate(${point.x} ${point.y})` });
         group.append(solarMakeSvg("circle", { class: "solar-system-planet-hit", r: 15, fill: "transparent" }));
         if (planet.id === "saturn") group.append(solarMakeSvg("ellipse", { cx: 0, cy: 0, rx: 11, ry: 4.5, fill: "none", stroke: planet.color, "stroke-width": 2, transform: "rotate(-25)" }));
         group.append(solarMakeSvg("circle", { class: "solar-system-planet-disc", r: planet.id === "jupiter" ? 8 : planet.id === "saturn" ? 7 : planet.id === "earth" ? 6.5 : 5.5, fill: planet.color, stroke: planet.id === solarSelectedId ? "#ffffff" : "#152238", "stroke-width": planet.id === solarSelectedId ? 2 : 1 }));
@@ -4895,7 +4895,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       { title: t("universe.titleNearbyStars"), pointer: t("universe.sunPointer"), description: t("universe.descNearby"), note: t("universe.noteNearby") },
       { title: t("universe.titleMilkyWay"), pointer: t("universe.milkyWayPointer"), description: t("universe.descMilkyWay"), note: t("universe.noteMilkyWay") },
       { title: "Le Groupe local", pointer: t("universe.localGroupPointer"), description: t("universe.descLocalGroup"), note: t("universe.noteLocalGroup") },
-      { title: "La toile cosmique et l’Univers observable", pointer: t("universe.universe.cosmicWebPointer"), description: t("universe.descCosmicWeb"), note: t("universe.noteCosmicWeb") }
+      { title: "La toile cosmique et l’Univers observable", pointer: t("universe.cosmicWebPointer"), description: t("universe.descCosmicWeb"), note: t("universe.noteCosmicWeb") }
     ];
     const universeNS = "http://www.w3.org/2000/svg";
     const universeEl = (tag, attrs = {}, content = "") => `<${tag} ${Object.entries(attrs).map(([k,v]) => `${k}="${String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;')}"`).join(' ')}>${content}</${tag}>`;
@@ -4943,7 +4943,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           for(let arm=0;arm<3;arm++){let pts=[];for(let t=.3;t<5.8;t+=.12){const a=t+arm*Math.PI*2/3,r=2+t*rx/5.8;pts.push(`${(gx+Math.cos(a)*r).toFixed(1)},${(gy+Math.sin(a)*r*.62).toFixed(1)}`);}g+=universeEl("polyline",{points:pts.join(" "),fill:"none",stroke:accent,"stroke-width":Math.max(1.2,rx*.055),"stroke-linecap":"round",opacity:.7});}
           g+=universeCircle(gx,gy,Math.max(4,rx*.16),"#fff0cf",{opacity:.9});g+=universeText(gx,gy+ry+18,name,"minor-label");return g;
         };
-        out+=drawMiniSpiral(300,260,38,24,-18,"#82c8ff","Voie lactée");
+        out+=drawMiniSpiral(300,260,38,24,-18,"#82c8ff",t("universeJourney.level2"));
         out+=drawMiniSpiral(590,235,47,28,32,"#d1a7ff","Andromède");
         out+=drawMiniSpiral(530,360,15,10,-10,"#9acde8","Triangle (M33)");
         for(let i=0;i<24;i++){let x=210+(i*71)%430,y=140+(i*47)%230;out+=universeCircle(x,y,1.8,"#b5cce8",{opacity:.5});}
