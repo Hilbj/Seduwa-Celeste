@@ -21,6 +21,7 @@ import {
 } from "./js/catalogues.js";
 
 import { createSensors } from "./js/sensors.js";
+import { t, getLocale } from "./js/i18n.js";
 import { createSolarSystem } from "./js/solar-system.js";
 import { calculateMinorPlanetPosition, calculateMinorPlanetPositions } from "./js/minor-planets.js";
 import { createUI } from "./js/ui.js";
@@ -562,14 +563,14 @@ import { createUI } from "./js/ui.js";
           visibleNowDateInput.value = formatLocalDateTime(displayedDate);
         }
         clock.textContent =
-          displayedDate.toLocaleTimeString("fr-FR", { hourCycle: "h23" });
+          displayedDate.toLocaleTimeString(getLocale(), { hourCycle: "h23" });
         const dateLabel = $("date-label");
         const discoveryClock = $("discovery-clock");
         const discoveryDateLabel = $("discovery-date-label");
         if (discoveryClock) {
-          discoveryClock.textContent = displayedDate.toLocaleTimeString("fr-FR", { hourCycle: "h23" });
+          discoveryClock.textContent = displayedDate.toLocaleTimeString(getLocale(), { hourCycle: "h23" });
         }
-        const formattedDate = displayedDate.toLocaleDateString("fr-FR", {
+        const formattedDate = displayedDate.toLocaleDateString(getLocale(), {
           weekday: "short", day: "2-digit", month: "short", year: "numeric"
         });
         if (dateLabel) dateLabel.textContent = formattedDate;
@@ -641,7 +642,7 @@ import { createUI } from "./js/ui.js";
     refreshAutoHeading();
     syncObservationModeVisuals();
     const label = $("observation-mode");
-    if (label) label.textContent = "Date choisie";
+    if (label) label.textContent = t("ui.dateChosen");
     horizontalPositionCache.key = null;
     closeObservationDialog();
     drawSky();
@@ -684,7 +685,7 @@ import { createUI } from "./js/ui.js";
       syncObservationModeVisuals();
       if (observationInput) observationInput.value = formatLocalDateTime(new Date());
       const label = $("observation-mode");
-      if (label) label.textContent = "Temps réel";
+      if (label) label.textContent = t("ui.realtime");
       closeObservationDialog();
       horizontalPositionCache.key = null;
       drawSky();
@@ -1233,6 +1234,9 @@ function drawStar(point, mag, bpRp = null) {
 }
 
 
+// Champ vertical du zoom ×1 (voir state.verticalFov initial et le bouton de réinitialisation du zoom).
+const REFERENCE_VERTICAL_FOV = 83.3333333333;
+
 function drawHorizon() {
   const w = state.width;
   const h = state.height;
@@ -1269,7 +1273,11 @@ function drawHorizon() {
       : profile === landscapeDistantProfile ? 0.53
       : 1;
     const relief = rawRelief * profileScale;
-    const altitude = deg(Math.atan2(relief * h, fy));
+    // Altitude angulaire du relief : elle doit rester indépendante du zoom, comme celle des
+    // astres. On convertit donc la fraction d'écran en angle avec le champ vertical de
+    // RÉFÉRENCE (celui du zoom ×1), et non avec le champ courant `fy` : sinon les collines
+    // « montent » en dézoomant (elles masquent des astres levés) et « descendent » en zoomant.
+    const altitude = deg(Math.atan(relief * 2 * Math.tan(rad(REFERENCE_VERTICAL_FOV) / 2)));
     const p = cameraCoordinates(azimuth, altitude);
     if (!Number.isFinite(p.x) || !Number.isFinite(p.y) || !Number.isFinite(p.z) || p.z <= 0.0001) return null;
 
@@ -1964,7 +1972,7 @@ function drawHorizon() {
   // Repères cardinaux ancrés au véritable azimut, projetés sur la silhouette.
   // Ils ne sont dessinés que lorsque leur direction entre dans le champ.
   const cardinals = [
-    [0, "N"], [90, "E"], [180, "S"], [270, "O"]
+    [0, "N"], [90, "E"], [180, "S"], [270, getLocale() === "en" ? "W" : "O"]
   ];
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
@@ -4107,7 +4115,7 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
     ctx.moveTo(point.x, point.y + 3.8); ctx.lineTo(point.x, point.y + 5.4);
     ctx.stroke();
     ctx.restore();
-    const mapLabel = object.dwarfPlanet ? (object.name || object.proper_name || "Planète naine") : `${object.id ? `${object.id} ` : ""}${object.name || object.designation || "Planète mineure"}`;
+    const mapLabel = object.dwarfPlanet ? (object.name || object.proper_name || t("ui.dwarfPlanet")) : `${object.id ? `${object.id} ` : ""}${object.name || object.designation || t("ui.minorPlanet")}`;
     drawLabel(mapLabel, point, color);
   }
 
@@ -4305,7 +4313,7 @@ function updateSkyGuide(target, camera, distance, nx, ny, message = "") {
   const modeToggle = $("sky-guide-mode-toggle");
   const freeMode = state.skyGuideMode === "free";
   if (eyebrow) eyebrow.textContent = freeMode ? "MODE LIBRE" : "GUIDAGE CÉLESTE";
-  if (modeToggle) modeToggle.textContent = freeMode ? "Guidage ciblé" : "Mode libre";
+  if (modeToggle) modeToggle.textContent = freeMode ? t("ui.targetedGuidance") : t("ui.freeMode");
   if (name) name.textContent = freeMode
     ? (target?._freeGuideLabel || (target?.type === "star" ? "Étoile dans le champ" : target?.name || target?.id) || "Balaye doucement le ciel")
     : (target?.name || target?.id || "Cible");
@@ -4340,7 +4348,7 @@ function updateSkyGuide(target, camera, distance, nx, ny, message = "") {
     if (marker) { marker.style.left = "0px"; marker.style.top = "0px"; marker.classList.add("outside"); }
     panel.querySelectorAll("[data-guide-ring]").forEach(ring => ring.classList.remove("acquired"));
     state.skyGuideProgress = 0;
-    if (progress) progress.textContent = "0 / 3 cercles acquis";
+    if (progress) progress.textContent = t("ui.circlesAcquired");
     if (status) status.textContent = message || "Balaye doucement le ciel pour repérer un objet.";
     return;
   }
@@ -4395,7 +4403,7 @@ function updateSkyGuide(target, camera, distance, nx, ny, message = "") {
   if (progress) progress.textContent = `${state.skyGuideProgress} / 3 cercles acquis`;
   if (status) status.textContent = message || (state.skyGuideProgress >= 3
     ? "Objet repéré ! Les trois cercles sont acquis."
-    : Number.isFinite(distance) ? `Écart au centre : ${distance.toFixed(1)}° · oriente doucement le téléphone.`
+    : Number.isFinite(distance) ? `${t("ui.deviationFromCenter")}: ${distance.toFixed(1).replace(".", ",")}° · ${t("ui.gentlyPointPhone")}`
     : "Active la boussole et vérifie les autorisations pour commencer.");
 }
 
@@ -4451,8 +4459,8 @@ function updateFinder(date = new Date()) {
     updateSkyGuide(null, null, NaN, NaN, NaN, "Balaye doucement le ciel pour repérer un objet.");
     if (horizontal) horizontal.textContent = "—";
     if (vertical) vertical.textContent = "—";
-    if (instruction) instruction.textContent = "Mode libre : approche doucement un objet du centre.";
-    if (sensor) sensor.textContent = "Aucun objet dans le champ de découverte pour le moment.";
+    if (instruction) instruction.textContent = t("ui.freeModeInstruction");
+    if (sensor) sensor.textContent = t("ui.noObjectInField");
     return;
   }
 
@@ -4550,7 +4558,7 @@ function updateFinder(date = new Date()) {
     }
 
     if (vertical) {
-      vertical.textContent = "Derrière";
+      vertical.textContent = t("ui.behind");
     }
 
     if (instruction) {
@@ -4562,7 +4570,7 @@ function updateFinder(date = new Date()) {
 
     if (sensor) {
       sensor.textContent =
-        `Écart angulaire : ${distance.toFixed(1)}° · ` +
+        `${t("ui.angularDeviation")}: ${distance.toFixed(1).replace(".", ",")}° · ` +
         `cap ${Math.round(norm360(state.heading))}°`;
     }
 
@@ -4661,8 +4669,8 @@ function updateFinder(date = new Date()) {
   if (sensor) {
     sensor.textContent =
       `Cap ${Math.round(norm360(state.heading))}° · ` +
-      `visée ${state.pitch.toFixed(1)}° · ` +
-      `écart ${distance.toFixed(1)}°`;
+      `${t("ui.pitch")}: ${state.pitch.toFixed(1).replace(".", ",")}° · ` +
+      `${t("ui.deviation")} ${distance.toFixed(1).replace(".", ",")}°`;
   }
 }
 
@@ -4796,7 +4804,7 @@ function locateUser() {
       drawSky();
 
       ui.showToast(
-        `Position actualisée (précision ±${Math.round(accuracy)} m).`
+        `${t("ui.positionUpdated")} (±${Math.round(accuracy)} m).`
       );
     },
     error => {
@@ -4964,7 +4972,7 @@ if (skyRenderDiagnostics) {
   const sensorLogButton = document.createElement("button");
   sensorLogButton.type = "button";
   sensorLogButton.id = "atlas-sensor-log-download";
-  sensorLogButton.textContent = "Télécharger les logs capteurs";
+  sensorLogButton.textContent = t("ui.downloadSensorLogs");
   Object.assign(sensorLogButton.style, {
     position: "fixed", left: "8px",
     bottom: "calc(var(--mobile-toolbar-height, 42px) + 24px + env(safe-area-inset-bottom, 0px))",
@@ -4999,7 +5007,7 @@ if (skyRenderDiagnostics) {
   const updateLogCount = (event) => {
     const count = event?.detail?.count ?? window.__atlasSensorLog?.records?.length ?? 0;
     // Le compteur est conservé dans le journal ; le bouton reste compact.
-    sensorLogButton.textContent = "Télécharger les logs capteurs";
+    sensorLogButton.textContent = t("ui.downloadSensorLogs");
   };
   window.addEventListener("atlas-sensor-log-updated", updateLogCount);
 }
@@ -5506,7 +5514,7 @@ function renderSkyNow() {
         ctx.moveTo(point.x, point.y - 12); ctx.lineTo(point.x, point.y - 5);
         ctx.moveTo(point.x, point.y + 5); ctx.lineTo(point.x, point.y + 12);
         ctx.stroke();
-        drawLabel(`HIP ${object.hip} · à vérifier`, { x: point.x, y: point.y + 17 }, "#ffcf87", true);
+        drawLabel(`HIP ${object.hip} · ${t("ui.toVerify")}`, { x: point.x, y: point.y + 17 }, "#ffcf87", true);
         ctx.restore();
       }
 
@@ -5892,7 +5900,7 @@ function renderSkyNow() {
       const li = document.createElement("li");
       const button = document.createElement("button");
       button.type = "button";
-      button.innerHTML = `<span><span class="review-star-name">HIP ${hip} · ${reviewStarNames[hip] || star.name || "Étoile"}</span><br><small>${star.name || "Catalogue Hipparcos"}</small></span><span class="review-star-status">${status}</span>`;
+      button.innerHTML = `<span><span class="review-star-name">HIP ${hip} · ${reviewStarNames[hip] || star.name || t("ui.star")}</span><br><small>${star.name || t("ui.hipparcosCatalogue")}</small></span><span class="review-star-status">${status}</span>`;
       button.addEventListener("click", () => {
         const currentPos = starHorizontalPosition(star, state.observationDate || new Date());
         state.selected = { ...star, type: "star", name: reviewStarNames[hip] || star.name, az: currentPos.az, alt: currentPos.alt };
@@ -6124,7 +6132,7 @@ function renderSkyNow() {
       const status = $("status");
 
       if (status) {
-        status.textContent = "Signal capteur perdu";
+        status.textContent = t("ui.signalLost");
       }
     }
   }, 1000);
