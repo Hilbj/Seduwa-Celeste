@@ -10,6 +10,7 @@ import { assessObservingDifficulty } from "./observing-difficulty.js";
 import { angularSeparationDeg, buildStarHopRoute, formatStarHopTargetLabel, recommendedStarHopMaxDeg, selectTargetGuideStar } from "./star-hop-route.js";
 import { SOLAR_PLANETS, calculateSolarOrbitPosition, calculateSolarOrbitPositions } from "./solar-system-orbits.js";
 import { uiTexts } from "./ui-texts.js";
+import { t, getLocale } from "./i18n.js";
 
 export function createUI({
   state,
@@ -129,14 +130,14 @@ export function createUI({
       if (result && typeof result.catch === "function") {
         result.catch(error => {
           console.error(`[Atlas] ${name} :`, error);
-          showToast(`${name} : opération impossible.`);
+          showToast(`${name} : ${t("ui.operationImpossible")}.`);
         });
       }
 
       return result;
     } catch (error) {
       console.error(`[Atlas] ${name} :`, error);
-      showToast(`${name} : opération impossible.`);
+      showToast(`${name} : ${t("ui.operationImpossible")}.`);
       return undefined;
     }
   }
@@ -154,12 +155,12 @@ export function createUI({
 
     setText(
       "clock",
-      now.toLocaleTimeString("fr-FR", { hourCycle: "h23" })
+      now.toLocaleTimeString(getLocale(), { hourCycle: "h23" })
     );
 
     setText(
       "date-label",
-      now.toLocaleDateString("fr-FR", {
+      now.toLocaleDateString(getLocale(), {
         weekday: "short",
         day: "2-digit",
         month: "short",
@@ -280,8 +281,8 @@ export function createUI({
     state.sensorActive = false;
     state.orientationListening = false;
     syncSensorButton();
-    setText("status", "Capteurs désactivés");
-    showToast("Capteurs désactivés.");
+    setText("status", t("ui.sensorsDisabled"));
+    setText("status", t("ui.sensorsDisabled"));
   }
 
   /* ==========================================================
@@ -301,16 +302,18 @@ export function createUI({
       `${Math.round(norm360(heading))}°`
     );
 
+    // Points cardinaux : SO et O deviennent SW et W en anglais
+    const cardinals = getLocale() === "en"
+      ? ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
+      : ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
     setText(
       "cardinal",
-      ["N", "NE", "E", "SE", "S", "SO", "O", "NO"][
-        Math.round(norm360(heading) / 45) % 8
-      ]
+      cardinals[Math.round(norm360(heading) / 45) % 8]
     );
 
     setText(
       "altitude-info",
-      `Visée ${pitch.toFixed(1)}°`
+      `${t("readout.pitch")} ${pitch.toFixed(1)}°`
     );
 
   }
@@ -416,24 +419,28 @@ export function createUI({
       const descriptions = uiTexts.descriptions;
       const discoveryDescriptions = uiTexts.discoveryDescriptions;
       const normalizedName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleUpperCase("fr-FR");
-      const expertFallback = object.type === "star" ? "Étoile de la Voie lactée. Les paramètres affichés dépendent des mesures disponibles dans le catalogue." :
-        object.type === "planet" ? "Planète du Système solaire ; sa position est recalculée pour la date d’observation sélectionnée." :
-        object.type === "dwarf-planet" ? "Planète naine du Système solaire ; sa position est estimée à partir d’éléments orbitaux simplifiés." :
-        object.type === "comet" ? "Comète : sa position et son éclat sont estimés à partir d’un modèle orbital simplifié. Les prévisions de luminosité des comètes restent très incertaines." :
-        object.type === "minor-planet" ? "Planète mineure : sa position est estimée à partir d’éléments orbitaux et d’un modèle képlérien simplifié." :
-        object.type === "galaxy" ? "Système gravitationnel composé d’étoiles, de gaz, de poussière et de matière noire." :
-        object.type === "nebula" ? "Nuage interstellaire de gaz et/ou de poussière, associé à la formation ou à l’évolution des étoiles." :
-        object.type === "cluster" ? "Groupe d’étoiles liées ou apparentées, observées dans une même région du ciel." :
-        object.type === "moon" ? descriptions.LUNE : object.type === "sun" ? descriptions.SOLEIL : "Objet astronomique du catalogue.";
-      const discoveryFallback = object.type === "star" ? `${name} est une étoile de la Voie lactée${constellationLabel ? ` située dans la constellation ${constellationLabel}` : ""}. Sa couleur et son éclat apparents aident à la comparer aux étoiles voisines ; son scintillement dépend aussi de l’atmosphère.` :
-        object.type === "planet" ? `${name} est une planète du Système solaire. Sa distance, sa taille apparente et les détails perceptibles changent selon sa position sur son orbite ; un point très brillant à l’œil nu ne révèle pas nécessairement sa surface.` :
-        object.type === "dwarf-planet" ? `${name} est une planète naine qui orbite autour du Soleil. Sa position sur la carte est calculée avec un modèle orbital simplifié ; une éphéméride professionnelle reste préférable pour un pointage de haute précision.` :
-        object.type === "comet" ? `${name} est une comète : un petit corps glacé qui peut libérer du gaz et de la poussière en s’approchant du Soleil. Sa position est calculée par un modèle orbital simplifié ; sa luminosité réelle peut différer fortement des prévisions.` :
-        object.type === "minor-planet" ? `${name} est un astéroïde qui orbite autour du Soleil. Sa position sur la carte est calculée avec une propagation orbitale simplifiée ; une éphéméride professionnelle reste préférable pour un pointage de haute précision.` :
-        object.type === "galaxy" ? `${name} est une galaxie : un immense ensemble d’étoiles, de gaz et de poussières liés par la gravité. À l’œil ou aux jumelles, elle apparaît le plus souvent comme une faible lueur diffuse, très sensible à la qualité du ciel.` :
-        object.type === "nebula" ? `${name} est une nébuleuse, un nuage de gaz et/ou de poussières. Selon sa nature, elle peut éclairer des étoiles en formation ou être constituée de matière rejetée par une étoile en fin de vie ; ses détails dépendent beaucoup du ciel et de l’instrument.` :
-        object.type === "cluster" ? `${name} est un amas d’étoiles. Un amas ouvert dessine un groupe d’étoiles dans la Voie lactée ; un amas globulaire forme une boule très dense d’étoiles anciennes. Les jumelles révèlent souvent de nombreux membres.` :
-        object.type === "moon" ? descriptions.LUNE : object.type === "sun" ? descriptions.SOLEIL : `${name} est un objet céleste dont l’aspect dépend de sa nature, de la qualité du ciel et de l’instrument utilisé.`;
+            // Descriptions courtes (Mode Expert)
+      const expertFallback = object.type === "star" ? t("ui.expertStar") :
+        object.type === "planet" ? t("ui.expertPlanet") :
+        object.type === "dwarf-planet" ? t("ui.expertDwarfPlanet") :
+        object.type === "comet" ? t("ui.expertComet") :
+        object.type === "minor-planet" ? t("ui.expertMinorPlanet") :
+        object.type === "galaxy" ? t("ui.expertGalaxy") :
+        object.type === "nebula" ? t("ui.expertNebula") :
+        object.type === "cluster" ? t("ui.expertCluster") :
+        object.type === "moon" ? descriptions.LUNE : object.type === "sun" ? descriptions.SOLEIL : t("ui.expertGeneric");
+
+      // Descriptions longues (Mode Découverte)
+      const inConst = constellationLabel ? ` ${t("ui.inConstellation")} ${constellationLabel}` : "";
+      const discoveryFallback = object.type === "star" ? `${name}${t("ui.discoveryStar1")}${inConst}${t("ui.discoveryStar2")}` :
+        object.type === "planet" ? `${name}${t("ui.discoveryPlanet")}` :
+        object.type === "dwarf-planet" ? `${name}${t("ui.discoveryDwarfPlanet")}` :
+        object.type === "comet" ? `${name}${t("ui.discoveryComet")}` :
+        object.type === "minor-planet" ? `${name}${t("ui.discoveryMinorPlanet")}` :
+        object.type === "galaxy" ? `${name}${t("ui.discoveryGalaxy")}` :
+        object.type === "nebula" ? `${name}${t("ui.discoveryNebula")}` :
+        object.type === "cluster" ? `${name}${t("ui.discoveryCluster")}` :
+        object.type === "moon" ? descriptions.LUNE : object.type === "sun" ? descriptions.SOLEIL : `${name}${t("ui.discoveryGeneric")}`;
       const description = discoveryMode
         ? (discoveryDescriptions[id] || discoveryDescriptions[normalizedName] || descriptions[id] || descriptions[id.replace(/^NGC/, "NGC")] || discoveryFallback)
         : (descriptions[id] || descriptions[id.replace(/^NGC/, "NGC")] || expertFallback);
@@ -1032,7 +1039,7 @@ export function createUI({
     if (!matches.length) {
       const empty = document.createElement("p");
       empty.className = "visible-now-search-empty muted";
-      empty.textContent = "Aucun objet correspondant dans les catalogues stellaires, Messier, NGC, planètes mineures ou Système solaire.";
+      empty.textContent = t("ui.noObjectFound");
       results.append(empty);
       return;
     }
@@ -1058,7 +1065,7 @@ export function createUI({
       const ficheButton = document.createElement("button");
       ficheButton.type = "button";
       ficheButton.className = "action-button visible-now-fiche";
-      ficheButton.textContent = "Fiche";
+      ficheButton.textContent = t("ui.fiche");
       ficheButton.setAttribute("aria-label", `Afficher la fiche de ${title.textContent}`);
       ficheButton.addEventListener("click", () => {
         applyVisibleNowPanelDateToSky();
@@ -1078,7 +1085,7 @@ export function createUI({
         const guideButton = document.createElement("button");
         guideButton.type = "button";
         guideButton.className = "action-button visible-now-guide";
-        guideButton.textContent = "Guider";
+        guideButton.textContent = t("ui.guide");
         guideButton.setAttribute("aria-label", `Guider vers ${title.textContent}`);
         guideButton.addEventListener("click", () => {
           applyVisibleNowPanelDateToSky();
@@ -1088,7 +1095,7 @@ export function createUI({
           }
           if (typeof selectTarget === "function") selectTarget(object);
           closeVisibleNow();
-          showToast(`Carte centrée sur ${title.textContent} ; guidage lancé.`);
+          showToast(`${t("ui.mapCenteredOn")} ${title.textContent} ; ${t("ui.guidanceLaunched")}.`);
         });
         actions.append(guideButton);
       }
@@ -1137,7 +1144,9 @@ export function createUI({
       instrument: $("visible-now-instrument")?.value || "all"
     });
     const summary = $("visible-now-summary");
-    if (summary) { const count = Math.min(8, tonightSelectionTargets.length); summary.textContent = `Sélection indicative pour le ${visibleNowDateDescription()} · jusqu’à ${count} piste${count > 1 ? "s" : ""} à explorer, selon l’équipement choisi`; }
+    if (summary) { const count = Math.min(8, tonightSelectionTargets.length);
+const piste = count > 1 ? t("ui.pistes") : t("ui.piste");
+summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescription()} ${t("ui.tonightSummaryUpTo")} ${count} ${piste} ${t("ui.tonightSummarySuffix")}`; }
     renderVisibleNowList();
     renderVisibleNowSearch();
     const date = getVisibleNowPanelDate();
@@ -1188,11 +1197,16 @@ export function createUI({
     const filterSummary = $("visible-now-filter-summary");
     if (filterSummary) {
       if (mode === "tonight") {
-        filterSummary.textContent = `${targets.length} recommandation${targets.length > 1 ? "s" : ""} affichée${targets.length > 1 ? "s" : ""}${filteredTargets.length > targets.length ? ` sur ${filteredTargets.length} cibles correspondantes` : ""}.`;
+        const rec = targets.length > 1 ? t("ui.recommendations") : t("ui.recommendation");
+        const aff = targets.length > 1 ? t("ui.affichees") : t("ui.affichee");
+        const suffix = filteredTargets.length > targets.length ? ` ${t("ui.filterSummaryOn")} ${filteredTargets.length} ${t("ui.filterSummaryMatchingTargets")}` : "";
+        filterSummary.textContent = `${targets.length} ${rec} ${aff}${suffix}.`;
       } else {
+        const cible = targets.length > 1 ? t("ui.cibles") : t("ui.cible");
+        const aff = targets.length > 1 ? t("ui.affichees") : t("ui.affichee");
         filterSummary.textContent = filteredTargets.length === sourceTargets.length
-          ? `${targets.length} cible${targets.length > 1 ? "s" : ""} affichée${targets.length > 1 ? "s" : ""}.`
-          : `${targets.length} cible${targets.length > 1 ? "s" : ""} sur ${sourceTargets.length} après filtrage.`;
+          ? `${targets.length} ${cible} ${aff}.`
+          : `${targets.length} ${cible} ${t("ui.filterSummaryOn")} ${sourceTargets.length} ${t("ui.filterSummaryAfterFiltering")}.`;
       }
     }
     if (!targets.length) {
@@ -1216,7 +1230,7 @@ export function createUI({
       title.textContent = commonStarName || object.name || object.proper_name || object.id || "Objet céleste";
       const rank = document.createElement("span");
       rank.className = "visible-now-rank";
-      rank.textContent = sort === "recommended" ? `Priorité ${targetIndex + 1}` : `Position ${targetIndex + 1}`;
+      rank.textContent = sort === "recommended" ? `${t("ui.priority")} ${targetIndex + 1}` : `${t("ui.position")} ${targetIndex + 1}`;
       const meta = document.createElement("p");
       const typeNames = { planet: "Planète", sun: "Soleil", moon: "Lune", "minor-planet": "Planète mineure", "dwarf-planet": "Planète naine", comet: "Comète", galaxy: "Galaxie", nebula: "Nébuleuse", cluster: "Amas", star: "Étoile", "deep-sky": "Ciel profond" };
       const type = typeNames[object.type] || (object.catalogue === "NGC" ? "Objet NGC" : object.catalogue === "Messier" ? "Objet Messier" : object.type || "Objet céleste");
@@ -1231,9 +1245,10 @@ export function createUI({
       const difficulty = assessObservingDifficulty(object, $("visible-now-instrument")?.value || "all");
       const difficultyLine = document.createElement("p");
       difficultyLine.className = `visible-now-difficulty is-${difficulty.level}`;
-      difficultyLine.textContent = `Repérage estimé : ${difficulty.label}`;
+      const repText = `${t("ui.estimatedSpotting")}: ${difficulty.label}`;
+      difficultyLine.textContent = repText;
       difficultyLine.title = difficulty.explanation;
-      difficultyLine.setAttribute("aria-label", `Repérage estimé : ${difficulty.label}`);
+      difficultyLine.setAttribute("aria-label", repText);
       const difficultyExplanation = document.createElement("p");
       difficultyExplanation.className = "visible-now-difficulty-explanation";
       difficultyExplanation.textContent = difficulty.explanation;
@@ -1250,7 +1265,7 @@ export function createUI({
       const ficheButton = document.createElement("button");
       ficheButton.type = "button";
       ficheButton.className = "action-button visible-now-fiche";
-      ficheButton.textContent = "Fiche";
+      ficheButton.textContent = t("ui.fiche");
       ficheButton.setAttribute("aria-label", `Afficher la fiche de ${title.textContent}`);
       ficheButton.addEventListener("click", () => {
         applyVisibleNowPanelDateToSky();
@@ -1264,14 +1279,14 @@ export function createUI({
       const guideButton = document.createElement("button");
       guideButton.type = "button";
       guideButton.className = "action-button visible-now-guide";
-      guideButton.textContent = "Guider";
+      guideButton.textContent = t("ui.guide");
       guideButton.setAttribute("aria-label", `Guider vers ${title.textContent}`);
       guideButton.addEventListener("click", () => {
         applyVisibleNowPanelDateToSky();
         finderReturnTo = "visible-now";
         if (typeof selectTarget === "function") selectTarget(object);
         closeVisibleNow();
-        showToast(`Guidage lancé vers ${title.textContent}.`);
+        showToast(`${t("ui.guidanceLaunchedTo")} ${title.textContent}.`);
       });
       actions.append(ficheButton, guideButton);
       card.append(content, actions);
@@ -1439,8 +1454,8 @@ export function createUI({
     setText(
       "constellations-status",
       state.showConstellations
-        ? "Lignes des constellations activées."
-        : "Lignes des constellations désactivées."
+        ? t("constellations.linesEnabled")
+        : t("constellations.linesDisabled")
     );
 
     safely("Affichage des constellations", () => drawSky());
@@ -1448,6 +1463,12 @@ export function createUI({
 
   function toggleConstellationBoundaries() {
     state.showConstellationBoundaries = !state.showConstellationBoundaries;
+    setText(
+      "constellations-boundaries-status",
+      state.showConstellationBoundaries
+        ? t("constellations.boundariesEnabled")
+        : t("constellations.boundariesDisabled")
+    );
     const button = $("constellation-boundaries-btn");
     if (button) {
       button.setAttribute("aria-pressed", String(state.showConstellationBoundaries));
@@ -1773,7 +1794,7 @@ export function createUI({
       .filter(item => celestialEventFilter === "all" || eventCategory(item) === celestialEventFilter)
       .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
     if (!upcoming.length) {
-      const p = document.createElement("p"); p.className = "muted"; p.textContent = "Aucun événement dans cette catégorie pour les 120 prochains jours à partir de la date sélectionnée."; list.append(p); return;
+      const p = document.createElement("p"); p.className = "muted"; p.textContent = t("events.noEvents"); list.append(p); return;
     }
     for (const item of upcoming) {
       const card = document.createElement("article"); card.className = "event-card";
@@ -1801,7 +1822,7 @@ export function createUI({
           openEventTarget(freshTarget);
         }); actions.append(button);
       }
-      const visibleButton = document.createElement("button"); visibleButton.type = "button"; visibleButton.className = "action-button"; visibleButton.textContent = "Voir les cibles";
+      const visibleButton = document.createElement("button"); visibleButton.type = "button"; visibleButton.className = "action-button"; visibleButton.textContent = t("events.seeTargets");
       visibleButton.addEventListener("click", () => {
         prepareEventObservationDate(item);
         const dialog = $("events-dialog"); if (dialog) dialog.hidden = true;
@@ -1859,9 +1880,9 @@ export function createUI({
     const card = document.createElement("article");
     card.className = "condition-card light-pollution-card";
     const label = document.createElement("span");
-    label.textContent = "Pollution lumineuse locale";
+    label.textContent = t("conditions.localLightPollution");
     const detail = document.createElement("small");
-    detail.textContent = "Carte interactive centrée sur le lieu sélectionné. Les données satellitaires donnent une estimation régionale, pas une mesure du ciel réel au sol.";
+    detail.textContent = t("conditions.lightPollutionDetail");
     const frame = document.createElement("iframe");
     frame.className = "light-pollution-map-frame";
     frame.title = "Carte interactive de pollution lumineuse pour le lieu sélectionné";
@@ -1890,9 +1911,9 @@ export function createUI({
     if (!content) return;
     if (!state.locationReady) {
       updateSessionWeatherStatus(null);
-      content.replaceChildren(); const p = document.createElement("p"); p.className = "muted"; p.textContent = "Position inconnue. Utilisez l’icône de position pour autoriser la géolocalisation, puis actualisez."; content.append(p); return;
+      content.replaceChildren(); const p = document.createElement("p"); p.className = "muted"; p.textContent = t("conditions.unknownPosition"); content.append(p); return;
     }
-    content.replaceChildren(); const loading = document.createElement("p"); loading.className = "muted"; loading.textContent = "Chargement des conditions météo et du ciel local…"; content.append(loading);
+    content.replaceChildren(); const loading = document.createElement("p"); loading.className = "muted"; loading.textContent = t("conditions.loading"); content.append(loading);
     setText("conditions-location", state.locationName || `${state.latitude.toFixed(3)}°, ${state.longitude.toFixed(3)}°`);
     try {
       const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(state.latitude)}&longitude=${encodeURIComponent(state.longitude)}&current=temperature_2m,relative_humidity_2m,apparent_temperature,is_day,precipitation,rain,cloud_cover,wind_speed_10m,visibility&hourly=temperature_2m,relative_humidity_2m,apparent_temperature,precipitation,precipitation_probability,cloud_cover,wind_speed_10m,visibility&forecast_days=7&timezone=auto`;
@@ -1923,20 +1944,20 @@ export function createUI({
       const context = document.createElement("p"); context.className = "conditions-context muted";
       if (hasTargetForecast) {
         const [year, month, day] = sessionDate.split("-");
-        context.textContent = `Prévisions horaires pour le ${day}/${month}/${year} à ${target.slice(11)} (heure locale), à l’heure pleine la plus proche de l’heure de début choisie (${sessionTime.slice(0, 5)}).`;
+        context.textContent = `${t("conditions.hourlyForecastIntro")} ${day}/${month}/${year} ${t("conditions.hourlyForecastAt")} ${target.slice(11)} ${t("conditions.hourlyForecastLocalTime")} (${sessionTime.slice(0, 5)}).`;
       } else {
-        context.textContent = "Prévisions horaires indisponibles pour cette date et cette heure ; les valeurs météo actuelles sont affichées à titre indicatif.";
+        context.textContent = t("conditions.hourlyUnavailable");
       }
       contentCards.push(context);
       const quality = document.createElement("article"); quality.className = "condition-card sky-quality-card";
-      const qualityLabel = document.createElement("span"); qualityLabel.textContent = "Indice météo pour l’observation";
+      const qualityLabel = document.createElement("span"); qualityLabel.textContent = t("conditions.weatherIndexLabel");
       const qualityValue = document.createElement("strong");
       const qualityDetail = document.createElement("small");
-      if (score === null) { qualityValue.textContent = "Indisponible"; qualityDetail.textContent = "Les données météo ne permettent pas de calculer un indice."; }
+      if (score === null) { qualityValue.textContent = t("conditions.unavailable"); qualityDetail.textContent = t("conditions.noIndexData"); }
       else {
         qualityValue.textContent = `${score}/100`;
         const rating = score >= 80 ? "Très favorable" : score >= 60 ? "Plutôt favorable" : score >= 40 ? "Mitigé" : "Défavorable";
-        qualityDetail.textContent = `${rating} · indice indicatif calculé à partir des nuages, précipitations, humidité, vent et visibilité ; il ne mesure ni la transparence astronomique ni la pollution lumineuse.`;
+        qualityDetail.textContent = `${rating} · ${t("conditions.indexBasis")}`;
         quality.dataset.quality = score >= 60 ? "good" : score >= 40 ? "mixed" : "poor";
       }
       quality.append(qualityLabel, qualityValue, qualityDetail); contentCards.push(quality);
@@ -1944,45 +1965,45 @@ export function createUI({
         ? `${Math.round(c.precipitation_probability)} %`
         : Number.isFinite(c.precipitation) ? `${c.precipitation} mm` : "Indisponible";
       const rows = [
-        ["Nuages", Number.isFinite(c.cloud_cover) ? `${Math.round(c.cloud_cover)} %` : "Indisponible", "Couverture nuageuse estimée", "Couverture nuageuse"],
-        ["Temp.", Number.isFinite(c.temperature_2m) ? `${Math.round(c.temperature_2m)} °C` : "Indisponible", Number.isFinite(c.apparent_temperature) ? `Ressenti ${Math.round(c.apparent_temperature)} °C` : "", "Température"],
-        ["Pluie", precipitationText, Number.isFinite(c.precipitation_probability) ? `Probabilité · ${hasTargetForecast ? "prévision horaire" : "valeur actuelle"}` : (hasTargetForecast ? "Quantité prévue à l’heure choisie" : "Quantité actuelle"), "Précipitations"],
-        ["Humidité", Number.isFinite(c.relative_humidity_2m) ? `${Math.round(c.relative_humidity_2m)} %` : "Indisponible", "Humidité relative", "Humidité relative"],
-        ["Vent", Number.isFinite(c.wind_speed_10m) ? `${Math.round(c.wind_speed_10m)} km/h` : "Indisponible", "Vitesse à 10 m", "Vitesse du vent"],
-        ["Visib.", Number.isFinite(c.visibility) ? `${(c.visibility / 1000).toLocaleString("fr-FR", { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km` : "Indisponible", "Visibilité météorologique estimée", "Visibilité météorologique"]
+        ["clouds", t("conditions.cardClouds"), Number.isFinite(c.cloud_cover) ? `${Math.round(c.cloud_cover)} %` : t("conditions.unavailable"), t("conditions.cardCloudsDesc"), t("conditions.cardCloudsAria")],
+        ["temp", t("conditions.cardTemp"), Number.isFinite(c.temperature_2m) ? `${Math.round(c.temperature_2m)} °C` : t("conditions.unavailable"), Number.isFinite(c.apparent_temperature) ? `${t("conditions.cardTempFeelsLike")} ${Math.round(c.apparent_temperature)} °C` : "", t("conditions.cardTempAria")],
+        ["rain", t("conditions.cardRain"), precipitationText, Number.isFinite(c.precipitation_probability) ? `${t("conditions.probability")} · ${hasTargetForecast ? t("conditions.hourlyForecast") : t("conditions.currentValue")}` : (hasTargetForecast ? t("conditions.forecastedQuantity") : t("conditions.currentQuantity")), t("conditions.cardRainAria")],
+        ["humidity", t("conditions.cardHumidity"), Number.isFinite(c.relative_humidity_2m) ? `${Math.round(c.relative_humidity_2m)} %` : t("conditions.unavailable"), t("conditions.cardHumidityDesc"), t("conditions.cardHumidityAria")],
+        ["wind", t("conditions.cardWind"), Number.isFinite(c.wind_speed_10m) ? `${Math.round(c.wind_speed_10m)} km/h` : t("conditions.unavailable"), t("conditions.cardWindDesc"), t("conditions.cardWindAria")],
+        ["visibility", t("conditions.cardVisibility"), Number.isFinite(c.visibility) ? `${(c.visibility / 1000).toLocaleString(getLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })} km` : t("conditions.unavailable"), t("conditions.cardVisibilityDesc"), t("conditions.cardVisibilityAria")]
       ];
-      for (const [label, value, detail, fullLabel] of rows) {
+      const explanations = {
+        "clouds": t("conditions.helpClouds"),
+        "temp": t("conditions.helpTemp"),
+        "rain": t("conditions.helpRain"),
+        "humidity": t("conditions.helpHumidity"),
+        "wind": t("conditions.helpWind"),
+        "visibility": t("conditions.helpVisibility")
+      };
+      for (const [id, label, value, detail, fullLabel] of rows) {
         const card = document.createElement("article");
         card.className = "condition-card condition-weather-card";
         card.setAttribute("aria-label", fullLabel);
-        const explanations = {
-          "Nuages": "Pourcentage du ciel couvert estimé : moins il y en a, mieux les objets faibles peuvent ressortir.",
-          "Temp.": "Température de l’air. Le ressenti peut être différent ; prévois des vêtements adaptés.",
-          "Pluie": "Probabilité ou quantité de précipitations prévue. Une averse peut interrompre l’observation et mouiller le matériel.",
-          "Humidité": "Humidité relative : avec le refroidissement, elle peut favoriser buée et condensation sur les optiques.",
-          "Vent": "Vitesse du vent à 10 m. Le vent peut gêner la stabilité du télescope et rendre le froid plus sensible.",
-          "Visib.": "Visibilité météorologique estimée, pas une mesure de transparence astronomique ni de pollution lumineuse."
-        };
-        card.title = explanations[label] || fullLabel;
+        card.title = explanations[id] || fullLabel;
         const l = document.createElement("span"); l.textContent = label;
         const v = document.createElement("strong"); v.textContent = value;
         const d = document.createElement("small"); d.textContent = detail;
         card.append(l, v, d); contentCards.push(card);
       }
       const help = document.createElement("details"); help.className = "conditions-help";
-      const helpSummary = document.createElement("summary"); helpSummary.textContent = "Comment lire ces indicateurs ?";
-      const helpText = document.createElement("p"); helpText.textContent = "Nuages : couverture du ciel ; température : confort et risque de buée ; pluie : risque de précipitations ; humidité : condensation possible ; vent : confort et stabilité de l’instrument ; visibilité : portée météorologique, qui ne garantit pas un ciel transparent. L’indice météo est indicatif et ne remplace pas l’évaluation du ciel sur place.";
+      const helpSummary = document.createElement("summary"); helpSummary.textContent = t("conditions.howToRead");
+      const helpText = document.createElement("p"); helpText.textContent = t("conditions.howToReadText");
       help.append(helpSummary, helpText); contentCards.push(help);
       const lightPollution = createLightPollutionMapCard();
       contentCards.push(lightPollution);
-      const source = document.createElement("p"); source.className = "conditions-source muted"; source.textContent = "Météo : Open-Meteo. Carte : Light Pollution Map (lightpollutionmap.app), estimation satellitaire de la pollution lumineuse."; contentCards.push(source);
+      const source = document.createElement("p"); source.className = "conditions-source muted"; source.textContent = t("conditions.sourceFull"); contentCards.push(source);
       renderConditionsLayout(content, contentCards);
     } catch (error) {
       updateSessionWeatherStatus(null);
       content.replaceChildren();
-      const p = document.createElement("p"); p.className = "muted"; p.textContent = "Prévisions météo indisponibles. Vérifiez la connexion internet ; la carte de pollution lumineuse reste accessible ci-dessous."; content.append(p);
+      const p = document.createElement("p"); p.className = "muted"; p.textContent = t("conditions.weatherUnavailable"); content.append(p);
       const lightPollution = createLightPollutionMapCard();
-      const source = document.createElement("p"); source.className = "conditions-source muted"; source.textContent = "Carte : Light Pollution Map (lightpollutionmap.app), estimation satellitaire de la pollution lumineuse.";
+      const source = document.createElement("p"); source.className = "conditions-source muted"; source.textContent = t("conditions.sourceMapOnly");
       renderConditionsLayout(content, [p, source, lightPollution]);
     }
   }
@@ -2717,16 +2738,24 @@ export function createUI({
         && (!query || normalizeCatalogSearchText(item.discoveryLabel).includes(query))
       );
       const limit = 24;
-      const filterLabels = { all: "objets nommés", comet: "comètes", planet: "planètes", galaxy: "galaxies", cluster: "amas" };
-      if (summary) summary.textContent = !query
-        ? `${matches.length} ${filterLabels[discoverySearchFilter] || "objets nommés"}${matches.length > limit ? ` · ${limit} premiers affichés` : ""}${discoverySearchFilter === "all" ? ". Saisis quelques lettres ou choisis un type." : " dans le catalogue."}`
-        : matches.length
-          ? `${matches.length} résultat${matches.length > 1 ? "s" : ""}${matches.length > limit ? ` · ${limit} premiers affichés` : ""}.`
-          : "Aucun objet ne correspond à cette recherche et à ce filtre.";
+      const filterLabels = { all: t("ui.namedObjects"), comet: t("ui.comets"), planet: t("ui.planets"), galaxy: t("ui.galaxies"), cluster: t("ui.clusters") };
+      if (summary) {
+        if (!query) {
+          const limitText = matches.length > limit ? ` · ${limit} ${t("ui.firstDisplayed")}` : "";
+          const suffix = discoverySearchFilter === "all" ? `. ${t("ui.typeLettersOrChoose")}` : ` ${t("ui.inCatalogue")}`;
+          summary.textContent = `${matches.length} ${filterLabels[discoverySearchFilter] || t("ui.namedObjects")}${limitText}${suffix}`;
+        } else if (matches.length) {
+          const res = matches.length > 1 ? t("ui.results") : t("ui.result");
+          const limitText = matches.length > limit ? ` · ${limit} ${t("ui.firstDisplayed")}` : "";
+          summary.textContent = `${matches.length} ${res}${limitText}.`;
+        } else {
+          summary.textContent = t("ui.noObjectMatchesSearch");
+        }
+      }
       if (!matches.length) {
         const empty = document.createElement("p");
         empty.className = "discovery-search-empty";
-        empty.textContent = "Essaie un autre nom commun, par exemple Véga, Andromède ou Saturne.";
+        empty.textContent = t("ui.tryAnotherName");
         results.append(empty);
         return;
       }
@@ -2757,7 +2786,7 @@ export function createUI({
         const show = document.createElement("button");
         show.type = "button";
         show.className = "action-button discovery-search-show";
-        show.textContent = "Montrer";
+        show.textContent = t("ui.show");
         show.setAttribute("aria-label", `Montrer ${item.discoveryLabel} sur la carte`);
         show.addEventListener("click", () => {
           // Recalculer une fois la liste du ciel pour que le pointage et les repères
@@ -2839,11 +2868,12 @@ export function createUI({
         typeof getVisibleNowObjects === "function" ? getVisibleNowObjects() : [],
         { instrument: "eye", limit: 5 }
       ).filter(object => Number.isFinite(Number(object.alt)) && Number(object.alt) > 0);
-      if (summary) summary.textContent = `Pour le ${date.toLocaleString("fr-FR", { dateStyle: "short", timeStyle: "short" })} · ${candidates.length} cible${candidates.length === 1 ? "" : "s"} à essayer à l’œil nu.`;
+      const ciblePlural = candidates.length === 1 ? t("ui.target") : t("ui.targets");
+if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getLocale(), { dateStyle: "short", timeStyle: "short" })} · ${candidates.length} ${ciblePlural} ${t("ui.toTryNakedEye")}.`;
       if (!candidates.length) {
         const empty = document.createElement("p");
         empty.className = "discovery-start-empty";
-        empty.textContent = "Aucune cible facile n’est actuellement au-dessus de l’horizon. Essaie une autre heure ou un autre lieu.";
+        empty.textContent = t("ui.noEasyTarget");
         list.append(empty);
         return;
       }
@@ -2866,7 +2896,7 @@ export function createUI({
         const referenceLine = document.createElement("p");
         referenceLine.className = "discovery-start-references";
         referenceLine.textContent = references.length
-          ? `Repères proches : ${references.map(item => item.object.discoveryLabel || item.object.name || item.object.proper_name || item.object.id || "étoile repère").join(" · ")}`
+          ? `${t("ui.nearbyLandmarks")}: ${references.map(item => item.object.discoveryLabel || item.object.name || item.object.proper_name || item.object.id || t("ui.anchorStar")).join(" · ")}`
           : "Repères proches : aucune étoile brillante proche identifiée dans le catalogue.";
         const advice = document.createElement("p");
         advice.className = "discovery-start-advice";
@@ -2951,7 +2981,7 @@ export function createUI({
       list.replaceChildren();
       if (!selected.length) {
         const empty = document.createElement("li");
-        empty.textContent = "Aucun parcours complet n’est disponible avec les objets actuellement au-dessus de 15° de hauteur. Essaie une autre heure.";
+        empty.textContent = t("ui.noFullRoute");
         list.append(empty);
       } else {
         selected.forEach((step, index) => {
@@ -2961,7 +2991,7 @@ export function createUI({
           const note = document.createElement("p");
           note.textContent = `${step.advice} Hauteur actuelle : ${Number(step.object.alt).toFixed(0)}°.`;
           const show = document.createElement("button");
-          show.type = "button"; show.textContent = "Montrer sur la carte";
+          show.type = "button"; show.textContent = t("ui.showOnMap");
           show.addEventListener("click", () => {
             state.selected = { ...step.object };
             state.heading = norm360(Number(step.object.az));
@@ -3324,7 +3354,7 @@ export function createUI({
             diagramLabels.appendChild(arrow);
             const targetLabel = document.createElementNS(ns, "text");
             targetLabel.setAttribute("x", x1 + 2); targetLabel.setAttribute("y", y1 - 3); targetLabel.setAttribute("text-anchor", "start");
-            targetLabel.setAttribute("fill", "#ffe1a0"); targetLabel.textContent = "À repérer"; diagramLabels.appendChild(targetLabel);
+            targetLabel.setAttribute("fill", "#ffe1a0"); targetLabel.textContent = t("ui.toSpot"); diagramLabels.appendChild(targetLabel);
           }
         }
       } else {
@@ -3463,7 +3493,7 @@ export function createUI({
       closeLocationDialog();
       refreshLocationLabel();
       drawSky();
-      showToast(`Lieu sélectionné : ${place.name}`);
+      showToast(`${t("ui.locationSelected")}: ${place.name}`);
     });
 
     // Boussole : activation des capteurs.
@@ -3597,7 +3627,7 @@ export function createUI({
       const anchor = (state.stars || []).find(star => String(star.hip ?? star.id ?? starHopName(star)) === starHopAnchor.value);
       const target = (typeof getVisibleNowObjects === "function" ? getVisibleNowObjects() : []).find(object => String(object.id ?? object.name) === starHopTarget.value);
       if (!anchor || !target || !Number.isFinite(Number(anchor.ra)) || !Number.isFinite(Number(anchor.dec)) || !Number.isFinite(Number(target.ra)) || !Number.isFinite(Number(target.dec))) {
-        starHopResult.textContent = "Coordonnées insuffisantes pour calculer ce cheminement.";
+        starHopResult.textContent = t("starHop.insufficientCoords");
         return;
       }
       const anchorHorizontal = typeof getStarPosition === "function" ? getStarPosition(anchor) : null;
@@ -3606,7 +3636,7 @@ export function createUI({
         if (starHopRouteList) {
           starHopRouteList.replaceChildren();
           const item = document.createElement("li");
-          item.textContent = "Aucun parcours calculé : l’étoile de départ n’est pas visible à cette date, cette heure et ce lieu.";
+          item.textContent = t("starHop.anchorNotVisible");
           starHopRouteList.append(item);
         }
         if (starHopRouteLines) starHopRouteLines.replaceChildren();
@@ -3749,7 +3779,7 @@ export function createUI({
           starHopRouteList.append(guideItem);
         }
         if (!route.legs.length && !finalGuide) {
-          const item = document.createElement("li"); item.textContent = "Aucune étape calculable avec les coordonnées disponibles."; starHopRouteList.append(item);
+          const item = document.createElement("li"); item.textContent = t("starHop.noStepCalculated"); starHopRouteList.append(item);
         }
       }
       const setFullDiagramLabel = (node, name, pos) => {
@@ -4144,11 +4174,11 @@ export function createUI({
     on("star-hop-target", "change", updateStarHopResult);
     on("star-hop-guide", "click", () => {
       const target = (typeof getVisibleNowObjects === "function" ? getVisibleNowObjects() : []).find(object => String(object.id ?? object.name) === starHopTarget?.value);
-      if (!target) { if (starHopResult) starHopResult.textContent = "Cette cible n’est plus disponible à la date choisie."; return; }
+      if (!target) { if (starHopResult) starHopResult.textContent = t("starHop.targetNotAvailable"); return; }
       finderReturnTo = "star-hop";
       if (typeof selectTarget === "function") selectTarget(target);
       closeStarHop();
-      showToast(`Guidage lancé vers ${target.name || target.id || "la cible"}.`);
+      showToast(`${t("ui.guidanceLaunchedTo")} ${target.name || target.id || t("ui.theTarget")}.`);
     });
 
     const conditionsDialog = $("conditions-dialog");
@@ -4540,7 +4570,7 @@ export function createUI({
       const frontLayer = $("jupiter-moons-front");
       const labelsLayer = $("jupiter-moons-labels");
       if (!A || !A.Body || typeof A.JupiterMoons !== "function" || typeof A.GeoVector !== "function" || typeof A.RotationAxis !== "function") {
-        if (status) status.textContent = "Les éphémérides des lunes de Jupiter ne sont pas disponibles dans cette version.";
+        if (status) status.textContent = t("jupiterMoons.unavailable");
         if (details) details.replaceChildren();
         [behindLayer, frontLayer, labelsLayer].forEach(layer => layer?.replaceChildren());
         return;
@@ -4626,7 +4656,7 @@ export function createUI({
         updateLocalizedDateTimeDisplay("jupiter-moons-datetime", "jupiter-moons-datetime-display");
       } catch (error) {
         console.error("Atlas Céleste : calcul des lunes de Jupiter impossible", error);
-        if (status) status.textContent = "Impossible de calculer les positions pour cette date. Choisis une autre date puis réessaie.";
+        if (status) status.textContent = t("jupiterMoons.calcError");
         [behindLayer, frontLayer, labelsLayer].forEach(layer => layer?.replaceChildren());
         if (details) details.replaceChildren();
       }
