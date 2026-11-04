@@ -9,7 +9,7 @@ Atlas Céleste Seduwa— version 498
 - Formatage des dates, nombres et heures selon la langue active, y compris les horaires de lever, culmination et coucher.
   
 ## v497
-Création des fichiers fr.json et en.json
+Création des fichiers fr.json, en.json et de.json
 
 ## v496
 De 15 minutes avant le lever du Soleil jusqu’à 15 minutes après son coucher, la carte s’ouvre centrée sur l’azimut du Soleil ; le reste du temps elle reste pointée au Nord
