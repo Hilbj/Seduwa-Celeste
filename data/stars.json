@@ -1980,7 +1980,8 @@
     "gaia_astrometry_status": "needs_review",
     "gaia_astrometry_review_reason": "Association Gaia DR3 conservée, mais à vérifier : le résidu entre la position Gaia à l’époque 2016.0 et la position Hipparcos propagée dépasse les incertitudes formelles combinées calculées sans covariances. La source Gaia possède une solution astrométrique à deux paramètres (position seulement) ; ne pas utiliser de mouvement propre Gaia pour la propagation. Pour les systèmes multiples, les effets de photocentre/composantes restent possibles.",
     "gaia_astrometry_review_epoch": 2016.0,
-    "gaia_astrometry_review_residual_arcsec": 0.3286
+    "gaia_astrometry_review_residual_arcsec": 0.3286,
+    "gaia_astrometry_review_reason_en": "Gaia DR3 association retained, but it should be reviewed: the residual between the Gaia position at epoch 2016.0 and the propagated Hipparcos position exceeds the combined formal uncertainties calculated without covariances. The Gaia source has a two-parameter astrometric solution (position only); do not use Gaia proper motion for propagation. Photocentre/component effects may still be present in multiple systems."
   },
   {
     "id": "HIP_21393",
@@ -2930,7 +2931,8 @@
     "gaia_reference_epoch": 2016,
     "gaia_astrometry_status": "needs_review",
     "gaia_astrometry_review_reason": "Association recoupée avec SIMBAD; Gaia DR3 astrometric_params_solved=3 (position seule), sans parallaxe ni mouvement propre. gaia_match_arcsec est ici l’écart au centre de la recherche en coordonnées catalogue, non un résidu après propagation d’époque; ne pas utiliser comme résidu astrométrique définitif.",
-    "astrometry_source": "Gaia DR3 source 3424609014036545920; solution de position seule (astrometric_params_solved=3); association recoupée avec SIMBAD. Parallaxe et mouvements propres Gaia indisponibles."
+    "astrometry_source": "Gaia DR3 source 3424609014036545920; solution de position seule (astrometric_params_solved=3); association recoupée avec SIMBAD. Parallaxe et mouvements propres Gaia indisponibles.",
+    "gaia_astrometry_review_reason_en": "Cross-checked with SIMBAD; Gaia DR3 astrometric_params_solved=3 (position only), with no parallax or proper motion. Here, gaia_match_arcsec is the offset from the search centre in catalogue coordinates, not a residual after epoch propagation; do not use it as a definitive astrometric residual."
   },
   {
     "id": "HIP_28910",
@@ -3020,7 +3022,8 @@
     "gaia_astrometry_status": "needs_review",
     "gaia_astrometry_review_reason": "Association Gaia DR3 conservée provisoirement et recoupée avec SIMBAD (η Geminorum / Propus). La valeur historique 2.262″ précédemment enregistrée comme gaia_match_arcsec n’a pas pu être reproduite dans les tables de correspondance Hipparcos de Gaia DR3 et coïncide avec phot_g_mean_mag arrondie à 2.262 ; elle est donc conservée uniquement comme valeur rapportée, non comme séparation vérifiée. Une recherche autour des coordonnées Hipparcos actuellement enregistrées retrouve la source à 1.68281″, mais cette séparation compare des positions d’époques différentes et ne constitue pas un résidu astrométrique corrigé. Gaia DR3 fournit ici une solution de position seule, sans parallaxe ni mouvement propre ; ne pas propager cette source.",
     "astrometry_source": "Gaia DR3 source 3377072212924335488; solution de position seule (astrometric_params_solved=3); association recoupée avec SIMBAD. Parallaxe et mouvements propres Gaia indisponibles; séparation historique non vérifiée.",
-    "gaia_search_center_distance_arcsec_reported": 2.262
+    "gaia_search_center_distance_arcsec_reported": 2.262,
+    "gaia_astrometry_review_reason_en": "Gaia DR3 association provisionally retained and cross-checked with SIMBAD (η Geminorum / Propus). The historical value 2.262″ previously recorded as gaia_match_arcsec could not be reproduced in the Gaia DR3 Hipparcos cross-match tables and matches phot_g_mean_mag rounded to 2.262; it is therefore retained only as a reported value, not as a verified separation. A search around the currently recorded Hipparcos coordinates finds the source at 1.68281″, but this separation compares positions from different epochs and is not an epoch-corrected astrometric residual. Gaia DR3 provides a position-only solution here, with no parallax or proper motion; do not propagate this source."
   },
   {
     "id": "HIP_29997",
@@ -5385,7 +5388,8 @@
     "gaia_astrometry_status": "needs_review",
     "gaia_astrometry_review_reason": "Association Gaia DR3 conservée, mais à vérifier : le résidu entre la position Gaia à l’époque 2016.0 et la position Hipparcos propagée dépasse les incertitudes formelles combinées calculées sans covariances. La source Gaia possède une solution astrométrique à deux paramètres (position seulement) ; ne pas utiliser de mouvement propre Gaia pour la propagation. Pour les systèmes multiples, les effets de photocentre/composantes restent possibles.",
     "gaia_astrometry_review_epoch": 2016.0,
-    "gaia_astrometry_review_residual_arcsec": 0.1856
+    "gaia_astrometry_review_residual_arcsec": 0.1856,
+    "gaia_astrometry_review_reason_en": "Gaia DR3 association retained, but it should be reviewed: the residual between the Gaia position at epoch 2016.0 and the propagated Hipparcos position exceeds the combined formal uncertainties calculated without covariances. The Gaia source has a two-parameter astrometric solution (position only); do not use Gaia proper motion for propagation. Photocentre/component effects may still be present in multiple systems."
   },
   {
     "id": "HIP_58001",
@@ -5429,7 +5433,8 @@
     "gaia_astrometry_status": "needs_review",
     "gaia_astrometry_review_reason": "Association Gaia DR3 conservée, mais à vérifier : le résidu entre la position Gaia à l’époque 2016.0 et la position Hipparcos propagée dépasse les incertitudes formelles combinées calculées sans covariances. La source Gaia possède une solution astrométrique à deux paramètres (position seulement) ; ne pas utiliser de mouvement propre Gaia pour la propagation. Pour les systèmes multiples, les effets de photocentre/composantes restent possibles.",
     "gaia_astrometry_review_epoch": 2016.0,
-    "gaia_astrometry_review_residual_arcsec": 0.1223
+    "gaia_astrometry_review_residual_arcsec": 0.1223,
+    "gaia_astrometry_review_reason_en": "Gaia DR3 association retained, but it should be reviewed: the residual between the Gaia position at epoch 2016.0 and the propagated Hipparcos position exceeds the combined formal uncertainties calculated without covariances. The Gaia source has a two-parameter astrometric solution (position only); do not use Gaia proper motion for propagation. Photocentre/component effects may still be present in multiple systems."
   },
   {
     "id": "HIP_58948",
@@ -6348,7 +6353,8 @@
     "gaia_astrometry_status": "needs_review",
     "gaia_astrometry_review_reason": "Association Gaia DR3 conservée, mais à vérifier : le résidu entre la position Gaia à l’époque 2016.0 et la position Hipparcos propagée dépasse les incertitudes formelles combinées calculées sans covariances. La source Gaia possède une solution astrométrique à deux paramètres (position seulement) ; ne pas utiliser de mouvement propre Gaia pour la propagation. Pour les systèmes multiples, les effets de photocentre/composantes restent possibles.",
     "gaia_astrometry_review_epoch": 2016.0,
-    "gaia_astrometry_review_residual_arcsec": 0.232
+    "gaia_astrometry_review_residual_arcsec": 0.232,
+    "gaia_astrometry_review_reason_en": "Gaia DR3 association retained, but it should be reviewed: the residual between the Gaia position at epoch 2016.0 and the propagated Hipparcos position exceeds the combined formal uncertainties calculated without covariances. The Gaia source has a two-parameter astrometric solution (position only); do not use Gaia proper motion for propagation. Photocentre/component effects may still be present in multiple systems."
   },
   {
     "id": "HIP_71860",
@@ -6488,7 +6494,8 @@
     "gaia_astrometry_status": "needs_review",
     "gaia_astrometry_review_reason": "Association Gaia DR3 conservée, mais à vérifier : le résidu entre la position Gaia à l’époque 2016.0 et la position Hipparcos propagée dépasse les incertitudes formelles combinées calculées sans covariances. La source Gaia possède une solution astrométrique à deux paramètres (position seulement) ; ne pas utiliser de mouvement propre Gaia pour la propagation. Pour les systèmes multiples, les effets de photocentre/composantes restent possibles.",
     "gaia_astrometry_review_epoch": 2016.0,
-    "gaia_astrometry_review_residual_arcsec": 0.0169
+    "gaia_astrometry_review_residual_arcsec": 0.0169,
+    "gaia_astrometry_review_reason_en": "Gaia DR3 association retained, but it should be reviewed: the residual between the Gaia position at epoch 2016.0 and the propagated Hipparcos position exceeds the combined formal uncertainties calculated without covariances. The Gaia source has a two-parameter astrometric solution (position only); do not use Gaia proper motion for propagation. Photocentre/component effects may still be present in multiple systems."
   },
   {
     "id": "HIP_73334",
@@ -8685,7 +8692,8 @@
     "gaia_astrometry_status": "needs_review",
     "gaia_astrometry_review_reason": "Association Gaia DR3 conservée, mais à vérifier : le résidu entre la position Gaia à l’époque 2016.0 et la position Hipparcos propagée dépasse les incertitudes formelles combinées calculées sans covariances. La source Gaia possède une solution astrométrique à deux paramètres (position seulement) ; ne pas utiliser de mouvement propre Gaia pour la propagation. Pour les systèmes multiples, les effets de photocentre/composantes restent possibles.",
     "gaia_astrometry_review_epoch": 2016.0,
-    "gaia_astrometry_review_residual_arcsec": 0.0565
+    "gaia_astrometry_review_residual_arcsec": 0.0565,
+    "gaia_astrometry_review_reason_en": "Gaia DR3 association retained, but it should be reviewed: the residual between the Gaia position at epoch 2016.0 and the propagated Hipparcos position exceeds the combined formal uncertainties calculated without covariances. The Gaia source has a two-parameter astrometric solution (position only); do not use Gaia proper motion for propagation. Photocentre/component effects may still be present in multiple systems."
   },
   {
     "id": "HIP_92175",

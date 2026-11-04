@@ -80,29 +80,32 @@ import { createUI } from "./js/ui.js";
     // Noms usuels des étoiles les plus brillantes, indexés par numéro HIP.
   // (Doublons supprimés pour éviter les écrasements silencieux)
   const COMMON_STAR_NAMES = {
-    677: t("names.star.alpheratz"), 746: t("names.star.caph"), 1067: t("names.star.algenib"), 3179: t("names.star.schedar"),
-    4427: t("names.star.navi"), 5447: t("names.star.mirach"), 6686: t("names.star.ruchbah"), 7588: t("names.star.achernar"),
-    8886: t("names.star.segin"), 9884: t("names.star.hamal"), 14135: t("names.star.menkar"), 14576: t("names.star.algol"),
-    15863: t("names.star.mirfak"), 21421: t("names.star.aldebaran"), 24436: t("names.star.rigel"), 24608: t("names.star.capella"),
-    25336: t("names.star.bellatrix"), 25428: t("names.star.elnath"), 25930: t("names.star.mintaka"), 26311: t("names.star.alnilam"),
-    26727: t("names.star.alnitak"), 27989: t("names.star.betelgeuse"), 30438: t("names.star.canopus"), 32349: t("names.star.sirius"),
-    33579: t("names.star.wezen"), 36850: t("names.star.castor"), 37279: t("names.star.procyon"), 37826: t("names.star.pollux"),
-    49669: t("names.star.regulus"), 53910: t("names.star.merak"), 54061: t("names.star.dubhe"), 57632: t("names.star.denebola"),
-    60718: t("names.star.acrux"), 62434: t("names.star.gacrux"), 63090: t("names.star.zosma"), 65378: t("names.star.mizar"),
-    65474: t("names.star.spica"), 67301: t("names.star.alkaid"), 68702: t("names.star.hadar"), 69673: t("names.star.arcturus"),
-    71683: t("names.star.alpha-centauri"), 80763: t("names.star.antares"), 91262: t("names.star.vega"), 97649: t("names.star.altair"),
-    102098: t("names.star.deneb"), 102488: t("names.star.gienah"), 113368: t("names.star.fomalhaut"), 11767: t("names.star.polaris"),
-    31592: t("names.star.alhena"), 39953: t("names.star.avior"), 41037: t("names.star.menkalinan"), 46390: t("names.star.adhara"),
-    59774: t("names.star.alphard"), 62956: t("names.star.gienah-corvi"), 65477: t("names.star.syrma"), 76267: t("names.star.kaus-australis"),
-    77070: t("names.star.shaula"), 82273: t("names.star.kaus-media"), 85927: t("names.star.nunki"), 86742: t("names.star.rasalhague"),
-    88635: t("names.star.eltanin"), 90185: t("names.star.peacock"), 92855: t("names.star.rasalgethi"), 94376: t("names.star.rastaban"),
-    100453: t("names.star.sadr"), 104732: t("names.star.enif"), 107315: t("names.star.sadalsuud"), 109268: t("names.star.sadalmelik"),
-    110960: t("names.star.scheat"), 113881: t("names.star.markab"), 116727: t("names.star.mimosa")
+    677: "names.star.alpheratz", 746: "names.star.caph", 1067: "names.star.algenib", 3179: "names.star.schedar",
+    4427: "names.star.navi", 5447: "names.star.mirach", 6686: "names.star.ruchbah", 7588: "names.star.achernar",
+    8886: "names.star.segin", 9884: "names.star.hamal", 14135: "names.star.menkar", 14576: "names.star.algol",
+    15863: "names.star.mirfak", 21421: "names.star.aldebaran", 24436: "names.star.rigel", 24608: "names.star.capella",
+    25336: "names.star.bellatrix", 25428: "names.star.elnath", 25930: "names.star.mintaka", 26311: "names.star.alnilam",
+    26727: "names.star.alnitak", 27989: "names.star.betelgeuse", 30438: "names.star.canopus", 32349: "names.star.sirius",
+    33579: "names.star.wezen", 36850: "names.star.castor", 37279: "names.star.procyon", 37826: "names.star.pollux",
+    49669: "names.star.regulus", 53910: "names.star.merak", 54061: "names.star.dubhe", 57632: "names.star.denebola",
+    60718: "names.star.acrux", 62434: "names.star.gacrux", 63090: "names.star.zosma", 65378: "names.star.mizar",
+    65474: "names.star.spica", 67301: "names.star.alkaid", 68702: "names.star.hadar", 69673: "names.star.arcturus",
+    71683: "names.star.alpha-centauri", 80763: "names.star.antares", 91262: "names.star.vega", 97649: "names.star.altair",
+    102098: "names.star.deneb", 102488: "names.star.gienah", 113368: "names.star.fomalhaut", 11767: "names.star.polaris",
+    31592: "names.star.alhena", 39953: "names.star.avior", 41037: "names.star.menkalinan", 46390: "names.star.adhara",
+    59774: "names.star.alphard", 62956: "names.star.gienah-corvi", 65477: "names.star.syrma", 76267: "names.star.kaus-australis",
+    77070: "names.star.shaula", 82273: "names.star.kaus-media", 85927: "names.star.nunki", 86742: "names.star.rasalhague",
+    88635: "names.star.eltanin", 90185: "names.star.peacock", 92855: "names.star.rasalgethi", 94376: "names.star.rastaban",
+    100453: "names.star.sadr", 104732: "names.star.enif", 107315: "names.star.sadalsuud", 109268: "names.star.sadalmelik",
+    110960: "names.star.scheat", 113881: "names.star.markab", 116727: "names.star.mimosa"
   };
 
   function displayStarName(star) {
     const hip = Number(star?.hip ?? String(star?.id ?? "").match(/^HIP[_\s-]*(\d+)$/i)?.[1]);
-    if (COMMON_STAR_NAMES[hip]) return COMMON_STAR_NAMES[hip];
+    if (COMMON_STAR_NAMES[hip]) {
+      const value = COMMON_STAR_NAMES[hip];
+      return value.startsWith("names.star.") ? t(value) : value;
+    }
     const properName = star?.proper_name || star?.properName;
     if (properName && !/^HIP[_\s-]*\d+$/i.test(String(properName))) return properName;
     const catalogName = star?.name;
@@ -110,6 +113,23 @@ import { createUI } from "./js/ui.js";
       return hip ? `HIP ${hip}` : "";
     }
     return catalogName.replace(/^HIP[_\s-]*(\d+)$/i, "HIP $1");
+  }
+
+
+  function localizedMapObjectName(object, fallback = "") {
+    if (!object || typeof object !== "object") return String(object || fallback || "");
+    const id = String(object.id || object.designation || "").trim();
+    const compactId = id.toUpperCase().replace(/\s+/g, "");
+    // Les dictionnaires sont la source de référence des noms affichés
+    // pour Messier et NGC, quelle que soit la langue active. Les champs
+    // bilingues du JSON restent disponibles comme alias de recherche/repli.
+    const catalogueKey = `catalogueNames.${compactId}`;
+    const catalogueName = t(catalogueKey);
+    if (catalogueName !== catalogueKey) return catalogueName;
+    if (getLocale() === "en") {
+      return object.englishName || object.english_name || object.name_en || object.common_name_en || object.name || object.proper_name || object.designation || fallback;
+    }
+    return object.name_fr || object.name || object.common_name_fr || object.common_name || object.proper_name || object.designation || fallback;
   }
 
   const LOCATION_STORAGE_KEY = "atlas-celeste-last-observation-location";
@@ -635,7 +655,7 @@ import { createUI } from "./js/ui.js";
     const value = observationInput?.value;
     const parsed = value ? new Date(value) : null;
     if (!parsed || !Number.isFinite(parsed.getTime())) {
-      ui.showToast("Choisissez une date et une heure valides.");
+      ui.showToast(t("ui.dateTimeInvalid"));
       return;
     }
     state.observationDate = parsed;
@@ -3487,11 +3507,16 @@ function drawConstellationNames(date) {
   for (const entry of entries) {
     const { constellation, center } = entry;
 
-    const label =
-      constellation.name ||
-      constellation.name_fr ||
-      constellation.abbreviation ||
-      constellation.id;
+    const constellationId = String(constellation.id || constellation.iau || "").trim();
+    const constellationKey = constellationId
+      ? `catalogueNames.constellations.${constellationId}`
+      : "";
+    const translatedConstellation = constellationKey ? t(constellationKey) : constellationKey;
+    const label = translatedConstellation && translatedConstellation !== constellationKey
+      ? translatedConstellation
+      : (getLocale() === "en"
+          ? (constellation.englishName || constellation.english_name || constellation.name || constellation.abbreviation || constellation.id)
+          : (constellation.name_fr || constellation.name || constellation.abbreviation || constellation.id));
 
     if (!label) continue;
 
@@ -3922,8 +3947,8 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
 
     drawLabel(
       object.catalogue === "NGC"
-        ? (object.name || object.id)
-        : (object.id || object.name),
+        ? localizedMapObjectName(object, object.id)
+        : (object.id || localizedMapObjectName(object)),
       point,
       color
     );
@@ -4090,7 +4115,7 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
     ctx.fill();
     ctx.restore();
 
-    drawLabel(object.name || object.proper_name || object.designation || t("ui.comet"), point, "#bfe6ff");
+    drawLabel(localizedMapObjectName(object, t("ui.comet")), point, "#bfe6ff");
   }
 
   function drawMinorPlanetObject(object, point) {
@@ -4115,7 +4140,8 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
     ctx.moveTo(point.x, point.y + 3.8); ctx.lineTo(point.x, point.y + 5.4);
     ctx.stroke();
     ctx.restore();
-    const mapLabel = object.dwarfPlanet ? (object.name || object.proper_name || t("ui.dwarfPlanet")) : `${object.id ? `${object.id} ` : ""}${object.name || object.designation || t("ui.minorPlanet")}`;
+    const localizedName = localizedMapObjectName(object, object.dwarfPlanet ? t("ui.dwarfPlanet") : t("ui.minorPlanet"));
+    const mapLabel = object.dwarfPlanet ? localizedName : `${object.id ? `${object.id} ` : ""}${localizedName}`;
     drawLabel(mapLabel, point, color);
   }
 
@@ -4242,7 +4268,7 @@ function drawLabel(text, point, color = "#dce7fa", prominent = false) {
 function freeModeObjectLabel(object) {
   if (!object) return "";
   if (object.type === "star") return displayStarName(object) || "";
-  return object.common_name || object.commonName || object.proper_name || object.properName || object.name || object.designation || "";
+  return localizedMapObjectName(object);
 }
 
 function findConstellationForGuideObject(object) {
@@ -4618,7 +4644,7 @@ function updateFinder(date = new Date()) {
     vertical.textContent =
       Math.abs(verticalError) < 0.5
         ? t("ui.centered")
-        : `${verticalError > 0 ? "Monter" : "Descendre"} ` +
+        : `${verticalError > 0 ? t("ui.finderMoveUp") : t("ui.finderMoveDown")} ` +
           `${Math.abs(verticalError).toFixed(1)}°`;
   }
 
@@ -4658,7 +4684,7 @@ function updateFinder(date = new Date()) {
         t("ui.targetLockedKeepPhoneStable");
     } else if (!insideField) {
       instruction.textContent =
-        "La cible est hors du champ. Suis les indications pour la retrouver.";
+        t("ui.finderTargetOutsideField");
     } else {
       instruction.textContent =
         t("ui.movePhoneGentlyToCenterTarget");
@@ -4668,7 +4694,7 @@ function updateFinder(date = new Date()) {
   // 11. Informations de diagnostic.
   if (sensor) {
     sensor.textContent =
-      `Cap ${Math.round(norm360(state.heading))}° · ` +
+      `${t("ui.headingLabel")} ${Math.round(norm360(state.heading))}° · ` +
       `${t("ui.pitch")}: ${state.pitch.toFixed(1).replace(".", ",")}° · ` +
       `${t("ui.deviation")} ${distance.toFixed(1).replace(".", ",")}°`;
   }
@@ -4773,7 +4799,7 @@ function locateUser() {
     return;
   }
 
-  ui.showToast("Recherche de votre position GPS…");
+  ui.showToast(t("ui.gpsSearching"));
 
   navigator.geolocation.getCurrentPosition(
     position => {
@@ -4795,7 +4821,7 @@ function locateUser() {
 
       state.latitude = latitude;
       state.longitude = longitude;
-      state.locationName = "Position GPS";
+      state.locationName = t("ui.gpsPosition");
       state.locationReady = true;
       refreshAutoHeading();
       persistLastObservationLocation();
@@ -5720,7 +5746,7 @@ function renderSkyNow() {
       );
 
       ui.showToast(
-        "Échec de stars.json. Vérifie le chemin du catalogue."
+        t("ui.catalogueStarsLoadFailed")
       );
     }
 
@@ -5746,7 +5772,7 @@ function renderSkyNow() {
       );
 
       ui.showToast(
-        "Échec de constellations.json. Vérifie le chemin du catalogue."
+        t("ui.catalogueConstellationsLoadFailed")
       );
     }
 
@@ -5810,11 +5836,11 @@ function renderSkyNow() {
 
     if (state.stars.length === 0) {
       ui.showToast(
-        "Aucune étoile valide dans stars.json."
+        t("ui.noValidStars")
       );
     } else if (state.constellations.length === 0) {
       ui.showToast(
-        "Étoiles chargées, mais aucune constellation."
+        t("ui.starsNoConstellations")
       );
     } else {
       ui.showToast(
@@ -5896,7 +5922,7 @@ function renderSkyNow() {
     for (const star of stars) {
       const hip = Number(star.hip);
       const pos = starHorizontalPosition(star, state.observationDate || new Date());
-      const status = !Number.isFinite(pos.alt) ? "Position indisponible" : pos.alt <= 0 ? "Sous l’horizon" : "Au-dessus de l’horizon";
+      const status = !Number.isFinite(pos.alt) ? t("ui.positionUnavailableState") : pos.alt <= 0 ? t("ui.belowHorizonState") : t("ui.aboveHorizonState");
       const li = document.createElement("li");
       const button = document.createElement("button");
       button.type = "button";
@@ -5953,7 +5979,7 @@ function renderSkyNow() {
     );
 
     ui.showToast(
-      "Erreur de chargement des catalogues."
+      t("ui.cataloguesLoadFailed")
     );
   });
 
@@ -5967,10 +5993,10 @@ function renderSkyNow() {
     const indicator = document.getElementById("connection-status");
     if (!indicator) return;
     const online = navigator.onLine;
-    indicator.textContent = online ? "En ligne" : "Hors ligne";
+    indicator.textContent = online ? t("ui.online") : t("ui.offline");
     indicator.classList.toggle("is-offline", !online);
     indicator.setAttribute("aria-label", online
-      ? "Connexion Internet disponible"
+      ? t("ui.internetAvailable")
       : t("ui.offlineLiveWeatherUnavailable"));
   };
   window.addEventListener("online", updateConnectionStatus);
@@ -6116,6 +6142,7 @@ function renderSkyNow() {
   /*
    * Rafraîchissement de l'horloge et des positions.
    */
+  document.addEventListener("localechange", () => drawSky());
   refreshAutoHeading();
   drawSky();
 

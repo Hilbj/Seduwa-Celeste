@@ -28,7 +28,7 @@
     <canvas id="sky" aria-label="Carte du ciel interactive" data-i18n-aria="app.canvasAria"></canvas>
 
     <section id="sky-guide" class="sky-guide" hidden aria-label="Guidage vers l’objet sélectionné" data-i18n-aria="ui.skyGuideAria">
-      <header class="sky-guide-header"><div><p id="sky-guide-eyebrow" class="eyebrow">GUIDAGE CÉLESTE</p><strong id="sky-guide-name">Cible</strong></div><div class="sky-guide-header-actions"><button id="sky-guide-exit" type="button" aria-label="Terminer le guidage" title="Terminer le guidage" data-i18n-aria="ui.finishGuidance" data-i18n-title="ui.finishGuidance">×</button></div></header>
+      <header class="sky-guide-header"><div><p id="sky-guide-eyebrow" class="eyebrow" data-i18n="ui.skyGuideEyebrow">GUIDAGE CÉLESTE</p><strong id="sky-guide-name" data-i18n="ui.skyGuideTarget">Cible</strong></div><div class="sky-guide-header-actions"><button id="sky-guide-exit" type="button" aria-label="Terminer le guidage" title="Terminer le guidage" data-i18n-aria="ui.finishGuidance" data-i18n-title="ui.finishGuidance">×</button></div></header>
       <div class="sky-guide-reticle">
         <div class="sky-guide-ring sky-guide-ring-outer" data-guide-ring="0"></div>
         <div class="sky-guide-ring sky-guide-ring-middle" data-guide-ring="1"></div>
@@ -37,19 +37,19 @@
         <div id="sky-guide-common-name" class="sky-guide-common-name" hidden></div>
         <div class="sky-guide-center"></div>
       </div>
-      <p id="sky-guide-status" class="sky-guide-status" aria-live="polite">Active la boussole pour commencer.</p>
-      <div class="sky-guide-progress"><span id="sky-guide-progress">0 / 3 cercles acquis</span><button id="sky-guide-mode-toggle" type="button" aria-label="Activer le mode libre" title="Basculer entre le mode libre et le guidage ciblé">Mode libre</button><button id="sky-guide-finish" type="button" data-i18n="ui.finishGuidanceShort">Terminer</button></div>
+      <p id="sky-guide-status" class="sky-guide-status" aria-live="polite" data-i18n="ui.skyGuideStart">Activez la boussole pour commencer.</p>
+      <div class="sky-guide-progress"><span id="sky-guide-progress" data-i18n="ui.circlesAcquired">0 / 3 cercles acquis</span><button id="sky-guide-mode-toggle" type="button" aria-label="Activer le mode libre" title="Basculer entre le mode libre et le guidage ciblé" data-i18n="ui.freeMode">Mode libre</button><button id="sky-guide-finish" type="button" data-i18n="ui.finishGuidanceShort">Terminer</button></div>
     </section>
 
     <button id="interface-toggle" type="button" aria-pressed="false"
-            aria-label="Afficher l’interface" title="Afficher l’interface">
+            aria-label="Afficher l’interface" title="Afficher l’interface" data-i18n-aria="ui.showInterfaceTitle" data-i18n-title="ui.showInterfaceTitle">
       <span aria-hidden="true">☰</span>
     </button>
 
 
         <header class="topbar">
       <div class="brand">
-        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 498 — interface bilingue enrichie">v498</span></div>
+        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 511 — noms des constellations centralisés" data-i18n-aria="app.version511Aria">v511</span></div>
         <div>
           <div class="brand-title-row">
             <h1><span data-i18n="app.title">SEDUWA</span> <span data-i18n="app.subtitle">CÉLESTE</span></h1>
@@ -64,7 +64,7 @@
             <button id="map-settings-open" class="map-settings-open" type="button" aria-expanded="false" aria-controls="display-settings" aria-label="Paramètres de la carte" title="Paramètres de la carte" data-i18n-aria="settings.title" data-i18n-title="settings.title"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M4 6h16M4 12h16M4 18h16"/><circle cx="9" cy="6" r="2"/><circle cx="15" cy="12" r="2"/><circle cx="8" cy="18" r="2"/></svg><span data-i18n="settings.button">Paramètres</span></button>
             <button id="night-vision-btn" class="header-night-vision" type="button" aria-pressed="false" aria-label="Activer la vision nocturne rouge" title="Activer la vision nocturne rouge" data-i18n-aria="nightVision.activate" data-i18n-title="nightVision.activate"><svg viewBox="0 0 24 24" aria-hidden="true"><path d="M20.5 15.5A8.5 8.5 0 0 1 8.5 3.5 8.5 8.5 0 1 0 20.5 15.5Z"/><path d="M15 3v4M13 5h4"/></svg></button>
           </div>
-          <p id="location">Localisation non définie</p>
+          <p id="location" data-i18n="ui.locationUndefined">Localisation non définie</p>
           <p id="location-coordinates" class="location-coordinates">48.0000°, 4.2000°</p>
         </div>
       </div>
@@ -82,9 +82,9 @@
       <span id="discovery-date-label" class="discovery-local-date">--</span>
     </button>
 
-    <section id="review-stars-panel" class="review-stars-panel" aria-label="Étoiles à vérifier" hidden>
-      <header><strong>Associations Gaia à vérifier</strong><button id="review-stars-close" type="button" aria-label="Fermer la liste">×</button></header>
-      <p>Liste indépendante de l’horizon et du champ de la carte.</p>
+    <section id="review-stars-panel" class="review-stars-panel" aria-label="Étoiles à vérifier" data-i18n-aria="ui.reviewStarsAria" hidden>
+      <header><strong data-i18n="ui.gaiaReviewTitle">Associations Gaia à vérifier</strong><button id="review-stars-close" type="button" aria-label="Fermer la liste" data-i18n-aria="ui.closeReviewList">×</button></header>
+      <p data-i18n="ui.gaiaReviewDescription">Liste indépendante de l’horizon et du champ de la carte.</p>
       <ul id="review-stars-list"></ul>
     </section>
 
@@ -94,7 +94,7 @@
         <span id="heading">180°</span>
         <span id="cardinal">S</span>
       </div>
-      <p id="altitude-info">Visée 0°</p>
+      <p id="altitude-info" data-i18n="ui.aimAltitude">Visée 0°</p>
     </section>
 
     <section id="discovery-panel" class="discovery-panel" aria-label="Découvrir le ciel" data-i18n-aria="discovery.panel.sectionAria" hidden>
@@ -115,10 +115,10 @@
         <button type="button" id="discovery-jupiter-moons-open" data-discovery-action="jupiter-moons" class="discovery-jupiter-moons-action"><span aria-hidden="true">♃</span><span data-i18n="discovery.actions.jupiterMoons">Lunes de Jupiter</span></button>
         <button type="button" id="solar-system-open" data-discovery-action="solar-system"><span aria-hidden="true">◎</span><span data-i18n="discovery.actions.solarSystem">Système solaire</span></button>
         <button type="button" id="universe-journey-open" data-discovery-action="universe"><span aria-hidden="true">✧</span><span data-i18n="discovery.actions.universe">Voyage dans l’Univers</span></button>
-        <button type="button" id="discovery-compass-toggle" class="discovery-compass-menu-button" aria-label="Activer la boussole" title="Activer la boussole" aria-pressed="false"><span class="toolbar-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.8 7.8-2.7 5.3-5 3.1 2.7-5.4z"/><circle cx="12" cy="12" r="1"/></svg></span><span>Boussole</span></button>
+        <button type="button" id="discovery-compass-toggle" class="discovery-compass-menu-button" aria-label="Activer la boussole" title="Activer la boussole" data-i18n-aria="ui.discoveryCompass" data-i18n-title="ui.discoveryCompass" aria-pressed="false"><span class="toolbar-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.8 7.8-2.7 5.3-5 3.1 2.7-5.4z"/><circle cx="12" cy="12" r="1"/></svg></span><span data-i18n="ui.discoveryCompassLabel">Boussole</span></button>
       </div>
       <section id="discovery-start-tonight" class="discovery-start-tonight" hidden aria-label="Visible maintenant" data-i18n-aria="discovery.start.title">
-        <div class="discovery-start-heading"><div><strong data-i18n="discovery.start.title">Visible maintenant</strong><p id="discovery-start-summary">Quelques cibles à essayer à l’œil nu ; la visibilité dépend aussi des conditions du ciel.</p></div><button id="discovery-start-close" type="button" class="icon-button" aria-label="Fermer les recommandations" title="Fermer" data-i18n-aria="discovery.start.closeAria" data-i18n-title="discovery.close">×</button></div>
+        <div class="discovery-start-heading"><div><strong data-i18n="discovery.start.title">Visible maintenant</strong><p id="discovery-start-summary" data-i18n="ui.discoveryStartSummary">Quelques cibles à essayer à l’œil nu ; la visibilité dépend aussi des conditions du ciel.</p></div><button id="discovery-start-close" type="button" class="icon-button" aria-label="Fermer les recommandations" title="Fermer" data-i18n-aria="discovery.start.closeAria" data-i18n-title="discovery.close">×</button></div>
         <div id="discovery-start-list" class="discovery-start-list" aria-live="polite"></div>
         <p class="discovery-start-note" data-i18n="discovery.start.note">Sélection indicative : la visibilité réelle dépend aussi des nuages, de la transparence et de la pollution lumineuse.</p>
       </section>
@@ -133,7 +133,7 @@
           <button type="button" class="discovery-search-filter" data-search-filter="galaxy" aria-pressed="false" data-i18n="discovery.search.filterGalaxies">◎ Galaxies</button>
           <button type="button" class="discovery-search-filter" data-search-filter="cluster" aria-pressed="false" data-i18n="discovery.search.filterClusters">✣ Amas</button>
         </div>
-        <p id="discovery-search-summary" class="discovery-search-summary" aria-live="polite">Saisis quelques lettres pour filtrer les objets nommés.</p>
+        <p id="discovery-search-summary" class="discovery-search-summary" aria-live="polite" data-i18n="ui.discoverySearchSummary">Saisis quelques lettres pour filtrer les objets nommés.</p>
         <div id="discovery-search-results" class="discovery-search-results" aria-live="polite"></div>
       </section>
       <section id="discovery-evening-route" class="discovery-evening-route" hidden aria-label="Parcours d’observation personnalisé" data-i18n-aria="discovery.evening.sectionAria">
@@ -166,7 +166,7 @@
         <select id="discovery-constellation-select">
           <option value="" data-i18n="discovery.constellationPicker.placeholder">Choisir une constellation…</option>
         </select>
-        <p id="discovery-constellation-hint">Choisissez une figure pour la mettre en évidence sur la carte.</p>
+        <p id="discovery-constellation-hint" data-i18n="ui.constellationPickerHint">Choisissez une figure pour la mettre en évidence sur la carte.</p>
         <svg id="discovery-constellation-diagram" class="discovery-constellation-diagram" viewBox="0 0 320 150" role="img" aria-label="Schéma simplifié de la constellation sélectionnée" data-i18n-aria="discovery.constellationPicker.diagramAria" hidden>
           <rect x="1" y="1" width="318" height="148" rx="10" fill="#071326" stroke="#344c70" />
           <g id="discovery-constellation-diagram-lines" fill="none" stroke="#ffd98a" stroke-width="1.8" stroke-linecap="round"></g>
@@ -177,7 +177,7 @@
           <p id="discovery-constellation-stars"></p>
           <div id="discovery-constellation-step-controls" class="discovery-constellation-step-controls" hidden>
             <button id="discovery-constellation-prev" type="button" aria-label="Étoile précédente" data-i18n="discovery.constellationPicker.prev" data-i18n-aria="discovery.constellationPicker.prevAria">← Précédente</button>
-            <span id="discovery-constellation-step" aria-live="polite">Étoile 1</span>
+            <span id="discovery-constellation-step" aria-live="polite" data-i18n="ui.firstLandmark">Étoile 1</span>
             <button id="discovery-constellation-next" type="button" data-i18n="discovery.constellationPicker.next">Suivante →</button>
           </div>
           <p id="discovery-constellation-howto"></p>
@@ -194,19 +194,19 @@
     </div>
 
     <div class="horizon-label controls" aria-hidden="true">
-      <span>HORIZON · 0°</span>
-      <span id="zenith-label">ZÉNITH · 90°</span>
+      <span data-i18n="ui.horizonLabel">HORIZON · 0°</span>
+      <span id="zenith-label" data-i18n="ui.zenithLabel">ZÉNITH · 90°</span>
     </div>
 
     <aside id="object-card" class="object-card" hidden>
       <button id="close-card" class="icon-button close-card"
-              aria-label="Fermer">×</button>
-      <p class="eyebrow" id="object-type">OBJET CÉLESTE</p>
-      <h2 id="object-name">Objet</h2>
+              aria-label="Fermer" data-i18n-aria="ui.closeObjectCard">×</button>
+      <p class="eyebrow" id="object-type" data-i18n="ui.objectType">OBJET CÉLESTE</p>
+      <h2 id="object-name" data-i18n="ui.objectDefault">Objet</h2>
       <p id="object-detail"></p>
       <div class="object-coordinates">
-        <span>AZIMUT<strong id="object-az">—</strong></span>
-        <span>ALTITUDE<strong id="object-alt">—</strong></span>
+        <span><span data-i18n="ui.azimuth">AZIMUT</span><strong id="object-az">—</strong></span>
+        <span><span data-i18n="ui.altitude">ALTITUDE</span><strong id="object-alt">—</strong></span>
       </div>
       <div id="object-extra" class="object-extra"></div>
       <button id="guide-selected" class="action-button" data-i18n="ui.guideSelected">
@@ -218,9 +218,9 @@
       <header class="finder-header">
         <div>
           <p class="eyebrow" data-i18n="ui.finderMode">MODE CHERCHEUR</p>
-          <h2 id="finder-name">Choisir une cible</h2>
+          <h2 id="finder-name" data-i18n="ui.finderChooseTarget">Choisir une cible</h2>
         </div>
-        <button id="finder-exit" class="action-button">
+        <button id="finder-exit" class="action-button" data-i18n="ui.backToMap">
           Retour à la carte
         </button>
       </header>
@@ -232,25 +232,25 @@
         <div id="finder-marker" class="finder-marker"><span>✦</span></div>
       </div>
 
-      <p id="finder-instruction" class="finder-instruction">
-        Sélectionne un objet sur la carte pour commencer.
+      <p id="finder-instruction" class="finder-instruction" data-i18n="ui.finderInstruction">
+        Sélectionnez un objet sur la carte pour commencer.
       </p>
 
       <div class="finder-readouts" aria-live="polite">
         <div class="finder-metric">
-          <span>HORIZONTAL</span>
+          <span data-i18n="ui.horizontal">HORIZONTAL</span>
           <strong id="finder-horizontal">—</strong>
         </div>
         <div class="finder-metric">
-          <span>VERTICAL</span>
+          <span data-i18n="ui.vertical">VERTICAL</span>
           <strong id="finder-vertical">—</strong>
         </div>
       </div>
 
-      <p id="finder-sensor" class="finder-sensor">
-        Active la boussole pour utiliser le guidage.
+      <p id="finder-sensor" class="finder-sensor" data-i18n="ui.finderSensorHelp">
+        Activez la boussole pour utiliser le guidage.
       </p>
-      <button id="finder-recenter" class="action-button">
+      <button id="finder-recenter" class="action-button" data-i18n="ui.finderRecenter">
         Recentrer le guidage
       </button>
     </section>
@@ -286,7 +286,7 @@
         </button>
 
         <button id="orientation-btn" class="tool-button" type="button" aria-label="Activer la boussole" title="Boussole" data-i18n-aria="toolbar.compassLong" data-i18n-title="toolbar.compass">
-            <span class="toolbar-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.8 7.8-2.7 5.3-5 3.1 2.7-5.4z"/><circle cx="12" cy="12" r="1"/></svg></span><span class="orientation-button-label">Boussole</span>
+            <span class="toolbar-icon" aria-hidden="true"><svg viewBox="0 0 24 24"><circle cx="12" cy="12" r="9"/><path d="m15.8 7.8-2.7 5.3-5 3.1 2.7-5.4z"/><circle cx="12" cy="12" r="1"/></svg></span><span class="orientation-button-label" data-i18n="ui.compass">Boussole</span>
         </button>
 
         <button id="display-settings-open" class="tool-button" type="button" aria-expanded="false" aria-controls="display-settings" aria-label="Personnaliser l'affichage" title="Affichage" data-i18n-aria="toolbar.displaySettingsLong" data-i18n-title="toolbar.displaySettings">
@@ -354,7 +354,6 @@
             <select id="locale-select" class="location-select display-settings-language-select">
               <option value="fr">Français</option>
               <option value="en">English</option>
-              <option value="de">Deutsch</option>
             </select>
           </label>
         </div>
@@ -411,7 +410,7 @@
         <div class="star-hop-controls">
           <label for="star-hop-anchor" data-i18n="starHop.anchorLabel">1. Étoile repère</label><select id="star-hop-anchor"></select>
           <label for="star-hop-target" data-i18n="starHop.targetLabel">2. Objet à retrouver</label><select id="star-hop-target"></select>
-          <details class="star-hop-recognition"><summary data-i18n="starHop.recognitionSummary">Comment reconnaître cette étoile ?</summary><p id="star-hop-anchor-recognition">Choisis une étoile repère pour afficher des indices simples.</p></details>
+          <details class="star-hop-recognition"><summary data-i18n="starHop.recognitionSummary">Comment reconnaître cette étoile ?</summary><p id="star-hop-anchor-recognition" data-i18n="ui.starHopAnchorHint">Choisis une étoile repère pour afficher des indices simples.</p></details>
           <div class="star-hop-learning-layout">
             <div class="star-hop-visual-card">
               <div class="star-hop-sphere-controls" aria-label="Commandes de la sphère céleste" data-i18n-aria="starHop.sphereControlsAria"><button id="star-hop-zoom-out" type="button" aria-label="Dézoomer" data-i18n-aria="starHop.zoomOutAria">−</button><button id="star-hop-sphere-reset" type="button" data-i18n="starHop.sphereReset">Recentrer la sphère</button><button id="star-hop-zoom-in" type="button" aria-label="Zoomer" data-i18n-aria="starHop.zoomInAria">+</button></div>
@@ -429,16 +428,16 @@
                 <g id="star-hop-field-stars"></g>
                 <g id="star-hop-field-labels"></g>
                 <circle id="star-hop-anchor-halo" cx="300" cy="170" r="19" fill="#f5d88c" opacity=".13"/><circle id="star-hop-anchor-dot" cx="300" cy="170" r="7" fill="#ffe9a8"/><circle id="star-hop-anchor-core" cx="300" cy="170" r="2" fill="#fff"/>
-                <text id="star-hop-diagram-anchor" x="300" y="198" fill="#f6e7bd" font-size="12" font-weight="600" text-anchor="middle">Étoile repère</text>
+                <text id="star-hop-diagram-anchor" x="300" y="198" fill="#f6e7bd" font-size="12" font-weight="600" text-anchor="middle" data-i18n="ui.starHopAnchor">Étoile repère</text>
                 <circle id="star-hop-target-halo" cx="410" cy="110" r="18" fill="#8dbfff" opacity=".13"/><circle id="star-hop-target-dot" cx="410" cy="110" r="6" fill="#a8d1ff"/><circle id="star-hop-target-core" cx="410" cy="110" r="2" fill="#fff"/>
-                <text id="star-hop-diagram-target" x="410" y="138" fill="#d7e8ff" font-size="12" font-weight="600" text-anchor="middle">Cible</text>
-                <text id="star-hop-diagram-direction" x="355" y="118" fill="#b9d8ff" font-size="11" text-anchor="middle">Direction</text>
+                <text id="star-hop-diagram-target" x="410" y="138" fill="#d7e8ff" font-size="12" font-weight="600" text-anchor="middle" data-i18n="ui.target">Cible</text>
+                <text id="star-hop-diagram-direction" x="355" y="118" fill="#b9d8ff" font-size="11" text-anchor="middle" data-i18n="ui.directionLabel">Direction</text>
                 </g></g>
                 <text x="300" y="320" fill="#9baecb" font-size="11" text-anchor="middle" data-i18n="starHop.sphereCaption">Sphère céleste · rotation libre, orientation schématique</text>
               </svg>
               <div class="star-hop-metrics"><div><span data-i18n="starHop.separationLabel">Séparation angulaire</span><strong id="star-hop-separation">—</strong></div><div><span data-i18n="starHop.compassLabel">Direction céleste</span><strong id="star-hop-compass">—</strong></div></div>
             </div>
-            <div class="star-hop-instructions"><div id="star-hop-result" class="star-hop-result" aria-live="polite">Choisis une étoile repère et une cible pour préparer le cheminement.</div><section class="star-hop-route-card" aria-label="Étapes du cheminement" data-i18n-aria="starHop.routeCardAria"><p class="star-hop-visual-title" data-i18n="starHop.routeTitle">Parcours proposé</p><ol id="star-hop-route-list" class="star-hop-route-list"><li>Choisis une étoile repère et une cible.</li></ol></section><aside class="star-hop-sphere-info" aria-label="Information sur la sphère" data-i18n-aria="starHop.sphereInfoAria"><p class="muted star-hop-sphere-help" data-i18n="starHop.sphereHelp">La sphère utilise les coordonnées célestes réelles. Fais glisser pour la tourner, utilise la molette ou les boutons pour agrandir ou réduire la sphère, et « Recentrer » pour retrouver le parcours complet. La rotation de la sphère est une manipulation du modèle : elle ne représente pas le mouvement réel du ciel.</p></aside></div>
+            <div class="star-hop-instructions"><div id="star-hop-result" class="star-hop-result" aria-live="polite" data-i18n="ui.starHopStartHint">Choisis une étoile repère et une cible pour préparer le cheminement.</div><section class="star-hop-route-card" aria-label="Étapes du cheminement" data-i18n-aria="starHop.routeCardAria"><p class="star-hop-visual-title" data-i18n="starHop.routeTitle">Parcours proposé</p><ol id="star-hop-route-list" class="star-hop-route-list"><li data-i18n="ui.starHopChooseBoth">Choisis une étoile repère et une cible.</li></ol></section><aside class="star-hop-sphere-info" aria-label="Information sur la sphère" data-i18n-aria="starHop.sphereInfoAria"><p class="muted star-hop-sphere-help" data-i18n="starHop.sphereHelp">La sphère utilise les coordonnées célestes réelles. Fais glisser pour la tourner, utilise la molette ou les boutons pour agrandir ou réduire la sphère, et « Recentrer » pour retrouver le parcours complet. La rotation de la sphère est une manipulation du modèle : elle ne représente pas le mouvement réel du ciel.</p></aside></div>
           </div>
           <button id="star-hop-guide" class="action-button" type="button" data-i18n="starHop.guideButton">Guider vers la cible</button>
         </div>
@@ -450,7 +449,7 @@
       <section class="visible-now-panel" role="dialog" aria-modal="true" aria-labelledby="visible-now-title">
         <header class="visible-now-header">
           <div><h2 id="visible-now-title" data-i18n="visibleNow.title">Visible maintenant</h2>
-          <p id="visible-now-summary" class="muted">Une sélection adaptée au ciel et à ton équipement</p></div>
+          <p id="visible-now-summary" class="muted" data-i18n="ui.visibleNowSummary">Une sélection adaptée au ciel et à ton équipement</p></div>
           <button id="visible-now-close" class="icon-button" type="button" aria-label="Fermer" data-i18n-aria="visibleNow.closeAria">×</button>
         </header>
         <section class="visible-now-time-controls" aria-label="Date et heure pour les objets visibles" data-i18n-aria="visibleNow.timeControlsAria">
@@ -477,7 +476,7 @@
               </select>
             </label>
           </section>
-          <p id="visible-now-sunset-note" class="visible-now-sunset-note" aria-live="polite">Calcul des horaires du coucher du Soleil…</p>
+          <p id="visible-now-sunset-note" class="visible-now-sunset-note" aria-live="polite" data-i18n="ui.calculatingSunsetTimes">Calcul des horaires du coucher du Soleil…</p>
           <details class="visible-now-advanced">
             <summary data-i18n="visibleNow.advancedSummary">Recherche et filtres avancés</summary>
             <section class="catalogue-quick-search" aria-label="Rechercher dans le catalogue du ciel profond" data-i18n-aria="visibleNow.searchAria">
@@ -525,9 +524,9 @@
                   <option value="name" data-i18n="visibleNow.sortName">Nom (A–Z)</option>
                 </select>
               </label>
-              <div class="visible-now-filter-footer"><p id="visible-now-filter-summary" class="muted" aria-live="polite">Toutes les cibles visibles sont affichées.</p><button id="visible-now-reset-filters" class="action-button visible-now-reset-filters" type="button" data-i18n="visibleNow.resetFilters">Réinitialiser les filtres</button></div>
+              <div class="visible-now-filter-footer"><p id="visible-now-filter-summary" class="muted" aria-live="polite" data-i18n="visibleNow.allTargetsShown">Toutes les cibles visibles sont affichées.</p><button id="visible-now-reset-filters" class="action-button visible-now-reset-filters" type="button" data-i18n="visibleNow.resetFilters">Réinitialiser les filtres</button></div>
             </section>
-            <p id="visible-now-magnitude-help" class="muted visible-now-note">Le filtre de magnitude utilise la valeur du catalogue ; pour les galaxies et nébuleuses, elle ne suffit pas à prévoir la visibilité réelle.</p>
+            <p id="visible-now-magnitude-help" class="muted visible-now-note" data-i18n="visibleNow.magnitudeFilterNote">Le filtre de magnitude utilise la valeur du catalogue ; pour les galaxies et nébuleuses, elle ne suffit pas à prévoir la visibilité réelle.</p>
             <details class="tonight-help">
               <summary data-i18n="visibleNow.helpSummary">Comment lire cette sélection ?</summary>
               <p data-i18n="visibleNow.helpText">La sélection privilégie les objets au-dessus de 10° et propose quelques cibles selon leur type et leur magnitude de catalogue. L'étiquette « Repérage » est une estimation pédagogique fondée sur la hauteur, le type, la magnitude et l'équipement choisi, pas une garantie de visibilité. La pollution lumineuse, la transparence, la brillance surfacique et l'expérience changent le résultat ; les objets diffus peuvent être difficiles même avec une magnitude intégrée favorable. Quand elle est calculable, la culmination indique à quel moment la cible passe au plus haut dans le ciel.</p>
@@ -542,7 +541,7 @@
     <section id="conditions-dialog" class="visible-now-dialog" hidden aria-label="Conditions d’observation" data-i18n-aria="conditions.sectionAria">
       <div class="visible-now-backdrop" data-close-conditions></div>
       <section class="visible-now-panel conditions-panel" role="dialog" aria-modal="true" aria-labelledby="conditions-title">
-        <header class="visible-now-header"><div><p class="eyebrow" data-i18n="conditions.eyebrow">PRÉPARER SA SORTIE</p><h2 id="conditions-title" data-i18n="conditions.title">Conditions d’observation</h2><p id="conditions-location" class="muted">Pour la position sélectionnée</p></div><button id="conditions-close" class="icon-button" type="button" aria-label="Fermer" data-i18n-aria="conditions.closeAria">×</button></header>
+        <header class="visible-now-header"><div><p class="eyebrow" data-i18n="conditions.eyebrow">PRÉPARER SA SORTIE</p><h2 id="conditions-title" data-i18n="conditions.title">Conditions d’observation</h2><p id="conditions-location" class="muted" data-i18n="ui.forSelectedLocation">Pour la position sélectionnée</p></div><button id="conditions-close" class="icon-button" type="button" aria-label="Fermer" data-i18n-aria="conditions.closeAria">×</button></header>
         <div id="conditions-content" class="conditions-grid"><p class="muted" data-i18n="conditions.placeholder">Définissez votre position puis actualisez les conditions.</p></div>
         <div class="observation-dialog-actions"><button id="conditions-refresh" class="action-button primary" type="button" data-i18n="conditions.refresh">Actualiser</button></div>
         <p class="muted" data-i18n="conditions.disclaimer">Prévisions fournies par Open-Meteo. La carte intégrée présente une estimation satellitaire de la pollution lumineuse, et non une mesure du ciel réel au sol.</p>
@@ -574,7 +573,7 @@
             </section>
           </div>
           <section class="session-suggestion" aria-live="polite" aria-labelledby="session-suggestion-title">
-            <div><p class="eyebrow" data-i18n="session.suggestionEyebrow">IDÉE POUR CE SOIR</p><h3 id="session-suggestion-title" data-i18n="session.suggestionTitle">Suggestion pour votre objectif</h3><p id="session-suggestion-text">Repérez la Grande Ourse, puis prolongez l’alignement des deux étoiles du bord de la casserole jusqu’à l’Étoile polaire.</p></div>
+            <div><p class="eyebrow" data-i18n="session.suggestionEyebrow">IDÉE POUR CE SOIR</p><h3 id="session-suggestion-title" data-i18n="session.suggestionTitle">Suggestion pour votre objectif</h3><p id="session-suggestion-text" data-i18n="session.defaultSuggestion">Repérez la Grande Ourse, puis prolongez l’alignement des deux étoiles du bord de la casserole jusqu’à l’Étoile polaire.</p></div>
             <button id="session-suggestion-add" class="action-button" type="button" data-i18n="session.suggestionAdd">Ajouter aux notes</button>
           </section>
           <details class="first-night-guide"><summary data-i18n="session.guideSummary">Mini-guide facultatif · ma première soirée</summary><ol><li><strong data-i18n="session.guideStep1Title">Commence simplement.</strong> <span data-i18n="session.guideStep1Text">Choisis un lieu dégagé et vérifie nuages, vent et Lune.</span></li><li><strong data-i18n="session.guideStep2Title">Prends tes repères.</strong> <span data-i18n="session.guideStep2Text">Laisse tes yeux s’habituer à l’obscurité, puis identifie une constellation facile.</span></li><li><strong data-i18n="session.guideStep3Title">Observe sans te presser.</strong> <span data-i18n="session.guideStep3Text">Commence à l’œil nu ou aux jumelles, puis utilise le télescope si tu en as un.</span></li><li><strong data-i18n="session.guideStep4Title">Note ce que tu vois.</strong> <span data-i18n="session.guideStep4Text">Inscris l’heure, la cible et une impression ; une observation courte est déjà réussie.</span></li></ol><p class="muted" data-i18n="session.guideWarning">Conseil : évite les lumières blanches et n’observe jamais le Soleil sans filtre solaire certifié adapté.</p></details>
@@ -600,12 +599,12 @@
           <div class="moon-time-row"><label for="moon-datetime" data-i18n="moon.datetimeLabel">Date et heure</label><div class="localized-native-field"><input id="moon-datetime" type="datetime-local" step="1" lang="fr-FR"><output id="moon-datetime-display" class="localized-native-display" aria-hidden="true">JJ/MM/AAAA, 21:00</output></div><button id="moon-now" class="action-button" type="button" data-i18n="moon.nowButton">Maintenant</button></div>
           <div class="moon-overview">
             <div class="moon-disc-wrap"><svg id="moon-phase-svg" viewBox="0 0 180 180" role="img" aria-label="Disque lunaire éclairé selon la phase calculée" data-i18n-aria="moon.phaseSvgAria"><defs><clipPath id="moon-disc-clip"><circle cx="90" cy="90" r="68"/></clipPath><radialGradient id="moon-surface" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#f8f6ed"/><stop offset="0.65" stop-color="#c9c8c0"/><stop offset="1" stop-color="#777b83"/></radialGradient><filter id="moon-shadow"><feGaussianBlur stdDeviation="1.2"/></filter></defs><circle cx="90" cy="90" r="70" fill="#1a2433" stroke="#657286" stroke-width="1.5"/><g clip-path="url(#moon-disc-clip)"><circle cx="90" cy="90" r="68" fill="#202a39"/><path id="moon-illuminated-shape" fill="url(#moon-surface)" d="M90 22 A68 68 0 0 1 90 158 A68 68 0 0 1 90 22Z"/><g fill="#777b83" opacity=".25"><circle cx="66" cy="66" r="8"/><circle cx="111" cy="52" r="5"/><circle cx="115" cy="112" r="11"/><circle cx="72" cy="126" r="4"/><circle cx="91" cy="84" r="3"/></g></g></svg></div>
-            <div class="moon-facts"><p id="moon-phase-name" class="moon-phase-name">Calcul en cours…</p><p id="moon-phase-trend" class="muted">—</p><div class="moon-illumination"><div><span data-i18n="moon.illuminatedSurface">Surface éclairée</span><strong id="moon-illumination-value">— %</strong></div><div class="moon-progress"><span id="moon-illumination-bar"></span></div></div><dl class="moon-metrics"><div><dt data-i18n="moon.age">Âge lunaire estimé</dt><dd id="moon-age">—</dd></div><div><dt data-i18n="moon.distance">Distance Terre–Lune</dt><dd id="moon-distance">—</dd></div><div><dt data-i18n="moon.diameter">Diamètre apparent</dt><dd id="moon-diameter">—</dd></div><div><dt data-i18n="moon.altitude">Hauteur locale</dt><dd id="moon-altitude">—</dd></div><div><dt data-i18n="moon.azimuth">Azimut</dt><dd id="moon-azimuth">—</dd></div></dl></div>
+            <div class="moon-facts"><p id="moon-phase-name" class="moon-phase-name" data-i18n="moon.calculating">Calcul en cours…</p><p id="moon-phase-trend" class="muted">—</p><div class="moon-illumination"><div><span data-i18n="moon.illuminatedSurface">Surface éclairée</span><strong id="moon-illumination-value">— %</strong></div><div class="moon-progress"><span id="moon-illumination-bar"></span></div></div><dl class="moon-metrics"><div><dt data-i18n="moon.age">Âge lunaire estimé</dt><dd id="moon-age">—</dd></div><div><dt data-i18n="moon.distance">Distance Terre–Lune</dt><dd id="moon-distance">—</dd></div><div><dt data-i18n="moon.diameter">Diamètre apparent</dt><dd id="moon-diameter">—</dd></div><div><dt data-i18n="moon.altitude">Hauteur locale</dt><dd id="moon-altitude">—</dd></div><div><dt data-i18n="moon.azimuth">Azimut</dt><dd id="moon-azimuth">—</dd></div></dl></div>
           </div>
           <div class="moon-orbit-layout"><section class="moon-orbit-section"><div class="moon-orbit-heading"><div class="moon-orbit-title-block"><h3 class="moon-orbit-heading-title" data-i18n="moon.orbitTitle">Position par rapport au Soleil et à la Terre</h3><p class="muted" data-i18n="moon.orbitSubtitle">Schéma orbital vu du dessus · distances non à l’échelle</p></div></div>
             <svg id="moon-orbit-svg" class="moon-orbit-svg" viewBox="0 0 360 230" role="img" aria-label="Schéma interactif de la position orbitale de la Lune par rapport à la Terre et au Soleil" data-i18n-aria="moon.orbitSvgAria"><defs><radialGradient id="moon-sun-glow"><stop offset="0" stop-color="#fff2a8"/><stop offset="1" stop-color="#f4b942"/></radialGradient><marker id="moon-ray-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6Z" fill="#f3c65f"/></marker></defs><circle cx="180" cy="115" r="68" fill="none" stroke="#7890a9" stroke-dasharray="4 5"/><path d="M26 115 H98" stroke="#f3c65f" stroke-width="1.8" marker-end="url(#moon-ray-arrow)"/><circle cx="25" cy="115" r="16" fill="url(#moon-sun-glow)"/><g fill="#e7edf5" font-size="11"><text x="25" y="145" text-anchor="middle" data-i18n="moon.orbit.sun">Soleil</text><text x="180" y="151" text-anchor="middle" data-i18n="moon.orbit.earth">Terre</text><text x="180" y="17" text-anchor="middle" data-i18n="moon.orbit.schematic">Orbite lunaire schématique</text><text x="180" y="216" text-anchor="middle" data-i18n="moon.orbit.phaseDepends">La phase dépend de l’angle Soleil–Terre–Lune</text></g><circle cx="180" cy="115" r="17" fill="#287eb6" stroke="#a9dcff" stroke-width="1.2"/><path d="M170 105l9-5 7 7-4 6 5 7-10 7-5-9-6-4z" fill="#62ad7b"/><g id="moon-orbit-position" class="moon-orbit-draggable" tabindex="0" role="slider" aria-label="Déplacer la Lune sur son orbite pour explorer les phases" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0" data-i18n-aria="moon.orbit.sliderAria"><circle cx="0" cy="0" r="8" fill="#202a39" stroke="#f4f6fa" stroke-width="1.2"/><path id="moon-orbit-lit-shape" fill="#e7e5dc" d="M0 -8 A8 8 0 0 1 0 8 A8 8 0 0 1 0 -8Z"/><text id="moon-orbit-label" data-i18n="ui.moonOrbitLabel" x="0" y="-14" text-anchor="middle" fill="#f3f5f8" font-size="11" pointer-events="none">Lune</text></g></svg>
-            <p id="moon-orbit-explanation" class="muted">Faites glisser la Lune sur son orbite, ou utilisez les flèches du clavier, pour explorer les phases. La date sélectionnée s’ajuste et les données se recalculent.</p>
-          </section><aside class="moon-orbit-side-info" aria-label="Informations complémentaires sur la phase lunaire" data-i18n-aria="moon.sideInfoAria"><div class="moon-orbit-info-subblock"><p class="moon-orbit-info-label" data-i18n="moon.observationConditionsLabel">Conditions d’observation</p><p id="moon-observation-note" class="moon-observation-note" aria-live="polite">Calcul des conditions d’observation…</p></div><div class="moon-orbit-info-subblock moon-phase-angle-subblock"><p class="moon-orbit-info-label" data-i18n="moon.phaseAngleLabel">Angle de phase</p><p id="moon-phase-angle-note" class="moon-phase-angle-note">Calcul en cours…</p></div></aside></div>
+            <p id="moon-orbit-explanation" class="muted" data-i18n="moon.orbitInstruction">Faites glisser la Lune sur son orbite, ou utilisez les flèches du clavier, pour explorer les phases. La date sélectionnée s’ajuste et les données se recalculent.</p>
+          </section><aside class="moon-orbit-side-info" aria-label="Informations complémentaires sur la phase lunaire" data-i18n-aria="moon.sideInfoAria"><div class="moon-orbit-info-subblock"><p class="moon-orbit-info-label" data-i18n="moon.observationConditionsLabel">Conditions d’observation</p><p id="moon-observation-note" class="moon-observation-note" aria-live="polite" data-i18n="moon.calculatingObservation">Calcul des conditions d’observation…</p></div><div class="moon-orbit-info-subblock moon-phase-angle-subblock"><p class="moon-orbit-info-label" data-i18n="moon.phaseAngleLabel">Angle de phase</p><p id="moon-phase-angle-note" class="moon-phase-angle-note" data-i18n="moon.calculatingPhaseAngle">Calcul en cours…</p></div></aside></div>
         </div>
       </section>
     </section>
@@ -655,7 +654,7 @@
             </svg>
             <p class="jupiter-moons-note" data-i18n="jupiterMoons.note">Position calculée depuis les éphémérides pour la date choisie. L’écart horizontal suit l’échelle des orbites ; l’écart vertical est amplifié ×6 pour montrer leur faible inclinaison apparente. Les diamètres des lunes ne sont pas à l’échelle.</p>
           </section>
-          <div id="jupiter-moons-status" class="jupiter-moons-status" aria-live="polite">Calcul des positions…</div>
+          <div id="jupiter-moons-status" class="jupiter-moons-status" aria-live="polite" data-i18n="jupiterMoons.calculatingPositions">Calcul des positions…</div>
           <div id="jupiter-moons-details" class="jupiter-moons-details" aria-label="Position des lunes" data-i18n-aria="jupiterMoons.detailsAria"></div>
         </div>
       </section>
@@ -669,7 +668,7 @@
           <div class="solar-system-controls"><label for="solar-system-datetime" data-i18n="solarSystem.datetimeLabel">Date et heure</label><div class="localized-native-field"><input id="solar-system-datetime" type="datetime-local" step="1" lang="fr-FR"><output id="solar-system-datetime-display" class="localized-native-display" aria-hidden="true">JJ/MM/AAAA, 21:00</output></div><button id="solar-system-now" class="action-button" type="button" data-i18n="solarSystem.nowButton">Maintenant</button><button id="solar-system-play" class="action-button" type="button" aria-pressed="false"><span aria-hidden="true">▶</span> <span data-i18n="solarSystem.animate">Animer</span></button><label class="solar-system-speed-label" for="solar-system-speed" data-i18n="solarSystem.speedLabel">Vitesse</label><select id="solar-system-speed" class="solar-system-speed-select"><option value="1" data-i18n="solarSystem.speed1">1 jour/s</option><option value="7" data-i18n="solarSystem.speed7">7 jours/s</option><option value="30" data-i18n="solarSystem.speed30">30 jours/s</option><option value="365" data-i18n="solarSystem.speed1y">1 an/s</option></select><button id="solar-system-reset" class="action-button" type="button" data-i18n="solarSystem.reset">Retour à la date de départ</button></div>
           <div class="solar-system-layout">
             <section class="solar-system-orbit-card"><svg id="solar-system-orbit-svg" class="solar-system-orbit-svg" viewBox="0 0 720 520" role="img" aria-label="Vue orbitale interactive du Soleil et des huit planètes" data-i18n-aria="solarSystem.orbitSvgAria"><defs><radialGradient id="solar-system-sun-glow"><stop offset="0" stop-color="#fff9c6"/><stop offset=".48" stop-color="#ffc84c"/><stop offset="1" stop-color="#e98625"/></radialGradient></defs><g id="solar-system-orbits"></g><circle cx="360" cy="260" r="17" fill="url(#solar-system-sun-glow)" stroke="#ffe6a1" stroke-width="1.5"/><text x="360" y="292" class="solar-system-sun-label" text-anchor="middle" data-i18n="solarSystem.sunLabel">Soleil</text><g id="solar-system-planets"></g></svg><p class="solar-system-caption" data-i18n="solarSystem.caption">Clique sur une planète pour en savoir plus. Fais-la glisser le long de son orbite pour explorer une position hypothétique. « Retour à la date de départ » annule un déplacement manuel.</p></section>
-            <aside class="solar-system-info" aria-live="polite"><h3 id="solar-system-planet-name">Mercure</h3><p id="solar-system-planet-fact">La planète la plus proche du Soleil.</p><dl><div><dt data-i18n="solarSystem.distance">Distance au Soleil</dt><dd id="solar-system-distance">—</dd></div><div><dt data-i18n="solarSystem.period">Période orbitale</dt><dd id="solar-system-period">—</dd></div><div><dt data-i18n="solarSystem.diameter">Diamètre moyen</dt><dd id="solar-system-diameter">—</dd></div><div><dt data-i18n="solarSystem.longitude">Position orbitale</dt><dd id="solar-system-longitude">—</dd></div><div><dt data-i18n="solarSystem.rotation">Durée du jour</dt><dd id="solar-system-rotation">—</dd></div><div><dt data-i18n="solarSystem.temperature">Température moyenne</dt><dd id="solar-system-temperature">—</dd></div><div><dt data-i18n="solarSystem.composition">Nature</dt><dd id="solar-system-composition">—</dd></div><div><dt data-i18n="solarSystem.moons">Satellites naturels</dt><dd id="solar-system-moons">—</dd></div></dl><p id="solar-system-position-mode" class="solar-system-position-mode">Positions calculées pour la date choisie.</p></aside>
+            <aside class="solar-system-info" aria-live="polite"><h3 id="solar-system-planet-name" data-i18n="names.planet.mercury">Mercure</h3><p class="eyebrow solar-system-fact-label" data-i18n="solarSystem.factLabel">Description de la planète</p><p id="solar-system-planet-fact" data-i18n="solarSystem.defaultPlanetFact">La planète la plus proche du Soleil.</p><dl><div><dt data-i18n="solarSystem.distance">Distance au Soleil</dt><dd id="solar-system-distance">—</dd></div><div><dt data-i18n="solarSystem.period">Période orbitale</dt><dd id="solar-system-period">—</dd></div><div><dt data-i18n="solarSystem.diameter">Diamètre moyen</dt><dd id="solar-system-diameter">—</dd></div><div><dt data-i18n="solarSystem.longitude">Position orbitale</dt><dd id="solar-system-longitude">—</dd></div><div><dt data-i18n="solarSystem.rotation">Durée du jour</dt><dd id="solar-system-rotation">—</dd></div><div><dt data-i18n="solarSystem.temperature">Température moyenne</dt><dd id="solar-system-temperature">—</dd></div><div><dt data-i18n="solarSystem.composition">Nature</dt><dd id="solar-system-composition">—</dd></div><div><dt data-i18n="solarSystem.moons">Satellites naturels</dt><dd id="solar-system-moons">—</dd></div></dl><p id="solar-system-position-mode" class="solar-system-position-mode" data-i18n="solarSystem.calculatedPositions">Positions calculées pour la date choisie.</p></aside>
           </div>
           <p class="solar-system-disclaimer" data-i18n="solarSystem.disclaimer">Schéma non à l'échelle : les distances sont comprimées pour garder toutes les orbites visibles. Les positions utilisent un modèle orbital képlérien simplifié, destiné à l'exploration pédagogique plutôt qu'à l'éphéméride de précision.</p>
         </div>
@@ -684,10 +683,10 @@
           <div class="universe-journey-toolbar"><button id="universe-zoom-out" class="action-button" type="button" aria-label="Dézoomer vers une échelle plus vaste" title="Dézoomer" data-i18n-aria="universeJourney.zoomOutAria" data-i18n-title="universeJourney.zoomOut">−</button><input id="universe-zoom-range" type="range" min="0" max="4" step="0.01" value="0" aria-label="Échelle du voyage cosmique" data-i18n-aria="universeJourney.zoomRangeAria"><button id="universe-zoom-in" class="action-button" type="button" aria-label="Zoomer vers notre Système solaire" title="Zoomer" data-i18n-aria="universeJourney.zoomInAria" data-i18n-title="universeJourney.zoomIn">+</button><button id="universe-journey-home" class="action-button" type="button" data-i18n="universeJourney.home">Revenir au Système solaire</button></div>
           <div class="universe-journey-main">
             <div class="universe-journey-stage-wrap"><svg id="universe-journey-stage" class="universe-journey-stage" viewBox="0 0 900 500" preserveAspectRatio="none" role="img" aria-label="Scène cosmique continue ; seuls les noms des objets sont inscrits dans la scène" data-i18n-aria="universeJourney.stageAria"></svg><div id="universe-journey-pointer" class="universe-journey-pointer" aria-live="polite" hidden></div></div>
-            <aside class="universe-journey-distance-panel" aria-live="polite" aria-label="Repères de distance selon l’échelle" data-i18n-aria="universeJourney.distancePanelAria"><h3 data-i18n="universeJourney.distanceTitle">Repères de distance</h3><p id="universe-distance-scale" class="universe-distance-scale">Système solaire</p><div class="universe-distance-list"><div><span data-i18n="universeJourney.unitKm">En kilomètres</span><strong id="universe-distance-km">149 600 000 km</strong></div><div><span data-i18n="universeJourney.unitMillion">En millions de km</span><strong id="universe-distance-million">149,6 millions</strong></div><div><span data-i18n="universeJourney.unitBillion">En milliards de km</span><strong id="universe-distance-billion">0,150 milliard</strong></div><div><span data-i18n="universeJourney.unitLy">En années-lumière</span><strong id="universe-distance-ly">0,000016 al</strong></div></div><p class="universe-distance-footnote" data-i18n="universeJourney.distanceFootnote">Repères astronomiques de l’échelle courante. Le dessin reste schématique : les tailles et distances ne sont pas toutes à la même échelle.</p></aside>
+            <aside class="universe-journey-distance-panel" aria-live="polite" aria-label="Repères de distance selon l’échelle" data-i18n-aria="universeJourney.distancePanelAria"><h3 data-i18n="universeJourney.distanceTitle">Repères de distance</h3><p id="universe-distance-scale" class="universe-distance-scale" data-i18n="universeJourney.level0">Système solaire</p><div class="universe-distance-list"><div><span data-i18n="universeJourney.unitKm">En kilomètres</span><strong id="universe-distance-km">149 600 000 km</strong></div><div><span data-i18n="universeJourney.unitMillion">En millions de km</span><strong id="universe-distance-million">149,6 millions</strong></div><div><span data-i18n="universeJourney.unitBillion">En milliards de km</span><strong id="universe-distance-billion">0,150 milliard</strong></div><div><span data-i18n="universeJourney.unitLy">En années-lumière</span><strong id="universe-distance-ly">0,000016 al</strong></div></div><p class="universe-distance-footnote" data-i18n="universeJourney.distanceFootnote">Repères astronomiques de l’échelle courante. Le dessin reste schématique : les tailles et distances ne sont pas toutes à la même échelle.</p></aside>
           </div>
           <div class="universe-journey-levels" id="universe-journey-levels" role="group" aria-label="Choisir une échelle" data-i18n-aria="universeJourney.levelsAria"><button type="button" data-universe-level="0" class="is-active" data-i18n="universeJourney.level0">Système solaire</button><button type="button" data-universe-level="1" data-i18n="universeJourney.level1">Étoiles proches</button><button type="button" data-universe-level="2" data-i18n="universeJourney.level2">Voie lactée</button><button type="button" data-universe-level="3" data-i18n="universeJourney.level3">Groupe local</button><button type="button" data-universe-level="4" data-i18n="universeJourney.level4">Grandes structures</button></div>
-          <article class="universe-journey-info" aria-live="polite"><h3 id="universe-journey-level-title">Notre Système solaire</h3><p id="universe-journey-level-description">Huit planètes orbitent autour du Soleil. À cette échelle, les distances entre les planètes sont déjà immenses, même si le schéma les comprime.</p><p id="universe-journey-distance-note" class="universe-journey-distance-note">Échelle schématique : les tailles et distances ne sont pas représentées proportionnellement.</p></article>
+          <article class="universe-journey-info" aria-live="polite"><h3 id="universe-journey-level-title" data-i18n="universeJourney.defaultLevelTitle">Notre Système solaire</h3><p id="universe-journey-level-description" data-i18n="universeJourney.defaultLevelDescription">Huit planètes orbitent autour du Soleil. À cette échelle, les distances entre les planètes sont déjà immenses, même si le schéma les comprime.</p><p id="universe-journey-distance-note" class="universe-journey-distance-note" data-i18n="universeJourney.defaultDistanceNote">Échelle schématique : les tailles et distances ne sont pas représentées proportionnellement.</p></article>
         </div>
       </section>
     </section>
@@ -708,7 +707,7 @@
       </section>
     </section>
 
-    <button id="exit-immersive" aria-label="Quitter le mode immersif">
+    <button id="exit-immersive" aria-label="Quitter le mode immersif" data-i18n="ui.exitImmersive">
       Quitter l'immersion ×
     </button>
     <div id="toast" role="status" aria-live="polite"></div>

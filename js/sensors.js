@@ -490,7 +490,7 @@ function handleOrientation(event) {
 
     // Ne modifier le statut que lors de l'activation.
     if (!wasSensorActive) {
-      setStatus("Orientation active");
+      setStatus(t("ui.orientationActive"));
     }
     }
   }
@@ -618,13 +618,13 @@ function stopListening() {
 
   async function enableOrientation() {
     if (state.orientationListening) {
-      showToast("Capteurs déjà activés.");
+      showToast(t("ui.sensorsAlreadyEnabled"));
       return;
     }
 
     if (typeof window.DeviceOrientationEvent === "undefined") {
       showToast(
-        "Ce navigateur ne prend pas en charge l'orientation."
+        t("ui.orientationUnsupported")
       );
       return;
     }
@@ -642,7 +642,7 @@ function stopListening() {
 
         if (permission !== "granted") {
           showToast(
-            "Autorisation des capteurs refusée. Vérifie les réglages du navigateur."
+            t("ui.orientationPermissionDenied")
           );
           return;
         }
@@ -688,10 +688,10 @@ function stopListening() {
       }
 
       state.orientationListening = true;
-      setStatus("Recherche du cap géographique…");
+      setStatus(t("ui.orientationSearchHeading"));
 
       showToast(
-        "Capteurs démarrés. Déplace doucement le téléphone."
+        t("ui.sensorsStartedMovePhone")
       );
 
       /*
@@ -707,16 +707,16 @@ function stopListening() {
         }
 
         if (headingSamples === 0 && pitchSamples === 0) {
-          setStatus("Aucune donnée du capteur");
+          setStatus(t("ui.noSensorData"));
 
           showToast(
-            "Aucune donnée reçue. Vérifie HTTPS, les autorisations et la compatibilité de l'appareil."
+            t("ui.noSensorDataHelp")
           );
         } else if (!state.sensorActive) {
-          setStatus("Cap géographique indisponible");
+          setStatus(t("ui.geographicHeadingUnavailable"));
 
           showToast(
-            "Inclinaison détectée, mais aucun cap absolu fiable n'est disponible."
+            t("ui.noAbsoluteHeading")
           );
         }
       }, 3000);
@@ -728,7 +728,7 @@ function stopListening() {
       console.error("[Atlas] Erreur du capteur :", error);
 
       showToast(
-        "Impossible d'activer les capteurs. Vérifie HTTPS et les autorisations."
+        t("ui.sensorActivationFailed")
       );
     }
   }
@@ -740,14 +740,14 @@ function stopListening() {
 
     if (!fresh) {
       showToast(
-        "Cap géographique indisponible. Vérifie les capteurs et la calibration."
+        t("ui.geographicHeadingUnavailableHelp")
       );
       return;
     }
 
     drawSky();
 
-    showToast("Orientation actualisée.");
+    showToast(t("ui.orientationUpdated"));
   }
 
   return {

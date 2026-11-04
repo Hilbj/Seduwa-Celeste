@@ -1,10 +1,12 @@
+import { t } from "./i18n.js";
+
 /**
  * Estimation analytique des événements de lever, culmination et coucher.
  * Le seuil de franchissement est fixé à -0,566° (convention apparente simplifiée).
  * Les heures sont locales à l'appareil ; le fuseau du lieu d'observation n'est
  * pas déduit automatiquement des coordonnées géographiques.
  */
-export function calculateRiseTransitSet(object, date, latitude, longitude, locale = "fr") {
+export function calculateRiseTransitSet(object, date, latitude, longitude, locale = "fr", translate = t) {
   if (!object || !Number.isFinite(object.ra) || object.ra < 0 || object.ra >= 24 ||
       !Number.isFinite(object.dec) || object.dec < -90 || object.dec > 90 ||
       !(date instanceof Date) || !Number.isFinite(date.getTime()) ||
@@ -39,7 +41,7 @@ export function calculateRiseTransitSet(object, date, latitude, longitude, local
   const dateKey = d => `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, "0")}-${String(d.getDate()).padStart(2, "0")}`;
   const dayNumber = d => Date.UTC(d.getFullYear(), d.getMonth(), d.getDate()) / 86400000;
   const dayOffset = d => Math.round(dayNumber(d) - dayNumber(localMidnight));
-  const daySuffix = offset => offset < 0 ? ` (${locale === "en" ? "previous day" : "veille"})` : offset > 0 ? ` (${locale === "en" ? "next day" : "lendemain"})` : "";
+  const daySuffix = offset => offset < 0 ? ` (${translate("riseTransit.previousDay")})` : offset > 0 ? ` (${translate("riseTransit.nextDay")})` : "";
   const formatEvent = d => d.toLocaleTimeString(locale, { hour: "2-digit", minute: "2-digit", hourCycle: "h23" }) + daySuffix(dayOffset(d));
   const base = {
     thresholdAltitudeDeg,
@@ -50,10 +52,10 @@ export function calculateRiseTransitSet(object, date, latitude, longitude, local
   };
 
   if (cosH > 1) {
-    return { ...base, belowHorizon: true, rise: locale === "en" ? "Does not rise today" : "Ne se lève pas ce jour", transit: locale === "en" ? "Below the horizon" : "Sous l’horizon", set: locale === "en" ? "Does not set today" : "Ne se couche pas ce jour", riseDate: null, setDate: null, riseDayOffset: null, setDayOffset: null };
+    return { ...base, belowHorizon: true, rise: translate("riseTransit.doesNotRise"), transit: translate("riseTransit.belowHorizon"), set: translate("riseTransit.doesNotSet"), riseDate: null, setDate: null, riseDayOffset: null, setDayOffset: null };
   }
   if (cosH < -1) {
-    return { ...base, belowHorizon: false, rise: locale === "en" ? "Circumpolar" : "Circumpolaire", transit: formatEvent(transitDate), set: locale === "en" ? "Circumpolar" : "Circumpolaire", riseDate: null, setDate: dateKey(transitDate), riseDayOffset: null, setDayOffset: null };
+    return { ...base, belowHorizon: false, rise: translate("riseTransit.circumpolar"), transit: formatEvent(transitDate), set: translate("riseTransit.circumpolar"), riseDate: null, setDate: dateKey(transitDate), riseDayOffset: null, setDayOffset: null };
   }
 
   const hourAngleHours = Math.acos(Math.max(-1, Math.min(1, cosH))) * 12 / Math.PI;

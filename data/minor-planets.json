@@ -19,7 +19,8 @@
       "G": 0.12,
       "designation": "(1) Ceres",
       "dwarfPlanet": true,
-      "dwarfPlanetNote": "Cérès est aussi classée comme planète naine."
+      "dwarfPlanetNote": "Cérès est aussi classée comme planète naine.",
+      "dwarfPlanetNoteEn": "Ceres is also classified as a dwarf planet."
     },
     {
       "number": 2,
@@ -299,7 +300,8 @@
       "a": 2.2177102436468425,
       "M0": 286.5175841841178,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes"
+      "catalogue": "Comètes",
+      "englishName": "2P/Encke"
     },
     {
       "id": "1P/Halley",
@@ -323,7 +325,8 @@
       "a": 17.858921421421424,
       "M0": 192.35324111075678,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes"
+      "catalogue": "Comètes",
+      "englishName": "1P/Halley"
     },
     {
       "id": "67P/Churyumov-Gerasimenko",
@@ -347,7 +350,8 @@
       "a": 3.462395543175488,
       "M0": 223.84642145685717,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes"
+      "catalogue": "Comètes",
+      "englishName": "67P/Churyumov–Gerasimenko"
     },
     {
       "id": "C/1995 O1 Hale-Bopp",
@@ -371,7 +375,8 @@
       "a": 186.53061224489738,
       "M0": 4.122618161743702,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes"
+      "catalogue": "Comètes",
+      "englishName": "C/1995 O1 Hale–Bopp"
     },
     {
       "id": "C/2020 F3 NEOWISE",
@@ -395,7 +400,8 @@
       "a": 368.7499999999894,
       "M0": 0.3014841485429769,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes"
+      "catalogue": "Comètes",
+      "englishName": "C/2020 F3 NEOWISE"
     },
     {
       "id": "161P/Hartley-IRAS",
@@ -419,8 +425,11 @@
       "a": 7.722460963728924,
       "M0": 352.138245930918,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes"
+      "catalogue": "Comètes",
+      "englishName": "161P/Hartley–IRAS"
     }
   ],
-  "dwarfPlanetsSource": "IAU: https://www.iau.org/static/archives/releases/pdf/iau0807.pdf ; éléments orbitaux individuels: LESIA Lucky Star / NIMA, URLs consignées dans le code documentaire."
+  "dwarfPlanetsSource": "IAU: https://www.iau.org/static/archives/releases/pdf/iau0807.pdf ; éléments orbitaux individuels: LESIA Lucky Star / NIMA, URLs consignées dans le code documentaire.",
+  "englishCatalogue": "Minor planets",
+  "englishNote": "Educational selection of numbered asteroids and the five dwarf planets (Ceres, Pluto, Eris, Haumea and Makemake). Catalogue orbital elements come from published tables; positions are propagated with a simplified Keplerian model, without planetary perturbations, and are not precision JPL Horizons ephemerides. Added comets use simplified Keplerian propagation from reference orbital elements; their brightness is particularly uncertain, and the positions do not replace an up-to-date ephemeris."
 }

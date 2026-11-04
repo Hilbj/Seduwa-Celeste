@@ -35,55 +35,64 @@ export function createSolarSystem({
     if (!solarSystemBodies) {
       solarSystemBodies = [
           {
-            name: t("names.planet.sun"),
+            planetId: "sun",
+            nameKey: "names.planet.sun",
             body: A.Body.Sun,
             type: "sun",
             mag: -26.74
           },
           {
-            name: t("names.planet.moon"),
+            planetId: "moon",
+            nameKey: "names.planet.moon",
             body: A.Body.Moon,
             type: "moon",
             mag: -12
           },
           {
-            name: t("names.planet.mercury"),
+            planetId: "mercury",
+            nameKey: "names.planet.mercury",
             body: A.Body.Mercury,
             type: "planet",
             mag: 0
           },
           {
-            name: t("names.planet.venus"),
+            planetId: "venus",
+            nameKey: "names.planet.venus",
             body: A.Body.Venus,
             type: "planet",
             mag: -4
           },
           {
-            name: t("names.planet.mars"),
+            planetId: "mars",
+            nameKey: "names.planet.mars",
             body: A.Body.Mars,
             type: "planet",
             mag: 1
           },
           {
-            name: t("names.planet.jupiter"),
+            planetId: "jupiter",
+            nameKey: "names.planet.jupiter",
             body: A.Body.Jupiter,
             type: "planet",
             mag: -2
           },
           {
-            name: t("names.planet.saturn"),
+            planetId: "saturn",
+            nameKey: "names.planet.saturn",
             body: A.Body.Saturn,
             type: "planet",
             mag: 1
           },
           {
-            name: t("names.planet.uranus"),
+            planetId: "uranus",
+            nameKey: "names.planet.uranus",
             body: A.Body.Uranus,
             type: "planet",
             mag: 5.7
           },
           {
-            name: t("names.planet.neptune"),
+            planetId: "neptune",
+            nameKey: "names.planet.neptune",
             body: A.Body.Neptune,
             type: "planet",
             mag: 7.8
@@ -97,7 +106,7 @@ export function createSolarSystem({
       try {
         if (item.body === undefined) {
           console.warn(
-            `[Atlas] Corps absent dans Astronomy Engine : ${item.name}`
+            `[Atlas] Corps absent dans Astronomy Engine : ${t(item.nameKey)}`
           );
           continue;
         }
@@ -116,7 +125,7 @@ export function createSolarSystem({
           !Number.isFinite(equ.dec)
         ) {
           console.warn(
-            `[Atlas] Coordonnées équatoriales invalides : ${item.name}`,
+            `[Atlas] Coordonnées équatoriales invalides : ${t(item.nameKey)}`,
             equ
           );
           continue;
@@ -136,7 +145,7 @@ export function createSolarSystem({
           !Number.isFinite(hor.altitude)
         ) {
           console.warn(
-            `[Atlas] Coordonnées horizontales invalides : ${item.name}`,
+            `[Atlas] Coordonnées horizontales invalides : ${t(item.nameKey)}`,
             hor
           );
           continue;
@@ -144,6 +153,7 @@ export function createSolarSystem({
 
         result.push({
           ...item,
+          name: t(item.nameKey),
           ra: equ.ra,
           dec: equ.dec,
           az: norm360(hor.azimuth),
@@ -151,7 +161,7 @@ export function createSolarSystem({
         });
       } catch (error) {
         console.error(
-          `[Atlas] Erreur de calcul pour ${item.name} :`,
+          `[Atlas] Erreur de calcul pour ${t(item.nameKey)} :`,
           error
         );
       }

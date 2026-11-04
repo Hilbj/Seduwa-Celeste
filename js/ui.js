@@ -8,8 +8,7 @@ import { filterVisibleTargets } from "./visible-target-filters.js";
 import { buildTonightSelection, isPrioritySolarTarget } from "./tonight-recommendations.js";
 import { assessObservingDifficulty } from "./observing-difficulty.js";
 import { angularSeparationDeg, buildStarHopRoute, formatStarHopTargetLabel, recommendedStarHopMaxDeg, selectTargetGuideStar } from "./star-hop-route.js";
-import { SOLAR_PLANETS, calculateSolarOrbitPosition, calculateSolarOrbitPositions } from "./solar-system-orbits.js";
-import { uiTexts } from "./ui-texts.js";
+import { SOLAR_PLANETS, getLocalizedSolarPlanet, calculateSolarOrbitPosition, calculateSolarOrbitPositions } from "./solar-system-orbits.js";
 import { t, getLocale } from "./i18n.js";
 
 export function createUI({
@@ -110,7 +109,7 @@ export function createUI({
     const output = document.getElementById(outputId);
     if (!input || !output) return;
     const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(input.value || "");
-    const datePart = match ? (getLocale() === "en" ? `${match[2]}/${match[3]}/${match[1]}` : `${match[3]}/${match[2]}/${match[1]}`) : (getLocale() === "en" ? "MM/DD/YYYY" : "JJ/MM/AAAA");
+    const datePart = match ? (getLocale() === "en" ? `${match[2]}/${match[3]}/${match[1]}` : `${match[3]}/${match[2]}/${match[1]}`) : t("ui.datePlaceholder");
     output.textContent = match ? `${datePart}, ${match[4]}:${match[5]}:${(match[6] || "00").padEnd(2, "0").slice(0, 2)}` : `${datePart}, --:--:--`;
   }
   function setupLocalizedDateTimeDisplays() {
@@ -227,13 +226,13 @@ export function createUI({
       button.setAttribute("aria-pressed", String(active));
       button.classList.toggle("active", active);
       const label = sensorActivationPending
-        ? "Autorisation de la boussole…"
+        ? t("ui.compassPermissionPending")
         : active ? t("ui.disableCompass") : t("ui.activateCompass");
       button.setAttribute("aria-label", label);
       button.setAttribute("title", label);
       const spans = button.querySelectorAll("span");
       if (button.id === "orientation-btn" && spans.length > 1) {
-        spans[1].textContent = sensorActivationPending ? "Autorisation…" : active ? t("ui.stopCompass") : t("ui.compass");
+        spans[1].textContent = sensorActivationPending ? t("ui.permissionPending") : active ? t("ui.stopCompass") : t("ui.compass");
       }
       button.disabled = sensorActivationPending;
     }
@@ -250,14 +249,14 @@ export function createUI({
     if (
       typeof sensors?.enableOrientation !== "function"
     ) {
-      showToast("Module de boussole indisponible.");
+      showToast(t("ui.compassModuleUnavailable"));
       return;
     }
 
     sensorActivationPending = true;
     syncSensorButton();
 
-    safely("Activation de la boussole", () => {
+    safely(t("ui.compassActivation"), () => {
       return Promise.resolve(sensors.enableOrientation()).finally(() => {
         sensorActivationPending = false;
         syncSensorButton();
@@ -267,11 +266,11 @@ export function createUI({
 
   function recenter() {
     if (typeof sensors?.recenter !== "function") {
-      showToast("Recentrage des capteurs indisponible.");
+      showToast(t("ui.sensorRecenterUnavailable"));
       return;
     }
 
-    safely("Recentrage", () => {
+    safely(t("ui.sensorRecentering"), () => {
       sensors.recenter();
     });
   }
@@ -331,7 +330,10 @@ export function createUI({
     // Les catalogues peuvent fournir un nom imbriqué dans un objet. Chercher
     // récursivement une vraie chaîne et refuser explicitement la conversion
     // générique « [object Object] ».
-    const preferredKeys = ["fr", getLocale(), "name_fr", "common_name_fr", "commonNameFr", "common_name", "commonName", "proper_name", "properName", "name", "label", "designation", "id", "en"];
+    const localeKeys = getLocale() === "en"
+      ? ["en", "englishName", "english_name", "name_en", "common_name_en", "proper_name_en", "name", "label", "designation", "id", "fr", "name_fr"]
+      : ["fr", "name_fr", "common_name_fr", "commonNameFr", "name", "common_name", "commonName", "proper_name", "properName", "label", "designation", "id", "en", "englishName", "english_name"]; 
+    const preferredKeys = localeKeys;
     const read = (candidate, depth = 0, seen = new Set()) => {
       if (typeof candidate === "string" || typeof candidate === "number") {
         const text = String(candidate).trim();
@@ -358,21 +360,57 @@ export function createUI({
     return read(value) || read(fallback) || t("ui.celestialObject");
   }
 
+  function localizedObjectName(object, fallback = "") {
+    if (!object || typeof object !== "object") return displayObjectName(object, fallback);
+    const id = String(object.id || object.designation || "").trim();
+    const compactId = id.toUpperCase().replace(/\s+/g, "");
+    const catalogueKey = `catalogueNames.${compactId}`;
+    const catalogueName = t(catalogueKey);
+    if (catalogueName !== catalogueKey) return catalogueName;
+    if (getLocale() === "en") {
+      const english = object.englishName || object.english_name || object.name_en || object.common_name_en || object.proper_name_en;
+      if (english) return displayObjectName(english, fallback);
+    }
+    const type = String(object.type || "").toLowerCase();
+    const planetId = String(object.planetId || object.id || "").toLowerCase();
+    if (["sun", "moon", "planet"].includes(type) || object.catalogue === "Système solaire") {
+      const key = `names.planet.${type === "sun" ? "sun" : type === "moon" ? "moon" : planetId}`;
+      const translated = t(key);
+      if (translated !== key) return translated;
+    }
+    return displayObjectName(getLocale() === "en"
+      ? (object.englishName || object.english_name || object.name_en || object.name || object.proper_name || object.id)
+      : (object.name_fr || object.name || object.proper_name || object.id), fallback);
+  }
+
+  function localizedCatalogueName(value) {
+    const raw = String(value || "").trim();
+    const normalized = raw.toLocaleLowerCase("fr");
+    const keys = {
+      "messier": "catalogue.messier", "ngc": "catalogue.ngc", "hipparcos": "catalogue.hipparcos",
+      "système solaire": "catalogue.solarSystem", "solar system": "catalogue.solarSystem",
+      "planètes mineures": "catalogue.minorPlanets", "minor planets": "catalogue.minorPlanets",
+      "planètes naines": "catalogue.dwarfPlanets", "dwarf planets": "catalogue.dwarfPlanets",
+      "comètes": "catalogue.comets", "comets": "catalogue.comets"
+    };
+    const key = keys[normalized];
+    return key ? t(key) : raw;
+  }
+
   function updateObjectCard(object) {
     if (!object) {
       setHidden("object-card", true);
       return;
     }
 
-    const name = displayObjectName(object.name) !== t("ui.celestialObject")
-      ? displayObjectName(object.name)
-      : displayObjectName(object.proper_name, displayObjectName(object.id, displayObjectName(object.designation)));
+    const name = localizedObjectName(object, displayObjectName(object.proper_name, displayObjectName(object.id, displayObjectName(object.designation))));
     const typeNames = {
       star: t("ui.star"), planet: t("ui.planet"), sun: t("ui.sun"), moon: t("ui.moon"),
       galaxy: t("ui.galaxy"), nebula: t("ui.nebula"), cluster: t("ui.starCluster"),
       "deep-sky": t("ui.deepSkyObject"), "minor-planet": t("ui.minorPlanet"), "dwarf-planet": t("ui.dwarfPlanet"), comet: t("ui.comet")
     };
     setText("object-name", name);
+    $("object-name")?.setAttribute("aria-label", `${t("ui.objectName")}: ${name}`);
     const objectTypeLabel = typeNames[object.type] || object.type || t("ui.celestialObject");
     setText("object-type", objectTypeLabel);
     const discoveryMode = Boolean($("app")?.classList.contains("discovery-mode"));
@@ -387,18 +425,18 @@ export function createUI({
     }
 
     const detail = [];
-    const constellationLabel = object.constellation || findConstellationName(object);
+    const constellationLabel = localizedConstellationValue(object.constellation) || findConstellationName(object);
     if (discoveryMode) {
       detail.push(objectTypeLabel);
       if (constellationLabel) detail.push(`${t("ui.inConstellation")} ${constellationLabel}`);
       setText("object-detail", detail.join(" · ") || t("ui.newStepToExploreSky"));
     } else {
-      if (Number.isFinite(object.mag)) detail.push(`Magnitude apparente ${object.mag.toFixed(2)}`);
-      if (object.catalogue) detail.push(`${t("ui.catalogue")} ${object.catalogue}`);
+      if (Number.isFinite(object.mag)) detail.push(`${t("ui.apparentMagnitude")} ${object.mag.toLocaleString(getLocale(), { minimumFractionDigits: 2, maximumFractionDigits: 2 })}`);
+      if (object.catalogue) detail.push(`${t("ui.catalogue")} ${localizedCatalogueName(object.catalogue)}`);
       else if (object.id && /^(M\d+|NGC\s?\d+)/i.test(object.id)) detail.push(object.id);
-      if (Number.isFinite(object.ra)) detail.push(`AD ${formatHours(object.ra)}`);
+      if (Number.isFinite(object.ra)) detail.push(`${t("ui.rightAscensionShort")} ${formatHours(object.ra)}`);
       if (Number.isFinite(object.dec)) detail.push(`${t("ui.decLabel")} ${formatDegrees(object.dec)}`);
-      setText("object-detail", detail.join(" · ") || "Informations disponibles ci-dessous");
+      setText("object-detail", detail.join(" · ") || t("ui.informationAvailableBelow"));
     }
     $("object-card")?.classList.toggle("is-discovery-card", discoveryMode);
     setText("object-az", Number.isFinite(object.az) ? `${object.az.toFixed(1)}°` : "—");
@@ -421,8 +459,11 @@ export function createUI({
       const id = String(object.id || object.catalogue || "").toUpperCase().replace(/\s+/g, "");
       const lowerName = name.toLocaleLowerCase(getLocale());
       // Textes historiques conservés pour le Mode Expert : ne pas les modifier.
-      const descriptions = uiTexts.descriptions;
-      const discoveryDescriptions = uiTexts.discoveryDescriptions;
+      const objectText = (section, key) => {
+        const value = t(`objectText.${section}.${key}`);
+        return value.startsWith("objectText.") ? "" : value;
+      };
+      const descriptions = { LUNE: objectText("descriptions", "LUNE"), SOLEIL: objectText("descriptions", "SOLEIL") };
       const normalizedName = name.normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleUpperCase(getLocale());
             // Descriptions courtes (Mode Expert)
       const expertFallback = object.type === "star" ? t("ui.expertStar") :
@@ -447,17 +488,15 @@ export function createUI({
         object.type === "cluster" ? `${name}${t("ui.discoveryCluster")}` :
         object.type === "moon" ? descriptions.LUNE : object.type === "sun" ? descriptions.SOLEIL : `${name}${t("ui.discoveryGeneric")}`;
       const description = discoveryMode
-        ? (discoveryDescriptions[id] || discoveryDescriptions[normalizedName] || descriptions[id] || descriptions[id.replace(/^NGC/, "NGC")] || discoveryFallback)
-        : (descriptions[id] || descriptions[id.replace(/^NGC/, "NGC")] || expertFallback);
-      const observingAdvice = uiTexts.observingAdvice;
+        ? (objectText("discoveryDescriptions", id) || objectText("discoveryDescriptions", normalizedName) || objectText("descriptions", id) || objectText("descriptions", id.replace(/^NGC/, "NGC")) || discoveryFallback)
+        : (objectText("descriptions", id) || objectText("descriptions", id.replace(/^NGC/, "NGC")) || expertFallback);
       // Placer le conseil en premier pour qu'il soit visible plus tôt sur les petits écrans.
-      add("Conseil d’observation", observingAdvice[object.type] || observingAdvice["deep-sky"]);
+      add(t("ui.observingAdvice"), objectText("observingAdvice", object.type) || objectText("observingAdvice", "deep-sky"));
       add(t("ui.description"), description);
+      extra?.setAttribute("aria-label", t("ui.objectDescription"));
 
-      const discoveryFacts = uiTexts.discoveryFacts;
-      const fact = discoveryFacts[id] || discoveryFacts[normalizedName] || "";
-      const discoveryChallenges = uiTexts.discoveryChallenges;
-      add(t("ui.smallChallenge"), discoveryChallenges[object.type] || discoveryChallenges["deep-sky"]);
+      const fact = objectText("discoveryFacts", id) || objectText("discoveryFacts", normalizedName);
+      add(t("ui.smallChallenge"), objectText("discoveryChallenges", object.type) || objectText("discoveryChallenges", "deep-sky"));
 
       const viewingModes = {
         star: [t("ui.eyeStars"), t("ui.binocularsStars"), t("ui.telescopeStars"), t("ui.photoStars")],
@@ -481,7 +520,7 @@ export function createUI({
       const termText = document.createElement("p"); termText.textContent = t("ui.glossaryTerms");
       terms.append(summary, termText);
 
-      if (object.hip !== undefined && Number.isFinite(Number(object.hip))) add("Identifiant", `HIP ${object.hip}`);
+      if (object.hip !== undefined && Number.isFinite(Number(object.hip))) add(t("ui.identifier"), `HIP ${object.hip}`);
       else if (object.id && object.id !== name) add(t("ui.catalogue"), object.id);
 
       // Distances indicatives pour quelques objets du ciel profond fréquemment observés.
@@ -508,57 +547,52 @@ export function createUI({
         if (Number.isFinite(distKm)) add(t("ui.distance"), `${Math.round(distKm).toLocaleString(getLocale())} km`);
       }
 
-      const angularSizes = {
-        M1: "6 × 4 minutes d’arc", M13: "20 minutes d’arc", M27: "8 × 5 minutes d’arc",
-        M31: "environ 3° × 1°", M42: "environ 1° × 1°", M44: "environ 95 minutes d’arc",
-        M45: "environ 2°", M51: "11 × 7 minutes d’arc", M57: "1,4 × 1 minute d’arc",
-        M81: "26 × 14 minutes d’arc", M82: "11 × 4 minutes d’arc", M104: "9 × 4 minutes d’arc",
-        NGC253: "27 × 7 minutes d’arc", NGC457: "13 minutes d’arc", "NGC869/884": "environ 1°",
-        NGC1499: "environ 2,5°", NGC3372: "environ 2°", NGC4755: "10 minutes d’arc",
-        NGC5139: "36 minutes d’arc", NGC4565: "15 × 2 minutes d’arc", NGC7000: "environ 2°",
-        NGC7293: "environ 25 minutes d’arc", NGC6888: "18 × 12 minutes d’arc"
+      const angularSizeKeys = {
+        M1: "M1", M13: "M13", M27: "M27", M31: "M31", M42: "M42", M44: "M44", M45: "M45", M51: "M51", M57: "M57",
+        M81: "M81", M82: "M82", M104: "M104", NGC253: "NGC253", NGC457: "NGC457", "NGC869/884": "NGC869/884",
+        NGC1499: "NGC1499", NGC3372: "NGC3372", NGC4755: "NGC4755", NGC5139: "NGC5139", NGC4565: "NGC4565",
+        NGC7000: "NGC7000", NGC7293: "NGC7293", NGC6888: "NGC6888"
       };
-      let apparentSize = angularSizes[id] || angularSizes[id.replace(/\s+/g, "")];
+      const angularSizeKey = angularSizeKeys[id] || angularSizeKeys[id.replace(/\s+/g, "")];
+      let apparentSize = angularSizeKey ? t(`ui.angularSizes.${angularSizeKey}`) : "";
       if (!apparentSize && (object.type === "planet" || object.type === "moon" || object.type === "sun")) {
-        const diameterKm = ({ soleil: 1392700, lune: 3475, mercure: 4879, vénus: 12104, venus: 12104, mars: 6779, jupiter: 139820, saturne: 116460, uranus: 50724, neptune: 49244 })[name.toLocaleLowerCase(getLocale())];
+        const diameterKm = ({ sun: 1392700, moon: 3475, mercury: 4879, venus: 12104, mars: 6779, jupiter: 139820, saturn: 116460, uranus: 50724, neptune: 49244 })[String(object.planetId || object.id || "").toLowerCase()];
         const distanceKm = getSolarDistanceKm(object);
         if (diameterKm && Number.isFinite(distanceKm) && distanceKm > diameterKm / 2) {
           const arcsec = 2 * Math.atan(diameterKm / (2 * distanceKm)) * 206264.806;
-          apparentSize = arcsec >= 60 ? `${(arcsec / 60).toFixed(1).replace(".", ",")} minutes d’arc` : `${arcsec.toFixed(1).replace(".", ",")} secondes d’arc`;
+          apparentSize = arcsec >= 60
+            ? `${(arcsec / 60).toLocaleString(getLocale(), { maximumFractionDigits: 1 })} ${t("ui.arcminutes")}`
+            : `${arcsec.toLocaleString(getLocale(), { maximumFractionDigits: 1 })} ${t("ui.arcseconds")}`;
         }
       }
-      add("Taille apparente", apparentSize);
+      add(t("ui.apparentSize"), apparentSize);
 
       if (object.type === "star") {
         const spectral = object.spectralType || object.spectral_type || inferSpectralType(object.teff_gspphot);
-        add("Type spectral", spectral);
+        add(t("ui.spectralType"), localizeSpectralType(spectral));
         if (Number.isFinite(object.teff_gspphot)) add(t("ui.surfaceTemperature"), `${Math.round(object.teff_gspphot).toLocaleString(getLocale())} K`);
         else if (Number.isFinite(object.temperatureK)) add(t("ui.surfaceTemperature"), `${Math.round(object.temperatureK).toLocaleString(getLocale())} K`);
         if (object.gaia_astrometry_status === "needs_review") {
           add(t("ui.astrometricCheck"), t("ui.toVerifyGaiaAssociation"));
-          add(t("ui.checkReason"), object.gaia_astrometry_review_reason || t("ui.astrometricResidualToExamine"));
+          add(t("ui.checkReason"), (getLocale() === "en" ? object.gaia_astrometry_review_reason_en : object.gaia_astrometry_review_reason) || object.gaia_astrometry_review_reason || t("ui.astrometricResidualToExamine"));
           if (Number.isFinite(object.gaia_astrometry_review_residual_arcsec)) {
             add(t("ui.positionResidual"), `${object.gaia_astrometry_review_residual_arcsec.toFixed(3).replace(".", ",")}″`);
           }
         }
-        if (object.gaia_source_id) add("Identifiant Gaia DR3", object.gaia_source_id);
+        if (object.gaia_source_id) add(t("ui.gaiaDr3Identifier"), object.gaia_source_id);
         if (Number.isFinite(object.gaia_reference_epoch)) add(t("ui.gaiaReferenceEpoch"), object.gaia_reference_epoch.toFixed(1));
         if (Number.isFinite(object.astrometry_epoch)) add(t("ui.catalogueCoordinatesEpoch"), object.astrometry_epoch.toFixed(1));
         const hasPmRa = Number.isFinite(object.pm_ra_cosdec_mas_yr);
         const hasPmDec = Number.isFinite(object.pm_dec_mas_yr);
         if (hasPmRa && hasPmDec) {
-          add("Mouvement propre en AD", `${object.pm_ra_cosdec_mas_yr.toFixed(2).replace(".", ",")} mas/an`);
-          add(t("ui.properMotionDeclination"), `${object.pm_dec_mas_yr.toFixed(2).replace(".", ",")} mas/an`);
+          add(t("ui.properMotionRightAscension"), `${object.pm_ra_cosdec_mas_yr.toLocaleString(getLocale(), { maximumFractionDigits: 2 })} mas/${getLocale() === "en" ? "yr" : "an"}`);
+          add(t("ui.properMotionDeclination"), `${object.pm_dec_mas_yr.toLocaleString(getLocale(), { maximumFractionDigits: 2 })} mas/${getLocale() === "en" ? "yr" : "an"}`);
         } else if (object.gaia_source_id) {
           add(t("ui.gaiaProperMotion"), t("ui.notAvailableInImportedData"));
         }
       }
 
-      if (object.constellation) add("Constellation", object.constellation);
-      else {
-        const constellation = findConstellationName(object);
-        if (constellation) add("Constellation", constellation);
-      }
+      if (constellationLabel) add(t("ui.constellationLabel"), constellationLabel);
 
       const physical = {
         "MERCURE": t("ui.factMercury"),
@@ -573,7 +607,10 @@ export function createUI({
         "SOLEIL": t("ui.factSun"),
         "LUNE": t("ui.factMoon")
       };
-      if (physical[name.toLocaleUpperCase(getLocale())]) add(t("ui.physicalInfo"), physical[name.toLocaleUpperCase(getLocale())]);
+      const physicalKey = String(object.planetId || object.id || "").toLowerCase();
+      const physicalById = { mercury: t("ui.factMercury"), venus: t("ui.factVenus"), earth: t("ui.factEarth"), mars: t("ui.factMars"), jupiter: t("ui.factJupiter"), saturn: t("ui.factSaturn"), uranus: t("ui.factUranus"), neptune: t("ui.factNeptune"), sun: t("ui.factSun"), moon: t("ui.factMoon") };
+      const physicalFact = physicalById[physicalKey] || physical[name.toLocaleUpperCase(getLocale())];
+      if (physicalFact) add(t("ui.physicalInfo"), physicalFact);
       else if (object.type === "galaxy" || object.type === "nebula" || object.type === "cluster") {
         add(t("ui.nature"), object.type === "galaxy" ? t("ui.starsGasDustGravitationallyBound") : object.type === "nebula" ? t("ui.interstellarGasDust") : t("ui.starClusterOpenOrGlobular"));
       }
@@ -587,7 +624,8 @@ export function createUI({
       const maximumAltitude = theoreticalMaximumAltitude(object);
       if (Number.isFinite(maximumAltitude)) add(t("ui.maximumTheoreticalAltitude"), `${maximumAltitude.toFixed(1).replace(".", ",")}° ${t("ui.atMeridian")}`);
       if (Number.isFinite(object.alt)) {
-        add(t("ui.skyState"), object.alt > 0 ? `Au-dessus de l’horizon (${object.alt.toFixed(1).replace(".", ",")}°)` : `Sous l’horizon (${object.alt.toFixed(1).replace(".", ",")}°)`);
+        const altitudeLabel = object.alt > 0 ? t("ui.aboveHorizonState") : t("ui.belowHorizonState");
+        add(t("ui.skyState"), `${altitudeLabel} (${object.alt.toLocaleString(getLocale(), { maximumFractionDigits: 1 })}°)`);
       }
 
       const nearby = findNearbyObjects(object);
@@ -602,18 +640,15 @@ export function createUI({
       extra.replaceChildren();
       if (discoveryMode) {
         const photoById = {
-          "NGC7000": ["NGC-7000.jpg", "Nébuleuse North America"],
-          "NGC2244": ["NGC-2244.jpg", "Amas ouvert NGC 2244"],
-          "NGC1499": ["NGC-1499.jpg", "Nébuleuse Californie"],
-          "M45": ["M45.jpg", "Les Pléiades"], "M42": ["M42.jpg", "Grande Nébuleuse d’Orion"],
-          "M31": ["M31.jpg", "Galaxie d’Andromède"], "M8": ["M8.jpg", "Nébuleuse de la Lagune"],
-          "IC1805": ["IC-1805.jpg", "Nébuleuse du Cœur"], "B33": ["B33.jpg", "Nébuleuse de la Tête de Cheval"]
+          "NGC7000": "NGC-7000.jpg", "NGC2244": "NGC-2244.jpg", "NGC1499": "NGC-1499.jpg",
+          "M45": "M45.jpg", "M42": "M42.jpg", "M31": "M31.jpg", "M8": "M8.jpg",
+          "IC1805": "IC-1805.jpg", "B33": "B33.jpg"
         };
         const photo = photoById[id.replace(/[^A-Z0-9]/g, "")];
         if (photo) {
           const figure = document.createElement("figure"); figure.className = "discovery-object-photo";
-          const img = document.createElement("img"); img.src = `https://seduwa.ch/mysky/photos/${photo[0]}`;
-          img.alt = photo[1]; img.loading = "lazy"; img.decoding = "async";
+          const img = document.createElement("img"); img.src = `https://seduwa.ch/mysky/photos/${photo}`;
+          img.alt = localizedObjectName(object); img.loading = "lazy"; img.decoding = "async";
           img.addEventListener("error", () => figure.remove(), { once: true });
           // Le nom commun est déjà indiqué dans la fiche : pas de légende redondante sous la photo.
           figure.append(img); extra.append(figure);
@@ -628,11 +663,11 @@ export function createUI({
         let visibilityLevel = "medium";
         let visibilityExplanation = t("ui.maybeVisibleDependsOnConditions");
         if (object.type === "sun") {
-          visibilityLabel = "Protection solaire indispensable";
+          visibilityLabel = t("ui.sunProtectionRequired");
           visibilityLevel = "warning";
           visibilityExplanation = t("ui.neverLookAtSunWithoutFilter");
         } else if (Number.isFinite(altitude) && altitude < 0) {
-          visibilityLabel = "Pas encore visible";
+          visibilityLabel = t("ui.notVisibleYet");
           visibilityLevel = "low";
           visibilityExplanation = t("ui.objectBelowHorizonForSelectedTime");
         } else if (Number.isFinite(altitude) && altitude < 10) {
@@ -640,13 +675,13 @@ export function createUI({
           visibilityLevel = "low";
           visibilityExplanation = t("ui.atmosphereInterferesNearHorizon");
         } else if (Number.isFinite(altitude) && altitude < 20) {
-          visibilityLabel = "Assez bas sur l’horizon";
+          visibilityLabel = t("ui.lowOnHorizon");
           visibilityLevel = "low";
           visibilityExplanation = t("ui.targetEasierToObserveWhenHigher");
         } else if (difficulty.level === "easy") {
           visibilityLabel = t("ui.easyToSpot");
           visibilityLevel = "easy";
-          visibilityExplanation = "Sa position est favorable, mais les nuages, la transparence et la pollution lumineuse comptent aussi.";
+          visibilityExplanation = t("ui.favorableVisibilityExplanation");
         } else if (difficulty.level === "challenging" || difficulty.level === "low") {
           visibilityLabel = t("ui.hardToSpot");
           visibilityLevel = "low";
@@ -654,7 +689,7 @@ export function createUI({
         } else if (!Number.isFinite(altitude)) {
           visibilityLabel = t("ui.visibilityNotEstimated");
           visibilityLevel = "medium";
-          visibilityExplanation = "La hauteur actuelle de cet objet n’est pas disponible.";
+          visibilityExplanation = t("ui.altitudeUnavailableExplanation");
         }
         const visibility = document.createElement("div");
         visibility.className = `discovery-visibility is-${visibilityLevel}`;
@@ -683,7 +718,7 @@ export function createUI({
           beginnerExplanation = t("ui.sunOnlyWithCertifiedProtection");
         } else if (rawLevel === "easy") {
           beginnerLevel = "easy";
-          beginnerLabel = "Niveau 1 · Facile";
+          beginnerLabel = t("ui.level1Easy");
           beginnerExplanation = t("ui.goodFirstTargetTryNakedEye");
         } else if (rawLevel === "challenging" || rawLevel === "low") {
           beginnerLevel = "challenge";
@@ -706,7 +741,7 @@ export function createUI({
         recognition.append(summary, explanation);
         // Les faits propres à certains objets complètent l'explication au lieu
         // d'être répétés dans une seconde rubrique « Le savais-tu ? ».
-        if (fact && (discoveryFacts[id] || discoveryFacts[normalizedName])) {
+        if (fact) {
           const detail = document.createElement("p");
           detail.className = "discovery-recognition-detail";
           detail.textContent = fact;
@@ -717,10 +752,10 @@ export function createUI({
       for (const [label, value] of visibleRows) {
         const row = document.createElement("div");
         row.className = "object-extra-row";
-        if ([t("ui.description"), t("ui.physicalInfo"), t("ui.nature"), t("ui.nearbyObjects"), "Conseil d’observation", t("ui.didYouKnow"), t("ui.smallChallenge")].includes(label)) row.classList.add("is-long");
+        if ([t("ui.description"), t("ui.physicalInfo"), t("ui.nature"), t("ui.nearbyObjects"), t("ui.observingAdvice"), t("ui.didYouKnow"), t("ui.smallChallenge")].includes(label)) row.classList.add("is-long");
         if (label === t("ui.didYouKnow")) row.classList.add("is-discovery-fact");
         if (label === t("ui.smallChallenge")) row.classList.add("is-discovery-challenge");
-        if (label === "Conseil d’observation") {
+        if (label === t("ui.observingAdvice")) {
           row.classList.add("is-observing-advice");
           if (object.type === "sun") row.classList.add("is-solar-safety");
         }
@@ -733,7 +768,7 @@ export function createUI({
             const button = document.createElement("button");
             button.type = "button";
             button.className = "nearby-object-button";
-            const nearbyName = displayObjectName(nearbyObject.name, displayObjectName(nearbyObject.proper_name, displayObjectName(nearbyObject.id, displayObjectName(nearbyObject.designation))));
+            const nearbyName = localizedObjectName(nearbyObject);
             const separation = Number(nearbyObject.separation);
             const separationLabel = Number.isFinite(separation) ? `${separation.toFixed(1).replace(".", ",")}°` : "";
             button.textContent = separationLabel ? `${nearbyName} · ${separationLabel}` : nearbyName;
@@ -762,15 +797,28 @@ export function createUI({
     setHidden("object-card", false);
   }
 
+  function localizeSpectralType(value) {
+    const text = String(value || "");
+    if (getLocale() !== "en") return text;
+    return text
+      .replace(/bleue[- ]blanche/gi, "blue-white")
+      .replace(/blanche[- ]jaune/gi, "yellow-white")
+      .replace(/bleue/gi, "blue")
+      .replace(/blanche/gi, "white")
+      .replace(/jaune/gi, "yellow")
+      .replace(/rouge/gi, "red")
+      .replace(/orange/gi, "orange");
+  }
+
   function inferSpectralType(temp) {
     if (!Number.isFinite(temp)) return t("ui.notSpecified");
-    if (temp >= 30000) return t("ui.spectralClassO");
-    if (temp >= 10000) return "B (bleue-blanche)";
-    if (temp >= 7500) return "A (blanche)";
-    if (temp >= 6000) return "F (blanche-jaune)";
-    if (temp >= 5200) return "G (jaune)";
-    if (temp >= 3700) return "K (orange)";
-    return "M (rouge)";
+    if (temp >= 30000) return t("ui.spectralO");
+    if (temp >= 10000) return t("ui.spectralB");
+    if (temp >= 7500) return t("ui.spectralA");
+    if (temp >= 6000) return t("ui.spectralF");
+    if (temp >= 5200) return t("ui.spectralG");
+    if (temp >= 3700) return t("ui.spectralK");
+    return t("ui.spectralM");
   }
 
   function getSolarDistanceKm(object) {
@@ -778,9 +826,8 @@ export function createUI({
       const A = window.Astronomy;
       const date = state.observationDate || new Date();
       if (!A || !A.GeoVector || !A.Body) return NaN;
-      const key = String(object.name || "").toLowerCase();
-      const bodyName = key === "soleil" ? "Sun" : key === "lune" ? "Moon" :
-        ({ mercure: "Mercury", vénus: "Venus", venus: "Venus", mars: t("names.planet.mars"), jupiter: t("names.planet.jupiter"), saturne: "Saturn", uranus: t("names.planet.uranus"), neptune: t("names.planet.neptune") })[key];
+      const key = String(object.planetId || object.id || object.type || "").toLowerCase();
+      const bodyName = ({ sun: "Sun", moon: "Moon", mercury: "Mercury", venus: "Venus", mars: "Mars", jupiter: "Jupiter", saturn: "Saturn", uranus: "Uranus", neptune: "Neptune" })[key];
       if (!bodyName || A.Body[bodyName] === undefined) return NaN;
       const v = A.GeoVector(A.Body[bodyName], date, true);
       const au = Math.sqrt(v.x * v.x + v.y * v.y + v.z * v.z);
@@ -788,12 +835,35 @@ export function createUI({
     } catch { return NaN; }
   }
 
+  function localizedConstellationName(item) {
+    if (!item) return "";
+    const id = String(item.id || item.iau || "").trim();
+    const key = id ? `catalogueNames.constellations.${id}` : "";
+    const translated = key ? t(key) : key;
+    if (translated && translated !== key) return translated;
+    // Les champs bilingues restent des alias de recherche et un repli sûr.
+    return getLocale() === "en"
+      ? String(item.englishName || item.english_name || item.name || id)
+      : String(item.name_fr || item.name || id);
+  }
+
+  function localizedConstellationValue(value) {
+    const raw = String(value || "").trim();
+    if (!raw) return "";
+    const normalized = normalizeCatalogSearchText(raw);
+    const item = (state.constellations || []).find(candidate =>
+      [candidate.id, candidate.name, candidate.name_fr, candidate.englishName, candidate.english_name]
+        .some(name => normalizeCatalogSearchText(name) === normalized)
+    );
+    return item ? localizedConstellationName(item) : raw;
+  }
+
   function findConstellationName(object) {
     const names = {
       11767: t("names.constellation.ursa-minor"), 32349: t("names.constellation.canis-major"), 91262: t("names.constellation.lyra"), 27989: t("names.constellation.orion"),
       24436: t("names.constellation.orion"), 21421: t("names.constellation.taurus"), 69673: t("names.constellation.bootes"), 97649: t("names.constellation.aquila"),
       102098: t("names.constellation.cygnus"), 80763: t("names.constellation.scorpius"), 24608: t("names.constellation.auriga"), 7588: t("names.constellation.eridanus"),
-      71683: "Centaure", 113368: "Poisson austral"
+      71683: t("names.constellation.centaurus"), 113368: t("names.constellation.southern-fish")
     };
     return names[Number(object.hip)] || "";
   }
@@ -871,7 +941,7 @@ export function createUI({
     // Masquer la fiche sans effacer la sélection : le repère de la cible
     // reste visible sur la carte jusqu’à une nouvelle sélection explicite.
     setHidden("object-card", true);
-    safely("Actualisation du ciel", () => drawSky());
+    safely(t("ui.skyRefresh"), () => drawSky());
   }
 
   /* ==========================================================
@@ -885,15 +955,15 @@ export function createUI({
     }
 
     if (typeof enterFinder === "function") {
-      safely("Mode chercheur", () => enterFinder());
+      safely(t("ui.finderMode"), () => enterFinder());
     } else {
-      showToast("Mode chercheur indisponible.");
+      showToast(t("ui.finderUnavailable"));
     }
   }
 
   function closeFinder() {
     if (typeof exitFinder === "function") {
-      safely("Fermeture du chercheur", () => exitFinder());
+      safely(t("ui.finderClose"), () => exitFinder());
     }
     if (finderReturnTo === "visible-now") {
       // Le chercheur réaffiche par défaut la fiche : pour un appel depuis
@@ -909,34 +979,35 @@ export function createUI({
 
   // Noms usuels des étoiles partagés entre la recherche Expert et Découverte.
   const SEARCH_COMMON_STAR_NAMES = {
-      677: "Alpheratz", 746: t("names.star.caph"), 1067: t("names.star.algenib"), 3179: t("names.star.schedar"),
-      4427: t("names.star.navi"), 5447: t("names.star.mirach"), 6686: t("names.star.ruchbah"), 7588: t("names.star.achernar"),
-      8886: t("names.star.segin"), 9884: t("names.star.hamal"), 14135: t("names.star.menkar"), 14576: t("names.star.algol"),
-      15863: t("names.star.mirfak"), 21421: t("names.star.aldebaran"), 24436: t("names.star.rigel"), 24608: t("names.star.capella"),
-      25336: t("names.star.bellatrix"), 25428: t("names.star.elnath"), 25930: t("names.star.mintaka"), 26311: t("names.star.alnilam"),
-      26727: t("names.star.alnitak"), 27989: t("names.star.betelgeuse"), 30438: t("names.star.canopus"), 32349: t("names.star.sirius"),
-      36850: t("names.star.castor"), 37279: t("names.star.procyon"), 37826: t("names.star.pollux"), 49669: t("names.star.regulus"),
-      53910: t("names.star.merak"), 54061: t("names.star.dubhe"), 60718: t("names.star.acrux"), 63090: t("names.star.zosma"),
-      65474: t("names.star.spica"), 68702: t("names.star.hadar"), 69673: t("names.star.arcturus"), 80763: t("names.star.antares"),
-      91262: t("names.star.vega"), 97649: t("names.star.altair"), 102098: t("names.star.deneb"), 113368: t("names.star.fomalhaut"),
-      11767: t("names.star.polaris-full"), 57632: "Denebola", 67301: "Alkaid",
-      65378: t("names.star.mizar"), 102488: t("names.star.gienah"),
+      677: "Alpheratz", 746: "names.star.caph", 1067: "names.star.algenib", 3179: "names.star.schedar",
+      4427: "names.star.navi", 5447: "names.star.mirach", 6686: "names.star.ruchbah", 7588: "names.star.achernar",
+      8886: "names.star.segin", 9884: "names.star.hamal", 14135: "names.star.menkar", 14576: "names.star.algol",
+      15863: "names.star.mirfak", 21421: "names.star.aldebaran", 24436: "names.star.rigel", 24608: "names.star.capella",
+      25336: "names.star.bellatrix", 25428: "names.star.elnath", 25930: "names.star.mintaka", 26311: "names.star.alnilam",
+      26727: "names.star.alnitak", 27989: "names.star.betelgeuse", 30438: "names.star.canopus", 32349: "names.star.sirius",
+      36850: "names.star.castor", 37279: "names.star.procyon", 37826: "names.star.pollux", 49669: "names.star.regulus",
+      53910: "names.star.merak", 54061: "names.star.dubhe", 60718: "names.star.acrux", 63090: "names.star.zosma",
+      65474: "names.star.spica", 68702: "names.star.hadar", 69673: "names.star.arcturus", 80763: "names.star.antares",
+      91262: "names.star.vega", 97649: "names.star.altair", 102098: "names.star.deneb", 113368: "names.star.fomalhaut",
+      11767: "names.star.polaris-full", 57632: "Denebola", 67301: "Alkaid",
+      65378: "names.star.mizar", 102488: "names.star.gienah",
       // Autres étoiles brillantes dont les noms sont utiles pour apprendre le ciel.
-      8903: t("names.star.sheratan"), 9640: t("names.star.almach"), 11767: t("names.star.polaris-full"),
-      17702: t("names.star.alcyone"), 17531: "Taygeta", 17573: "Maia", 17847: "Atlas",
-      17851: t("names.star.pleione"), 27366: t("names.star.saiph"), 26207: t("names.star.meissa"), 28380: t("names.star.menkalinan"),
-      30324: "Mirzam", 31681: t("names.star.alhena"), 33579: t("names.star.adhara"), 34444: t("names.star.wezen"),
+      8903: "names.star.sheratan", 9640: "names.star.almach", 11767: "names.star.polaris-full",
+      17702: "names.star.alcyone", 17531: "Taygeta", 17573: "Maia", 17847: "Atlas",
+      17851: "names.star.pleione", 27366: "names.star.saiph", 26207: "names.star.meissa", 28380: "names.star.menkalinan",
+      30324: "Mirzam", 31681: "names.star.alhena", 33579: "names.star.adhara", 34444: "names.star.wezen",
       35904: "Aludra", 50583: "Algieba", 61941: "Porrima", 63608: "Vindemiatrix",
       67927: "Muphrid", 72105: "Izar", 76267: "Alphecca", 77070: "Unukalhai",
-      84012: "Sabik", 85927: t("names.star.shaula"), 86032: t("names.star.rasalhague"), 90185: t("names.star.kaus-australis"),
-      92855: t("names.star.nunki"), 95947: t("names.star.albireo"), 97278: "Tarazed", 98036: "Alshain",
-      106278: t("names.star.sadalsuud"), 107315: t("names.star.enif"), 113881: t("names.star.scheat"), 113963: t("names.star.markab")
+      84012: "Sabik", 85927: "names.star.shaula", 86032: "names.star.rasalhague", 90185: "names.star.kaus-australis",
+      92855: "names.star.nunki", 95947: "names.star.albireo", 97278: "Tarazed", 98036: "Alshain",
+      106278: "names.star.sadalsuud", 107315: "names.star.enif", 113881: "names.star.scheat", 113963: "names.star.markab"
     };
 
   function getSearchCommonStarName(object) {
     const match = String(object?.id ?? object?.name ?? "").match(/^HIP[_\s-]*(\d+)$/i);
     const hip = Number(object?.hip ?? (match ? match[1] : NaN));
-    const candidate = SEARCH_COMMON_STAR_NAMES[hip] || object?.proper_name || object?.properName ||
+    const storedName = SEARCH_COMMON_STAR_NAMES[hip];
+    const candidate = (typeof storedName === "string" && storedName.startsWith("names.star.") ? t(storedName) : storedName) || object?.proper_name || object?.properName ||
       (object?.name && !/^HIP[_\s-]*\d+$/i.test(object.name) ? object.name : "");
     return String(candidate || "").trim();
   }
@@ -959,11 +1030,11 @@ export function createUI({
     }
     // Le Soleil, la Lune et les planètes ont des noms communs à part entière.
     if (["sun", "moon", "planet", "dwarf-planet"].includes(type) || catalogue === "Système solaire" || type === "minor-planet" || type === "comet" || catalogue === "Planètes mineures" || catalogue === "Planètes naines" || catalogue === "Comètes") {
-      const solarName = String(object.name || object.proper_name || object.common_name || "").trim();
+      const solarName = localizedObjectName(object, object.proper_name || object.common_name || "").trim();
       return solarName && !/^(?:HIP|HD|HR|SAO|TYC|Gaia)\s*[-#]?\s*\d/i.test(solarName) ? solarName : "";
     }
     const ids = [object.id, object.designation].map(value => String(value || "").trim()).filter(Boolean);
-    const candidates = [object.common_name, object.commonName, object.proper_name, object.properName, object.name];
+    const candidates = [object.common_name_en, object.common_name, object.commonName, object.proper_name_en, object.proper_name, object.properName, localizedObjectName(object)];
     for (const rawCandidate of candidates) {
       const candidate = String(rawCandidate || "").trim();
       if (!candidate) continue;
@@ -1036,7 +1107,7 @@ export function createUI({
     const catalog = typeof getCatalogObjects === "function" ? getCatalogObjects() : [];
     const matches = catalog.filter(object => {
       const commonName = object.catalogue === "Hipparcos" ? searchStarName(object) : "";
-      const fields = [object.id, object.name, object.proper_name, object.properName, object.catalogue,
+      const fields = [object.id, object.name, object.englishName, object.name_en, object.proper_name, object.properName, object.catalogue,
         object.hip ? `HIP ${object.hip}` : "", commonName]
         .filter(Boolean).map(normalizeSearchText).join(" ");
       return fields.includes(query);
@@ -1055,15 +1126,15 @@ export function createUI({
       content.className = "visible-now-card-content";
       const title = document.createElement("h3");
       const commonName = object.catalogue === "Hipparcos" ? searchStarName(object) : "";
-      const displayName = commonName && commonName !== object.name ? commonName : (object.name || object.proper_name || t("ui.celestialObject"));
+      const displayName = commonName && commonName !== object.name ? commonName : localizedObjectName(object);
       title.textContent = `${object.id ? `${object.id} · ` : ""}${displayName}`;
       const meta = document.createElement("p");
       const altitude = Number(object.alt);
       const above = Number.isFinite(altitude) && altitude > 0;
       const status = Number.isFinite(altitude)
         ? (above ? `Au-dessus de l’horizon · altitude ${altitude.toFixed(1)}°` : `Sous l’horizon · altitude ${altitude.toFixed(1)}°`)
-        : "Position horizontale indisponible";
-      meta.textContent = `${object.catalogue || t("ui.catalogue")} · ${status}`;
+        : t("ui.horizontalPositionUnavailable");
+      meta.textContent = `${localizedCatalogueName(object.catalogue) || t("ui.catalogue")} · ${status}`;
       content.append(title, meta);
       const actions = document.createElement("div");
       actions.className = "visible-now-card-actions";
@@ -1232,12 +1303,12 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       content.className = "visible-now-card-content";
       const title = document.createElement("h3");
       const commonStarName = object.catalogue === "Hipparcos" ? getSearchCommonStarName(object) : "";
-      title.textContent = commonStarName || object.name || object.proper_name || object.id || t("ui.celestialObject");
+      title.textContent = commonStarName || localizedObjectName(object);
       const rank = document.createElement("span");
       rank.className = "visible-now-rank";
       rank.textContent = sort === "recommended" ? `${t("ui.priority")} ${targetIndex + 1}` : `${t("ui.position")} ${targetIndex + 1}`;
       const meta = document.createElement("p");
-      const typeNames = { planet: t("ui.planet"), sun: t("ui.sun"), moon: t("ui.moon"), "minor-planet": t("ui.minorPlanet"), "dwarf-planet": t("ui.dwarfPlanet"), comet: t("ui.comet"), galaxy: t("ui.galaxy"), nebula: t("ui.nebula"), cluster: "Amas", star: t("ui.star"), "deep-sky": t("ui.deepSky") };
+      const typeNames = { planet: t("ui.planet"), sun: t("ui.sun"), moon: t("ui.moon"), "minor-planet": t("ui.minorPlanet"), "dwarf-planet": t("ui.dwarfPlanet"), comet: t("ui.comet"), galaxy: t("ui.galaxy"), nebula: t("ui.nebula"), cluster: t("ui.clusterTypeLabel"), star: t("ui.star"), "deep-sky": t("ui.deepSky") };
       const type = typeNames[object.type] || (object.catalogue === "NGC" ? t("ui.ngcObject") : object.catalogue === "Messier" ? t("ui.messierObject") : object.type || t("ui.celestialObject"));
       const parts = [type];
       if (object.id) parts.push(object.id);
@@ -1409,7 +1480,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
   visibleNowDateInput?.addEventListener("change", () => {
     const parsed = visibleNowDateInput.value ? new Date(visibleNowDateInput.value) : null;
     if (!parsed || !Number.isFinite(parsed.getTime())) {
-      showToast("Choisissez une date et une heure valides.");
+      showToast(t("ui.dateTimeInvalid"));
       return;
     }
     visibleNowPanelFollowsRealtime = false;
@@ -1463,7 +1534,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         : t("constellations.linesDisabled")
     );
 
-    safely("Affichage des constellations", () => drawSky());
+    safely(t("ui.constellationDisplay"), () => drawSky());
   }
 
   function toggleConstellationBoundaries() {
@@ -1486,7 +1557,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       if (state.showConstellationBoundaries) parts.push(t("ui.iauBoundariesActivated"));
       status.textContent = parts.length ? parts.join(" · ") + "." : t("ui.constellationLinesAndBoundariesDeactivated");
     }
-    safely("Affichage des limites des constellations", () => drawSky());
+    safely(t("ui.constellationLimitsDisplay"), () => drawSky());
   }
 
   /* ==========================================================
@@ -1500,7 +1571,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
   function bindImmersiveExit() {
     on("exit-immersive", "click", () => {
       if (typeof setImmersive === "function") {
-        safely("Sortie du mode immersif", () => {
+        safely(t("ui.immersiveExit"), () => {
           return setImmersive(false);
         });
       }
@@ -1681,22 +1752,22 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
      BRANCHEMENT DES BOUTONS
      ========================================================== */
 
-  const celestialEvents = [
-    { date: "2026-10-21", title: "Maximum des Orionides", type: t("events.typeMeteorShower"), detail: t("events.detailOrionids") },
-    { date: "2026-10-28", title: t("events.moonNearPleiades"), type: t("events.typeCelestialApproach"), detail: t("events.detailMoonNearPleiades") },
-    { date: "2026-11-05", title: "Maximum des Taurides du Sud", type: t("events.typeMeteorShower"), detail: t("events.detailSouthernTaurids") },
-    { date: "2026-11-11", title: "Maximum des Taurides du Nord", type: t("events.typeMeteorShower"), detail: t("events.detailNorthernTaurids") },
-    { date: "2026-11-16", title: "Rapprochement Mars–Jupiter", type: t("settings.planets"), detail: t("events.detailMarsJupiter") },
-    { date: "2026-11-17", title: t("events.leonidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailLeonids") },
-    { date: "2026-12-14", title: t("events.geminidsMax"), type: t("events.typeMeteorShower"), detail: "Un des essaims annuels les plus actifs ; observez largement autour du radiant." },
-    { date: "2026-12-22", title: "Maximum des Ursides", type: t("events.typeMeteorShower"), detail: t("events.detailUrsids") },
-    { date: "2027-01-04", title: "Maximum des Quadrantides", type: t("events.typeMeteorShower"), detail: t("events.detailQuadrantids") },
-    { date: "2027-02-06", title: t("events.annularSolarEclipse"), type: t("events.typeSolarEclipse"), detail: t("events.detailAnnularSolar") },
-    { date: "2027-02-21", title: t("events.penumbralLunarEclipse"), type: t("events.typeLunarEclipse"), detail: t("events.detailPenumbralLunar") },
-    { date: "2027-04-23", title: "Maximum des Lyrides", type: t("events.typeMeteorShower"), detail: "Essaim printanier observable en seconde partie de nuit." },
-    { date: "2027-05-06", title: t("events.etaAquariidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailEtaAquariids") },
-    { date: "2027-08-02", title: t("events.totalSolarEclipse"), type: t("events.typeSolarEclipse"), detail: t("events.detailTotalSolar") },
-    { date: "2027-08-12", title: t("events.perseidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailPerseids") }
+  const getCelestialEvents = () => [
+    { date: "2026-10-21", title: t("events.orionidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailOrionids"), category: "meteor" },
+    { date: "2026-10-28", title: t("events.moonNearPleiades"), type: t("events.typeCelestialApproach"), detail: t("events.detailMoonNearPleiades"), category: "moon", targets: ["moon"] },
+    { date: "2026-11-05", title: t("events.southernTauridsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailSouthernTaurids"), category: "meteor" },
+    { date: "2026-11-11", title: t("events.northernTauridsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailNorthernTaurids"), category: "meteor" },
+    { date: "2026-11-16", title: t("events.marsJupiterApproach"), type: t("events.typePlanets"), detail: t("events.detailMarsJupiter"), category: "planet", targets: ["mars", "jupiter"] },
+    { date: "2026-11-17", title: t("events.leonidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailLeonids"), category: "meteor" },
+    { date: "2026-12-14", title: t("events.geminidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailGeminids"), category: "meteor" },
+    { date: "2026-12-22", title: t("events.ursidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailUrsids"), category: "meteor" },
+    { date: "2027-01-04", title: t("events.quadrantidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailQuadrantids"), category: "meteor" },
+    { date: "2027-02-06", title: t("events.annularSolarEclipse"), type: t("events.typeSolarEclipse"), detail: t("events.detailAnnularSolar"), category: "other" },
+    { date: "2027-02-21", title: t("events.penumbralLunarEclipse"), type: t("events.typeLunarEclipse"), detail: t("events.detailPenumbralLunar"), category: "moon", targets: ["moon"] },
+    { date: "2027-04-23", title: t("events.lyridsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailLyrids"), category: "meteor" },
+    { date: "2027-05-06", title: t("events.etaAquariidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailEtaAquariids"), category: "meteor" },
+    { date: "2027-08-02", title: t("events.totalSolarEclipse"), type: t("events.typeSolarEclipse"), detail: t("events.detailTotalSolar"), category: "other" },
+    { date: "2027-08-12", title: t("events.perseidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailPerseids"), category: "meteor" }
   ];
 
   // Phases lunaires calculées à partir d’une nouvelle Lune de référence et
@@ -1725,13 +1796,13 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         addedFuture = true;
         const localDate = new Date(date.getTime());
         const iso = `${localDate.getFullYear()}-${String(localDate.getMonth()+1).padStart(2,'0')}-${String(localDate.getDate()).padStart(2,'0')}`;
-        events.push({ date: iso, title: phaseNames[phase], type: t("events.typeMoonPhase"), detail: phaseDetails[phase] });
+        events.push({ date: iso, title: phaseNames[phase], type: t("events.typeMoonPhase"), detail: phaseDetails[phase], category: "moon" });
         if (phase === 0) {
           for (const offset of [-1, 1]) {
             const dark = new Date(date); dark.setDate(dark.getDate() + offset);
             if (dark >= start && dark < end) {
               const darkIso = `${dark.getFullYear()}-${String(dark.getMonth()+1).padStart(2,'0')}-${String(dark.getDate()).padStart(2,'0')}`;
-              events.push({ date: darkIso, title: t("events.deepSkyWindow"), type: "Suggestion d’observation", detail: t("events.detailDeepSkyWindow") });
+              events.push({ date: darkIso, title: t("events.deepSkyWindow"), type: t("events.typeObservationSuggestion"), detail: t("events.detailDeepSkyWindow"), category: "dark-sky" });
             }
           }
         }
@@ -1745,12 +1816,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
   let celestialEventFilter = "all";
 
   function eventCategory(item) {
-    const text = `${item.type || ""} ${item.title || ""}`.toLocaleLowerCase(getLocale());
-    if (/lune|lunaire|éclipse/.test(text)) return "moon";
-    if (/météoritique|essaim|léonides|perséides|géminides|taurides|orionides|quadrantides|lyrides|aquarides/.test(text)) return "meteor";
-    if (/planète|mars|jupiter|conjonction|rapprochement/.test(text)) return "planet";
-    if (/ciel profond|nouvelle lune|nébuleuse|galaxie/.test(text)) return "dark-sky";
-    return "other";
+    return item?.category || "other";
   }
 
   function findEventTarget(query) {
@@ -1759,7 +1825,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       ...(typeof getVisibleNowObjects === "function" ? getVisibleNowObjects() || [] : [])
     ];
     const key = String(query || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase(getLocale());
-    return objects.find(object => [object.name, object.proper_name, object.id, object.designation]
+    return objects.find(object => [localizedObjectName(object), object.name, object.englishName, object.proper_name, object.id, object.designation]
       .some(value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLocaleLowerCase(getLocale()) === key));
   }
 
@@ -1794,7 +1860,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     referenceDate.setHours(0, 0, 0, 0);
     const end = new Date(referenceDate); end.setDate(end.getDate() + 120);
     const generated = generatedLunarEvents(referenceDate, 120);
-    const upcoming = [...celestialEvents, ...generated]
+    const upcoming = [...getCelestialEvents(), ...generated]
       .filter(item => { const date = new Date(`${item.date}T12:00:00`); return date >= referenceDate && date < end; })
       .filter(item => celestialEventFilter === "all" || eventCategory(item) === celestialEventFilter)
       .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
@@ -1808,16 +1874,18 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       const type = document.createElement("span"); type.className = "event-type"; type.textContent = item.type;
       const detail = document.createElement("p"); detail.textContent = item.detail;
       const actions = document.createElement("div"); actions.className = "event-card-actions";
-      const normalizedTitle = item.title.toLocaleLowerCase(getLocale());
-      let linkedTargets = [];
-      if (/lune|lunaire/.test(`${normalizedTitle} ${item.type}`.toLocaleLowerCase(getLocale()))) {
-        const moon = findEventTarget(t("ui.moon")) || findEventTarget("Moon");
-        if (moon) linkedTargets.push({ target: moon, label: "Voir la Lune" });
+      const linkedTargets = [];
+      if (item.targets?.includes("moon")) {
+        const moon = findEventTarget(t("names.planet.moon")) || findEventTarget("Moon");
+        if (moon) linkedTargets.push({ target: moon, label: t("events.viewMoon") });
       }
-      if (/mars.*jupiter|jupiter.*mars/.test(normalizedTitle)) {
-        const mars = findEventTarget(t("names.planet.mars")), jupiter = findEventTarget(t("names.planet.jupiter"));
-        if (mars) linkedTargets.push({ target: mars, label: "Fiche de Mars" });
-        if (jupiter) linkedTargets.push({ target: jupiter, label: "Fiche de Jupiter" });
+      if (item.targets?.includes("mars")) {
+        const mars = findEventTarget(t("names.planet.mars"));
+        if (mars) linkedTargets.push({ target: mars, label: t("events.sheetMars") });
+      }
+      if (item.targets?.includes("jupiter")) {
+        const jupiter = findEventTarget(t("names.planet.jupiter"));
+        if (jupiter) linkedTargets.push({ target: jupiter, label: t("events.sheetJupiter") });
       }
       for (const linked of linkedTargets) {
         const button = document.createElement("button"); button.type = "button"; button.className = "action-button"; button.textContent = linked.label;
@@ -1848,6 +1916,9 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       });
       renderCelestialEvents();
     });
+  });
+  document.addEventListener("localechange", () => {
+    if ($("events-dialog") && !$("events-dialog").hidden) renderCelestialEvents();
   });
   // Indice météo indicatif (0–100), distinct de la transparence réelle du ciel et de la pollution lumineuse.
   function calculateSkyQuality(weather) {
@@ -1968,7 +2039,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       quality.append(qualityLabel, qualityValue, qualityDetail); contentCards.push(quality);
       const precipitationText = Number.isFinite(c.precipitation_probability)
         ? `${Math.round(c.precipitation_probability)} %`
-        : Number.isFinite(c.precipitation) ? `${c.precipitation} mm` : "Indisponible";
+        : Number.isFinite(c.precipitation) ? `${c.precipitation} mm` : t("ui.unavailable");
       const rows = [
         ["clouds", t("conditions.cardClouds"), Number.isFinite(c.cloud_cover) ? `${Math.round(c.cloud_cover)} %` : t("conditions.unavailable"), t("conditions.cardCloudsDesc"), t("conditions.cardCloudsAria")],
         ["temp", t("conditions.cardTemp"), Number.isFinite(c.temperature_2m) ? `${Math.round(c.temperature_2m)} °C` : t("conditions.unavailable"), Number.isFinite(c.apparent_temperature) ? `${t("conditions.cardTempFeelsLike")} ${Math.round(c.apparent_temperature)} °C` : "", t("conditions.cardTempAria")],
@@ -2030,7 +2101,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       app.classList.toggle("interface-hidden", hidden);
       button.setAttribute("aria-pressed", String(hidden));
       button.setAttribute("aria-label", t("ui.showInterface"));
-      button.setAttribute("title", "Afficher l’interface");
+      button.setAttribute("title", t("ui.showInterfaceTitle"));
       button.innerHTML = '<span aria-hidden="true">☰</span>';
     };
     on("interface-toggle", "click", toggleInterface);
@@ -2047,7 +2118,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       search: t("ui.enterCommonName"),
       start: t("ui.chooseTargetToHighlight"),
       orient: t("ui.activateCompassThenTurnPhone"),
-      constellations: "Choisis une constellation pour faire ressortir sa forme sur la carte.",
+      constellations: t("ui.discoveryConstellationsHint"),
       walks: t("ui.chooseWalkThenAdvanceStepByStep")
     };
     const dismissDiscoveryHint = key => {
@@ -2235,7 +2306,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       try { savedCollapsed = localStorage.getItem(DISCOVERY_MENU_COLLAPSED_KEY) === "1"; } catch { /* stockage indisponible */ }
       setDiscoveryPanelCollapsed(savedCollapsed);
     }
-    const skyWalks = {
+    const getSkyWalks = () => ({
       polaris: { title: t("ui.findPolaris"), constellation: "ursa major", overlay: { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }, { from: "Dubhe", to: "Polaris", dashed: true }], target: "Polaris" }, stepOverlays: [
         { color: "#ff514d", segments: [{ from: "Dubhe", to: "Merak" }, { from: "Merak", to: "Phecda" }, { from: "Phecda", to: "Megrez" }, { from: "Megrez", to: "Dubhe" }], target: "Dubhe" },
         { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }, { from: "Dubhe", to: "Polaris", dashed: true }], target: "Dubhe" },
@@ -2272,7 +2343,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         t("walk.pleiadesStep2"),
         t("walk.pleiadesStep3")
       ], tip: t("walk.pleiadesTip"), search: ["taureau", "taurus"] },
-      winterhex: { title: "Le grand hexagone d’hiver", constellation: "orion", overlay: { color: "#ff514d", segments: [{ from: t("names.star.sirius"), to: "Rigel" }, { from: "Rigel", to: "Aldebaran" }, { from: "Aldebaran", to: "Capella" }, { from: "Capella", to: "Pollux" }, { from: "Pollux", to: "Procyon" }, { from: "Procyon", to: "Sirius" }], target: "Sirius" }, stepOverlays: [
+      winterhex: { title: t("walk.winterHexTitle"), constellation: "orion", overlay: { color: "#ff514d", segments: [{ from: t("names.star.sirius"), to: "Rigel" }, { from: "Rigel", to: "Aldebaran" }, { from: "Aldebaran", to: "Capella" }, { from: "Capella", to: "Pollux" }, { from: "Pollux", to: "Procyon" }, { from: "Procyon", to: "Sirius" }], target: "Sirius" }, stepOverlays: [
         { color: "#ff514d", segments: [], target: t("names.star.sirius") },
         { color: "#ff514d", segments: [{ from: "Sirius", to: "Rigel" }, { from: "Rigel", to: "Aldebaran" }], target: "Aldebaran" },
         { color: "#ff514d", segments: [{ from: "Sirius", to: "Rigel" }, { from: "Rigel", to: "Aldebaran" }, { from: "Aldebaran", to: t("names.star.capella") }, { from: "Capella", to: "Pollux" }, { from: "Pollux", to: "Procyon" }, { from: "Procyon", to: "Sirius" }], target: "Capella" }
@@ -2281,13 +2352,13 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         t("walk.winterHexStep2"),
         t("walk.winterHexStep3")
       ], tip: t("walk.winterHexTip"), search: ["orion", "taureau", "cocher", "gémeaux", "grand chien", "petit chien"] },
-      springtriangle: { title: "Le triangle du printemps", constellation: "bootes", overlay: { color: "#ff514d", segments: [{ from: t("names.star.arcturus"), to: "Spica" }, { from: "Spica", to: "Regulus" }, { from: "Regulus", to: "Arcturus" }], target: "Arcturus" }, stepOverlays: [
+      springtriangle: { title: t("walk.springTriTitle"), constellation: "bootes", overlay: { color: "#ff514d", segments: [{ from: t("names.star.arcturus"), to: "Spica" }, { from: "Spica", to: "Regulus" }, { from: "Regulus", to: "Arcturus" }], target: "Arcturus" }, stepOverlays: [
         { color: "#ff514d", segments: [], target: t("names.star.arcturus") },
         { color: "#ff514d", segments: [{ from: "Arcturus", to: t("names.star.spica"), dashed: true }], target: "Spica" },
         { color: "#ff514d", segments: [{ from: "Arcturus", to: "Spica" }, { from: "Spica", to: "Regulus" }, { from: "Regulus", to: "Arcturus" }], target: "Regulus" }
       ], intro: t("walk.springTriIntro"), steps: [
         t("walk.springTriStep1"),
-        "Depuis Arcturus, cherche Spica plus bas dans le ciel, dans la Vierge.",
+        t("walk.springTriStepMiddle"),
         t("walk.springTriStep2")
       ], tip: t("walk.springTriTip"), search: ["bouvier", "vierge", "lion"] },
       dippertoarcturus: { title: t("walk.dipperToArcturusTitle"), constellation: "bootes", overlay: { color: "#ff514d", segments: [{ from: "Merak", to: "Dubhe" }, { from: "Dubhe", to: "Alkaid", dashed: true }, { from: "Alkaid", to: "Arcturus", dashed: true }, { from: "Arcturus", to: t("names.star.spica"), dashed: true }], target: "Spica" }, stepOverlays: [
@@ -2308,7 +2379,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         t("walk.andromedaStep2"),
         t("walk.andromedaStep3")
       ], tip: t("walk.andromedaTip"), search: [t("walk.andromedaConstellation"), "andromeda"] }
-    };
+   });
     // Filtrage limité à la liste des balades. On réutilise les positions
     // calculées par le moteur de l'atlas ; aucune modification de drawSky.
     refreshSkyWalkAvailability = () => {
@@ -2350,7 +2421,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     let activeSkyWalkStep = 0;
     let skyWalkMapShown = false;
     const renderSkyWalk = () => {
-      const walk = skyWalks[activeSkyWalk];
+      const walk = getSkyWalks()[activeSkyWalk];
       const detail = $("discovery-walk-detail");
       if (!walk || !detail) return;
       detail.hidden = false;
@@ -2366,9 +2437,9 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       }
       $("discovery-walk-tip").textContent = walk.tip;
       $("discovery-walk-prev").disabled = activeSkyWalkStep === 0;
-      $("discovery-walk-next").textContent = activeSkyWalkStep === walk.steps.length - 1 ? "Recommencer ↻" : t("ui.stepNext");
+      $("discovery-walk-next").textContent = activeSkyWalkStep === walk.steps.length - 1 ? t("walk.restart") : t("ui.stepNext");
       const showButton = $("discovery-walk-show-constellation");
-      if (showButton) showButton.textContent = mobileWalk && skyWalkMapShown ? "Revenir au texte" : "Montrer sur la carte";
+      if (showButton) showButton.textContent = mobileWalk && skyWalkMapShown ? t("walk.backToText") : t("walk.showOnMap");
       const walksPanel = $("discovery-walks");
       if (walksPanel) walksPanel.classList.toggle("is-map-shown", mobileWalk && skyWalkMapShown);
       $("discovery-panel")?.classList.toggle("has-walk-map", mobileWalk && skyWalkMapShown);
@@ -2380,7 +2451,8 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     };
     const populateDiscoveryConstellations = select => {
       if (!select) return;
-      select.replaceChildren(new Option("Choisir une constellation…", ""));
+      const previousValue = String(select.value || "");
+      select.replaceChildren(new Option(t("discovery.constellationPicker.placeholder"), ""));
       const starsById = new Map((state.stars || []).map(star => [String(star.id), star]));
       const list = [...(state.constellations || [])].filter(item => {
         if (!item || !item.id || !(item.name || item.name_fr)) return false;
@@ -2392,18 +2464,19 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
           if (Number.isFinite(position?.alt) && position.alt > 0) return true;
         }
         return false;
-      }).sort((a, b) => String(a.name_fr || a.name).localeCompare(String(b.name_fr || b.name), "fr"));
+      }).sort((a, b) => localizedConstellationName(a).localeCompare(localizedConstellationName(b), getLocale()));
       for (const item of list) {
         const option = document.createElement("option");
         option.value = String(item.id);
-        option.textContent = String(item.name_fr || item.name);
+        option.textContent = localizedConstellationName(item);
         select.appendChild(option);
       }
       if (list.length === 0) {
         const option = document.createElement("option");
-        option.value = ""; option.textContent = "Aucune constellation au-dessus de l’horizon";
+        option.value = ""; option.textContent = t("constellation.noneVisible");
         option.disabled = true; select.appendChild(option);
       }
+      if (previousValue && [...select.options].some(option => option.value === previousValue)) select.value = previousValue;
     };
     const selectSkyWalkConstellation = walk => {
       const picker = $("discovery-constellation-picker");
@@ -2430,7 +2503,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         if (!option && constellation) {
           option = document.createElement("option");
           option.value = String(constellation.id);
-          option.textContent = String(constellation.name_fr || constellation.name || walk.title);
+          option.textContent = localizedConstellationName(constellation) || walk.title;
           select.appendChild(option);
         }
         if (!option) {
@@ -2560,7 +2633,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     };
     document.querySelectorAll("[data-sky-walk]").forEach(button => button.addEventListener("click", () => {
       activeSkyWalk = button.dataset.skyWalk || "";
-      const walk = skyWalks[activeSkyWalk];
+      const walk = getSkyWalks()[activeSkyWalk];
       const mobileWalk = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 600px)").matches;
       activeSkyWalkStep = 0;
       skyWalkMapShown = false;
@@ -2632,7 +2705,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       if (typeof drawSky === "function") drawSky();
     });
     const changeSkyWalkStep = direction => {
-      const walk = skyWalks[activeSkyWalk];
+      const walk = getSkyWalks()[activeSkyWalk];
       if (!walk) return;
       const lastStep = walk.steps.length - 1;
       activeSkyWalkStep = direction > 0
@@ -2650,7 +2723,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     on("discovery-walk-prev", "click", () => changeSkyWalkStep(-1));
     on("discovery-walk-next", "click", () => changeSkyWalkStep(1));
     on("discovery-walk-show-constellation", "click", () => {
-      const walk = skyWalks[activeSkyWalk];
+      const walk = getSkyWalks()[activeSkyWalk];
       if (!walk) return;
       const mobileWalk = typeof window.matchMedia === "function" && window.matchMedia("(max-width: 600px)").matches;
       if (mobileWalk && skyWalkMapShown) {
@@ -2890,18 +2963,18 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const copy = document.createElement("div");
         copy.className = "discovery-start-copy";
         const title = document.createElement("h4");
-        title.textContent = object.name || object.proper_name || object.id || t("ui.celestialObject");
+        title.textContent = localizedObjectName(object);
         const meta = document.createElement("p");
         const altitude = Number(object.alt);
         const type = typeLabels[String(object.type || (object.catalogue === "Hipparcos" ? "star" : "")).toLowerCase()] || t("ui.celestialObject");
-        meta.textContent = `${type} · ${altitude.toFixed(0)}° au-dessus de l’horizon${Number.isFinite(Number(object.mag)) ? ` · mag. ${Number(object.mag).toFixed(1)}` : ""}`;
+        meta.textContent = `${type} · ${altitude.toFixed(0)}° ${t("ui.aboveHorizon")}${Number.isFinite(Number(object.mag)) ? ` · mag. ${Number(object.mag).toFixed(1)}` : ""}`;
         // Même sélection de repères nommés que la recherche Découverte : étoiles/planètes
         // brillantes, au-dessus de l’horizon, entre 2° et 30° de la cible.
         const references = findDiscoveryNearbyReferences(object, allVisible);
         const referenceLine = document.createElement("p");
         referenceLine.className = "discovery-start-references";
         referenceLine.textContent = references.length
-          ? `${t("ui.nearbyLandmarks")}: ${references.map(item => item.object.discoveryLabel || item.object.name || item.object.proper_name || item.object.id || t("ui.anchorStar")).join(" · ")}`
+          ? `${t("ui.nearbyLandmarks")}: ${references.map(item => item.object.discoveryLabel || localizedObjectName(item.object) || t("ui.anchorStar")).join(" · ")}`
           : t("ui.noNearbyBrightStar");
         const advice = document.createElement("p");
         advice.className = "discovery-start-advice";
@@ -2947,8 +3020,10 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       }
     };
     refreshLocalePanels = () => {
-      if (!$("discovery-search-panel")?.hidden) renderDiscoverySearchResults();
+      if (!$("discovery-search-panel")?.hidden) refreshDiscoverySearchCatalog();
       if (!$("discovery-start-tonight")?.hidden) renderDiscoveryStartTonight();
+      if (!$("discovery-constellation-picker")?.hidden) populateDiscoveryConstellations($("discovery-constellation-select"));
+      if (activeSkyWalk && !$("discovery-walk-detail")?.hidden) renderSkyWalk();
     };
     on("discovery-start-close", "click", () => {
       // La liste ne se ferme qu’en choisissant une autre rubrique Découverte.
@@ -3103,7 +3178,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           const app = $("app");
           if (!app?.classList.contains("discovery-mode")) return;
           if (typeof enterFinder === "function") enterFinder({ free: true });
-          else showToast("Exploration du ciel indisponible.");
+          else showToast(t("ui.freeSkyUnavailable"));
           return;
         }
         if (action === "search") {
@@ -3371,8 +3446,8 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         state.discoveryConstellationTargetStarId = "";
       }
       if (hint) hint.textContent = selected
-        ? `${selected.name_fr || selected.name} : ${t("ui.constellationWalkIntro")}`
-        : t("constellation.intro");
+        ? `${localizedConstellationName(selected)} : ${t("ui.constellationWalkIntro")}`
+        : t("ui.constellationPickerHint");
 
       if (details) details.hidden = !selected;
       if (selected) {
@@ -3448,6 +3523,18 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       if (typeof drawSky === "function") drawSky();
     });
 
+    // Les textes pédagogiques de la constellation sélectionnée sont construits
+    // dynamiquement : les reconstruire après chaque changement de langue.
+    document.addEventListener("localechange", () => {
+      const select = $("discovery-constellation-select");
+      if (select?.value) {
+        select.dispatchEvent(new Event("change", { bubbles: true }));
+      } else {
+        const hint = $("discovery-constellation-hint");
+        if (hint) hint.textContent = t("ui.constellationPickerHint");
+      }
+    });
+
     const moveConstellationStep = direction => {
       const sequence = Array.isArray(state.discoveryConstellationSequence) ? state.discoveryConstellationSequence : [];
       if (sequence.length < 2) return;
@@ -3487,7 +3574,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         "la-hacquiniere": { name: "La Hacquinière · Bures-sur-Yvette", latitude: 48.694712, longitude: 2.153166 }
       };
       const place = places[select?.value];
-      if (!place) { showToast("Choisis un lieu dans la liste."); return; }
+      if (!place) { showToast(t("ui.choosePlaceFromList")); return; }
       state.latitude = place.latitude;
       state.longitude = place.longitude;
       state.locationName = place.name;
@@ -3612,7 +3699,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const ids = new Set([String(star?.id ?? ""), String(star?.hip ?? ""), `HIP_${starHopHip(star)}`]);
       const match = (state.constellations || []).find(item =>
         (item.lines || []).some(segment => Array.isArray(segment) && segment.some(id => ids.has(String(id)))));
-      return match ? String(match.name_fr || match.name || "") : "";
+      return match ? localizedConstellationName(match) : "";
     };
     const starHopBrightness = star => {
       const mag = Number(star?.mag);
@@ -4045,7 +4132,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const label = document.createElementNS(ns, "text");
         label.setAttribute("x", nearest.center.x.toFixed(1)); label.setAttribute("y", (nearest.center.y - 9).toFixed(1));
         label.setAttribute("fill", "#829cbd"); label.setAttribute("font-size", "11"); label.setAttribute("text-anchor", "middle"); label.setAttribute("opacity", ".9");
-        label.textContent = nearest.constellation.name;
+        label.textContent = localizedConstellationName(nearest.constellation);
         starHopConstellationLabels.append(label);
       }
       const wideSeparation = Number(separation) > 85;
@@ -4170,7 +4257,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           ? t("starHop.noAnchorOrTargetAboveHorizon")
           : !stars.length
             ? t("starHop.noNamedAnchorAboveHorizon")
-            : "Aucune cible n’est actuellement au-dessus de l’horizon.";
+            : t("ui.noStarHopTargetAboveHorizon");
       } else updateStarHopResult();
       starHopDialog.hidden = false;
     }
@@ -4206,7 +4293,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const dateDisplay = $("session-date-display");
       if (dateDisplay) {
         const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
-        dateDisplay.textContent = match ? (getLocale() === "en" ? `${match[2]}/${match[3]}/${match[1]}` : `${match[3]}/${match[2]}/${match[1]}`) : (getLocale() === "en" ? "MM/DD/YYYY" : "JJ/MM/AAAA");
+        dateDisplay.textContent = match ? (getLocale() === "en" ? `${match[2]}/${match[3]}/${match[1]}` : `${match[3]}/${match[2]}/${match[1]}`) : t("ui.datePlaceholder");
       }
       for (const [id, outputId, fallback] of [["session-start", "session-start-display", "--:--"], ["session-end", "session-end-display", "--:--"]]) {
         const output = $(outputId);
@@ -4278,7 +4365,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           validAltitude = true;
           if (horizon.altitude > 0) { moonAboveHorizon = true; break; }
         }
-        const presence = !validAltitude ? t("session.moonPresenceUnknown") : moonAboveHorizon ? t("session.moonAboveHorizon") : "sous l’horizon pendant la session";
+        const presence = !validAltitude ? t("session.moonPresenceUnknown") : moonAboveHorizon ? t("session.moonAboveHorizon") : t("session.moonBelowDuringSession");
         let impact = t("session.moonLimitedImpact");
         let level = "low";
         if (moonAboveHorizon && illumination >= 70) {
@@ -4380,14 +4467,18 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         moonNowButton.title = moonLiveMode ? t("moon.liveTracking") : t("moon.showCurrentTimeAndTrackPhase");
       }
     };
-    document.addEventListener("localechange", () => setMoonLiveMode(moonLiveMode));
+    document.addEventListener("localechange", () => {
+      setMoonLiveMode(moonLiveMode);
+      if (moonDialog && !moonDialog.hidden) updateMoonSheet();
+    });
     const toLocalDateTimeValue = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}T${String(date.getHours()).padStart(2,"0")}:${String(date.getMinutes()).padStart(2,"0")}:${String(date.getSeconds()).padStart(2,"0")}`;
-    const moonPhaseNames = [t("moon.newMoon"), t("moon.firstCrescent"), t("moon.firstQuarter"), t("moon.waxingGibbous"), t("moon.fullMoon"), t("moon.waningGibbous"), t("moon.lastQuarter"), t("moon.lastCrescent")];
+    const getMoonPhaseNames = () => [t("moon.newMoon"), t("moon.firstCrescent"), t("moon.firstQuarter"), t("moon.waxingGibbous"), t("moon.fullMoon"), t("moon.waningGibbous"), t("moon.lastQuarter"), t("moon.lastCrescent")];
     const moonSvgElement = (id) => document.getElementById(id);
     const updateMoonSheet = () => {
       if (!moonDateInput || !moonDateInput.value) return;
       const date = new Date(moonDateInput.value);
       if (!Number.isFinite(date.getTime())) return;
+      const moonPhaseNames = getMoonPhaseNames();
       const A = window.Astronomy;
       const put = (id, value) => { const el = $(id); if (el) el.textContent = value; };
       if (!A || typeof A.MoonPhase !== "function" || typeof A.Equator !== "function" || typeof A.Observer !== "function" || typeof A.Horizon !== "function" || !A.Body) {
@@ -4405,12 +4496,12 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         put("moon-phase-trend", angle < 180 ? t("moon.waxingPhase") : angle > 180 ? t("moon.waningPhase") : t("moon.fullMoon"));
         put("moon-illumination-value", `${illuminationRounded} %`);
         const bar = $("moon-illumination-bar"); if (bar) bar.style.width = `${illumination}%`;
-        const age = (angle / 360) * 29.530588853; put("moon-age", `${age.toFixed(1).replace(".", ",")} jours`);
+        const age = (angle / 360) * 29.530588853; put("moon-age", `${age.toLocaleString(getLocale(), { maximumFractionDigits: 1 })} ${t("ui.dayUnit")}`);
         const distanceKm = equ && Number.isFinite(equ.dist) ? equ.dist * 149597870.7 : NaN;
         put("moon-distance", Number.isFinite(distanceKm) ? `${Math.round(distanceKm).toLocaleString(getLocale())} km` : "—");
         const diameterArcmin = Number.isFinite(distanceKm) && distanceKm > 0 ? 2 * Math.atan(1737.4 / distanceKm) * 180 / Math.PI * 60 : NaN;
         put("moon-diameter", Number.isFinite(diameterArcmin) ? `${diameterArcmin.toFixed(2).replace(".", ",")}′` : "—");
-        put("moon-altitude", horizontal && Number.isFinite(horizontal.altitude) ? `${horizontal.altitude.toFixed(1).replace(".", ",")}°${horizontal.altitude > 0 ? " · au-dessus de l’horizon" : " · sous l’horizon"}` : "—");
+        put("moon-altitude", horizontal && Number.isFinite(horizontal.altitude) ? `${horizontal.altitude.toLocaleString(getLocale(), { maximumFractionDigits: 1 })}° · ${horizontal.altitude > 0 ? t("ui.aboveHorizonState") : t("ui.belowHorizonState")}` : "—");
         put("moon-azimuth", horizontal && Number.isFinite(horizontal.azimuth) ? `${horizontal.azimuth.toFixed(1).replace(".", ",")}°` : "—");
         // Disque SVG : la branche éclairée est orientée selon la phase (croissante à droite).
         const r = 68, cx = 90, cy = 90, rad = angle * Math.PI / 180;
@@ -4543,7 +4634,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     let jupiterMoonsLiveMode = false;
     let jupiterMoonsPlaying = false;
     let jupiterMoonsLastTick = 0;
-    const jupiterMoonInfo = [
+    const getJupiterMoonInfo = () => [
       { key: "io", name: t("names.moon.io"), color: "#f2c879" },
       { key: "europa", name: t("names.moon.europa"), color: "#d9e8f6" },
       { key: "ganymede", name: t("names.moon.ganymede"), color: "#c8a7f4" },
@@ -4571,7 +4662,11 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       }
       if (jupiterMoonsPlaying) jupiterMoonsLastTick = Date.now();
     };
-    document.addEventListener("localechange", () => { setJupiterMoonsLiveMode(jupiterMoonsLiveMode); setJupiterMoonsPlaying(jupiterMoonsPlaying); });
+    document.addEventListener("localechange", () => {
+      setJupiterMoonsLiveMode(jupiterMoonsLiveMode);
+      setJupiterMoonsPlaying(jupiterMoonsPlaying);
+      if (jupiterMoonsDialog && !jupiterMoonsDialog.hidden) updateJupiterMoonsSheet();
+    });
     const dot3 = (a, b) => a.x * b.x + a.y * b.y + a.z * b.z;
     const norm3 = a => Math.hypot(a.x, a.y, a.z);
     const unit3 = a => {
@@ -4586,6 +4681,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const date = new Date(jupiterMoonsDateInput.value);
       if (!Number.isFinite(date.getTime())) return;
       const A = window.Astronomy;
+      const jupiterMoonInfo = getJupiterMoonInfo();
       const status = $("jupiter-moons-status");
       const details = $("jupiter-moons-details");
       const behindLayer = $("jupiter-moons-behind");
@@ -4668,7 +4764,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
             else positionText = `${moon.side}, ${t("jupiterMoons.at")} ${Math.abs(moon.xRj).toFixed(1).replace(".", ",")} ${t("jupiterMoons.rjFromCenter")}`;
             position.textContent = positionText;
             const depth = document.createElement("p");
-            if (moon.projectedRadius > 1) depth.textContent = moon.depthRj > 0 ? "Plus loin que Jupiter." : "Entre la Terre et Jupiter.";
+            if (moon.projectedRadius > 1) depth.textContent = moon.depthRj > 0 ? t("jupiterMoons.beyondJupiter") : t("jupiterMoons.betweenEarthAndJupiter");
             else depth.textContent = moon.depthRj > 0 ? t("jupiterMoons.hiddenByDisc") : t("jupiterMoons.inForeground");
             card.append(heading, position, depth);
             details.append(card);
@@ -4845,13 +4941,13 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       solarSetText("solar-system-position-mode", solarHasManualDate ? t("solarSystem.manualSimulation") : t("solarSystem.calculatedPositions"));
     };
     const updateSolarPlanetInfo = (planetId, positions = calculateSolarOrbitPositions(solarDateValue())) => {
-      const planet = positions.find(item => item.id === planetId) || SOLAR_PLANETS.find(item => item.id === planetId);
+      const planet = positions.find(item => item.id === planetId) || getLocalizedSolarPlanet(SOLAR_PLANETS.find(item => item.id === planetId));
       if (!planet) return;
       solarSetText("solar-system-planet-name", planet.name);
       solarSetText("solar-system-planet-fact", planet.fact);
       const currentDistanceAU = Number.isFinite(planet.radiusAU) ? planet.radiusAU : planet.a;
-      solarSetText("solar-system-distance", `${currentDistanceAU.toLocaleString(getLocale(), { maximumFractionDigits: 3 })} UA · ${(currentDistanceAU * 149.5978707).toLocaleString(getLocale(), { maximumFractionDigits: 1 })} millions de km`);
-      solarSetText("solar-system-period", planet.period >= 365 ? `${(planet.period / 365.256).toLocaleString(getLocale(), { maximumFractionDigits: 2 })} ans` : `${planet.period.toLocaleString(getLocale(), { maximumFractionDigits: 1 })} jours`);
+      solarSetText("solar-system-distance", `${currentDistanceAU.toLocaleString(getLocale(), { maximumFractionDigits: 3 })} ${t("solarSystem.unitAU")} · ${(currentDistanceAU * 149.5978707).toLocaleString(getLocale(), { maximumFractionDigits: 1 })} ${t("solarSystem.unitMillionKm")}`);
+      solarSetText("solar-system-period", planet.period >= 365 ? `${(planet.period / 365.256).toLocaleString(getLocale(), { maximumFractionDigits: 2 })} ${t("solarSystem.unitYears")}` : `${planet.period.toLocaleString(getLocale(), { maximumFractionDigits: 1 })} ${t("solarSystem.unitDays")}`);
       solarSetText("solar-system-diameter", `${planet.diameter.toLocaleString(getLocale())} km`);
       solarSetText("solar-system-longitude", `${planet.longitude.toLocaleString(getLocale(), { maximumFractionDigits: 1 })}°`);
       solarSetText("solar-system-rotation", planet.rotation || "—");
@@ -4869,6 +4965,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     const solarPlayButton = $("solar-system-play");
     document.addEventListener("localechange", () => {
       if (solarPlayButton) solarPlayButton.textContent = solarPlaying ? `Ⅱ ${t("ui.pause")}` : `▶ ${t("solarSystem.animate")}`;
+      if (solarDialog && !solarDialog.hidden) renderSolarOrbits();
     });
     const closeSolarDialog = () => { if (solarDialog) solarDialog.hidden = true; setSolarPlaying(false); };
     const openSolarSystemDialog = () => {
@@ -4916,13 +5013,14 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     const universeDialog = $("universe-journey-dialog");
     const universeStage = $("universe-journey-stage");
     const universeRange = $("universe-zoom-range");
-    const universeLevels = [
+    const getUniverseLevels = () => [
       { title: t("universe.titleSolar"), pointer: t("universe.solarSystemPointer"), description: t("universe.descSolar"), note: t("universe.noteSolar") },
       { title: t("universe.titleNearbyStars"), pointer: t("universe.sunPointer"), description: t("universe.descNearby"), note: t("universe.noteNearby") },
       { title: t("universe.titleMilkyWay"), pointer: t("universe.milkyWayPointer"), description: t("universe.descMilkyWay"), note: t("universe.noteMilkyWay") },
-      { title: "Le Groupe local", pointer: t("universe.localGroupPointer"), description: t("universe.descLocalGroup"), note: t("universe.noteLocalGroup") },
-      { title: "La toile cosmique et l’Univers observable", pointer: t("universe.cosmicWebPointer"), description: t("universe.descCosmicWeb"), note: t("universe.noteCosmicWeb") }
+      { title: t("universe.titleLocalGroup"), pointer: t("universe.localGroupPointer"), description: t("universe.descLocalGroup"), note: t("universe.noteLocalGroup") },
+      { title: t("universe.titleCosmicWeb"), pointer: t("universe.cosmicWebPointer"), description: t("universe.descCosmicWeb"), note: t("universe.noteCosmicWeb") }
     ];
+    let currentUniverseZoom = 0;
     const universeNS = "http://www.w3.org/2000/svg";
     const universeEl = (tag, attrs = {}, content = "") => `<${tag} ${Object.entries(attrs).map(([k,v]) => `${k}="${String(v).replaceAll('&','&amp;').replaceAll('"','&quot;').replaceAll('<','&lt;')}"`).join(' ')}>${content}</${tag}>`;
     const universeText = (x, y, label, cls = "") => universeEl("text", { x, y, class: cls }, label);
@@ -4939,7 +5037,8 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         [[490,242,t("names.planet.mercury")],[515,218,t("names.planet.venus")],[548,272,t("names.planet.earth")],[591,227,t("names.planet.mars")],[635,303,t("names.planet.jupiter")],[390,65,t("names.planet.saturn")],[270,360,t("names.planet.uranus")],[234,143,t("names.planet.neptune")]].forEach((p,i)=>{out+=universeCircle(p[0],p[1],i===4?6:4,["#aaa9a5","#d5b18a","#64b7e7","#c76e50","#d5b68c","#d9c6a0","#83d7dc","#5e8be0"][i]); out+=universeText(p[0]+8,p[1]-7,p[2],"minor-label");});
         out+=universeMarker(450,250,474,390,t("ui.sun"));
       } else if (level === 1) {
-        const stars=[[180,155,t("names.object.proxima-centauri"), "4,24 al"],[270,310,t("names.object.alpha-centauri-ab"),"4,37 al"],[620,120,t("names.object.barnards-star"),"5,96 al"],[690,340,t("names.star.sirius"),"8,6 al"],[435,75,t("names.object.wolf-359"),"7,9 al"],[510,385,t("names.object.lalande-21185"),"8,3 al"],[350,220,t("ui.sun"),""]];
+        const ly = value => `${value.toLocaleString(getLocale(), { maximumFractionDigits: 2 })} ${t("universe.unitLyShort")}`;
+        const stars=[[180,155,t("names.object.proxima-centauri"),ly(4.24)],[270,310,t("names.object.alpha-centauri-ab"),ly(4.37)],[620,120,t("names.object.barnards-star"),ly(5.96)],[690,340,t("names.star.sirius"),ly(8.6)],[435,75,t("names.object.wolf-359"),ly(7.9)],[510,385,t("names.object.lalande-21185"),ly(8.3)],[350,220,t("ui.sun"),""]];
         for(const [x,y,n,d] of stars){out+=universeCircle(x,y,n===t("ui.sun")?8:4,n===t("ui.sun")?"#ffd75b":"#b8d6ff",n===t("ui.sun")?{stroke:"#fff0ad","stroke-width":2}:{});out+=universeText(x+10,y-8,n,"minor-label");}
         out+=universeMarker(350,220,375,275,t("universe.titleSolar"));
       } else if (level === 2) {
@@ -4957,7 +5056,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         // Bande sombre de poussières qui traverse le disque et rend la galaxie moins abstraite.
         out+=universeEl("path",{d:"M 100 365 Q 270 290 430 260 T 810 125",fill:"none",stroke:"#080d1b","stroke-width":13,opacity:.38,"stroke-linecap":"round"});
         out+=universeEl("ellipse",{cx,cy,rx:70,ry:48,fill:"url(#galaxy-core)",opacity:.95});
-        out+=universeCircle(cx,cy,13,"#ffe6a4",{opacity:.95});out+=universeText(cx-105,cy-30,"Centre galactique");
+        out+=universeCircle(cx,cy,13,"#ffe6a4",{opacity:.95});out+=universeText(cx-105,cy-30,t("universe.galacticCenter"));
         // Le Soleil est placé dans le bras local, à distance du noyau.
         out+=universeCircle(572,224,5,"#ffd75b",{class:"sun-marker",stroke:"#fff2b8","stroke-width":2});out+=universeMarker(572,224,610,198,t("ui.sun"));
       } else if (level === 3) {
@@ -4971,7 +5070,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         };
         out+=drawMiniSpiral(300,260,38,24,-18,"#82c8ff",t("universeJourney.level2"));
         out+=drawMiniSpiral(590,235,47,28,32,"#d1a7ff",t("names.constellation.andromeda"));
-        out+=drawMiniSpiral(530,360,15,10,-10,"#9acde8","Triangle (M33)");
+        out+=drawMiniSpiral(530,360,15,10,-10,"#9acde8",t("universe.triangleGalaxy"));
         for(let i=0;i<24;i++){let x=210+(i*71)%430,y=140+(i*47)%230;out+=universeCircle(x,y,1.8,"#b5cce8",{opacity:.5});}
         out+=universeMarker(315,247,350,200,t("universe.titleSolar"));
       } else {
@@ -5010,12 +5109,13 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         // Notre région est indiquée dans un petit amas distinct, sans suggérer que le Soleil est visible à cette échelle.
         out+=universeCircle(435,285,5,"#ffd75b",{class:"sun-marker",stroke:"#fff2b8","stroke-width":1.5});
         out+=universeEl("path",{d:"M 435 285 L 465 260 L 535 260",class:"leader"});
-        out+=universeText(470,250,"Groupe local","our-place-label");
+        out+=universeText(470,250,t("universe.localGroup"),"our-place-label");
       }
       return out;
     };
     const renderUniverseJourney = level => {
       const zoom = Math.max(0,Math.min(4,Number(level)||0));
+      currentUniverseZoom = zoom;
       const index = Math.round(zoom);
       if (universeRange) universeRange.value = zoom.toFixed(2);
       // Une seule scène SVG persistante : le curseur déplace uniquement la caméra.
@@ -5064,13 +5164,15 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           layer.setAttribute("pointer-events", "none");
         }
       }
-      const info = universeLevels[index];
+      const info = getUniverseLevels()[index];
+      const fmt = value => new Intl.NumberFormat(getLocale(), { maximumSignificantDigits: 3 }).format(value);
+      const approx = (value, unit) => `≈ ${fmt(value)} ${unit}`;
       const distanceReferences = [
-        { scale: t("universe.scaleSolar"), km: "≈ 14 960 000 000 km", million: "≈ 14 960 millions", billion: "≈ 14,96 milliards", ly: "≈ 0,00158 al" },
-        { scale: "Voisinage stellaire · Proxima du Centaure", km: "≈ 4,01 × 10¹³ km", million: "≈ 40,1 millions de km", billion: "≈ 40 100 milliards de km", ly: "≈ 4,24 al" },
-        { scale: t("universe.scaleMilkyWay"), km: "≈ 9,46 × 10¹⁷ km", million: "≈ 9,46 × 10¹¹ millions de km", billion: "≈ 9,46 × 10⁸ milliards de km", ly: "≈ 100 000 al" },
-        { scale: t("universe.scaleLocalGroup"), km: "≈ 2,37 × 10¹⁹ km", million: "≈ 2,37 × 10¹³ millions de km", billion: "≈ 2,37 × 10¹⁰ milliards de km", ly: "≈ 2,5 millions d’al" },
-        { scale: t("universe.scaleObservable"), km: "≈ 8,8 × 10²³ km", million: "≈ 8,8 × 10¹⁷ millions de km", billion: "≈ 8,8 × 10¹⁴ milliards de km", ly: "≈ 93 milliards d’al" }
+        { scale: t("universe.scaleSolar"), km: approx(1.496e10, t("universe.unitKm")), million: approx(14960, t("universe.unitMillionKm")), billion: approx(14.96, t("universe.unitBillionKm")), ly: approx(0.00158, t("universe.unitLightYears")) },
+        { scale: `${t("universe.titleNearbyStars")} · ${t("names.object.proxima-centauri")}`, km: approx(4.01e13, t("universe.unitKm")), million: approx(4.01e7, t("universe.unitMillionKm")), billion: approx(40100, t("universe.unitBillionKm")), ly: approx(4.24, t("universe.unitLightYears")) },
+        { scale: t("universe.scaleMilkyWay"), km: approx(9.46e17, t("universe.unitKm")), million: approx(9.46e11, t("universe.unitMillionKm")), billion: approx(9.46e8, t("universe.unitBillionKm")), ly: approx(100000, t("universe.unitLightYears")) },
+        { scale: t("universe.scaleLocalGroup"), km: approx(2.37e19, t("universe.unitKm")), million: approx(2.37e13, t("universe.unitMillionKm")), billion: approx(2.37e10, t("universe.unitBillionKm")), ly: approx(2.5e6, t("universe.unitLightYears")) },
+        { scale: t("universe.scaleObservable"), km: approx(8.8e23, t("universe.unitKm")), million: approx(8.8e17, t("universe.unitMillionKm")), billion: approx(8.8e14, t("universe.unitBillionKm")), ly: approx(93e9, t("universe.unitLightYears")) }
       ];
       const distance = distanceReferences[index];
       const setText = (id, value) => { const node = $(id); if (node) node.textContent = value; };
@@ -5089,6 +5191,12 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     on("universe-journey-home","click",()=>renderUniverseJourney(0));
     on("universe-zoom-range","input",event=>renderUniverseJourney(event.target.value));
     document.querySelectorAll("[data-universe-level]").forEach(button=>button.addEventListener("click",()=>renderUniverseJourney(button.dataset.universeLevel)));
+    document.addEventListener("localechange", () => {
+      if (universeDialog && !universeDialog.hidden) {
+        universeStage?.replaceChildren();
+        renderUniverseJourney(currentUniverseZoom);
+      }
+    });
 
     on("events-open", "click", () => { const dialog = $("events-dialog"); if (dialog) dialog.hidden = false; renderCelestialEvents(); });
     const closeEvents = () => { const dialog = $("events-dialog"); if (dialog) dialog.hidden = true; };
@@ -5173,7 +5281,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     on("setting-constellations", "change", () => {
       const input = $("setting-constellations");
       state.showConstellations = Boolean(input && input.checked);
-      safely("Affichage des constellations", () => drawSky());
+      safely(t("ui.constellationDisplay"), () => drawSky());
     });
     on("setting-constellation-boundaries", "change", () => {
       toggleConstellationBoundaries();

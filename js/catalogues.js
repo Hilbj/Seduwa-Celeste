@@ -262,6 +262,7 @@ export function normalizeConstellation(raw) {
     id: cleanName(raw.id ?? raw.iau ?? ""),
     name,
     name_fr: cleanName(raw.name_fr ?? raw.nom_fr ?? raw.name ?? raw.nom ?? name),
+    englishName: cleanName(raw.englishName ?? raw.english_name ?? raw.name_en ?? ""),
     color: cleanName(raw.color) || "#91bfff",
     lines
   };

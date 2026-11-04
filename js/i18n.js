@@ -12,7 +12,7 @@
    ========================================================== */
 
 const I18N_STORAGE_KEY = "atlas-celeste-locale";
-const SUPPORTED_LOCALES = ["fr", "en", "de"];
+const SUPPORTED_LOCALES = ["fr", "en"];
 const DEFAULT_LOCALE = "fr";
 
 let currentLocale = DEFAULT_LOCALE;
