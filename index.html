@@ -49,7 +49,7 @@
 
         <header class="topbar">
       <div class="brand">
-        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 511 — noms des constellations centralisés" data-i18n-aria="app.version511Aria">v511</span></div>
+        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 514 — correction des libellés de carte" data-i18n-aria="app.version514Aria">v514</span></div>
         <div>
           <div class="brand-title-row">
             <h1><span data-i18n="app.title">SEDUWA</span> <span data-i18n="app.subtitle">CÉLESTE</span></h1>
@@ -189,7 +189,7 @@
       <span class="compass-n">N</span>
       <span class="compass-e">E</span>
       <span class="compass-s">S</span>
-      <span class="compass-w">O</span>
+      <span class="compass-w" data-i18n="ui.cardinalDirections.west">O</span>
       <div class="center-reticle"></div>
     </div>
 
@@ -351,10 +351,7 @@
           <p class="display-settings-group-title" data-i18n="settings.language">Langue</p>
           <label for="locale-select" class="display-settings-language-row">
             <span data-i18n="settings.languageChoice">Langue de l'interface</span>
-            <select id="locale-select" class="location-select display-settings-language-select">
-              <option value="fr">Français</option>
-              <option value="en">English</option>
-            </select>
+            <select id="locale-select" class="location-select display-settings-language-select" aria-label="Langue de l’interface" data-i18n-aria="settings.languageChoice"></select>
           </label>
         </div>
         <p class="display-settings-note" data-i18n="settings.note">Les préférences sont conservées sur cet appareil.</p>
@@ -393,7 +390,7 @@
         <p class="eyebrow" data-i18n="observationDialog.eyebrow">SIMULATION DU CIEL</p>
         <h2 id="observation-dialog-title" data-i18n="observationDialog.title">Date et heure d'observation</h2>
         <label for="observation-datetime" data-i18n="observationDialog.label">Choisir la date et l'heure locales</label>
-        <div class="localized-native-field"><input id="observation-datetime" type="datetime-local" lang="fr-FR"><output id="observation-datetime-display" class="localized-native-display" aria-hidden="true">JJ/MM/AAAA, 21:00</output></div>
+        <div class="localized-native-field"><input id="observation-datetime" type="datetime-local" lang="fr-FR"><output id="observation-datetime-display" class="localized-native-display" aria-hidden="true" data-i18n="ui.dateTimePlaceholder">JJ/MM/AAAA, HH:MM:SS</output></div>
         <div class="observation-dialog-actions">
           <button id="observation-cancel" class="action-button" type="button" data-i18n="observationDialog.cancel">Annuler</button>
           <button id="observation-now" class="action-button" type="button" data-i18n="observationDialog.realtime">Temps réel</button>
@@ -455,7 +452,7 @@
         <section class="visible-now-time-controls" aria-label="Date et heure pour les objets visibles" data-i18n-aria="visibleNow.timeControlsAria">
           <div class="visible-now-date-row">
             <label class="visually-hidden" for="visible-now-datetime" data-i18n="visibleNow.datetimeLabel">Date et heure</label>
-            <div class="localized-native-field"><input id="visible-now-datetime" type="datetime-local" lang="fr-FR" ><output id="visible-now-datetime-display" class="localized-native-display" aria-hidden="true">JJ/MM/AAAA, 21:00</output></div>
+            <div class="localized-native-field"><input id="visible-now-datetime" type="datetime-local" lang="fr-FR" ><output id="visible-now-datetime-display" class="localized-native-display" aria-hidden="true" data-i18n="ui.dateTimePlaceholder">JJ/MM/AAAA, HH:MM:SS</output></div>
             <button id="visible-now-time-now" class="action-button" type="button" data-i18n="visibleNow.nowButton">Maintenant</button>
           </div>
         </section>
@@ -556,7 +553,7 @@
           <div class="session-fields">
             <div class="session-date-field">
               <label for="session-date" data-i18n="session.dateLabel">Date de la soirée</label>
-              <div class="localized-native-field"><input id="session-date" type="date" lang="fr-FR" aria-describedby="session-date-format"><output id="session-date-display" class="localized-native-display" aria-hidden="true">JJ/MM/AAAA</output></div>
+              <div class="localized-native-field"><input id="session-date" type="date" lang="fr-FR" aria-describedby="session-date-format"><output id="session-date-display" class="localized-native-display" aria-hidden="true" data-i18n="ui.dateOnlyPlaceholder">JJ/MM/AAAA</output></div>
               <span id="session-date-format" class="visually-hidden" data-i18n="session.dateFormatHint">Format : jour, mois, année.</span>
             </div>
             <label for="session-start"><span data-i18n="session.startLabel">Début</span><div class="localized-native-field"><input id="session-start" type="time" lang="fr-FR" value="21:00" aria-describedby="session-time-format"><output id="session-start-display" class="localized-native-display" aria-hidden="true">21:00</output></div></label>
@@ -596,7 +593,7 @@
       <section class="visible-now-panel moon-panel" role="dialog" aria-modal="true" aria-labelledby="moon-title">
         <header class="visible-now-header"><div><p class="eyebrow" data-i18n="moon.eyebrow">FICHE ASTRONOMIQUE</p><h2 id="moon-title" data-i18n="moon.title">La Lune</h2><p class="muted" data-i18n="moon.subtitle">Phase, géométrie orbitale et conditions d’observation</p></div><button id="moon-close" class="icon-button" type="button" aria-label="Fermer la fiche lunaire" data-i18n-aria="moon.closeAria">×</button></header>
         <div class="moon-content">
-          <div class="moon-time-row"><label for="moon-datetime" data-i18n="moon.datetimeLabel">Date et heure</label><div class="localized-native-field"><input id="moon-datetime" type="datetime-local" step="1" lang="fr-FR"><output id="moon-datetime-display" class="localized-native-display" aria-hidden="true">JJ/MM/AAAA, 21:00</output></div><button id="moon-now" class="action-button" type="button" data-i18n="moon.nowButton">Maintenant</button></div>
+          <div class="moon-time-row"><label for="moon-datetime" data-i18n="moon.datetimeLabel">Date et heure</label><div class="localized-native-field"><input id="moon-datetime" type="datetime-local" step="1" lang="fr-FR"><output id="moon-datetime-display" class="localized-native-display" aria-hidden="true" data-i18n="ui.dateTimePlaceholder">JJ/MM/AAAA, HH:MM:SS</output></div><button id="moon-now" class="action-button" type="button" data-i18n="moon.nowButton">Maintenant</button></div>
           <div class="moon-overview">
             <div class="moon-disc-wrap"><svg id="moon-phase-svg" viewBox="0 0 180 180" role="img" aria-label="Disque lunaire éclairé selon la phase calculée" data-i18n-aria="moon.phaseSvgAria"><defs><clipPath id="moon-disc-clip"><circle cx="90" cy="90" r="68"/></clipPath><radialGradient id="moon-surface" cx="35%" cy="30%" r="75%"><stop offset="0" stop-color="#f8f6ed"/><stop offset="0.65" stop-color="#c9c8c0"/><stop offset="1" stop-color="#777b83"/></radialGradient><filter id="moon-shadow"><feGaussianBlur stdDeviation="1.2"/></filter></defs><circle cx="90" cy="90" r="70" fill="#1a2433" stroke="#657286" stroke-width="1.5"/><g clip-path="url(#moon-disc-clip)"><circle cx="90" cy="90" r="68" fill="#202a39"/><path id="moon-illuminated-shape" fill="url(#moon-surface)" d="M90 22 A68 68 0 0 1 90 158 A68 68 0 0 1 90 22Z"/><g fill="#777b83" opacity=".25"><circle cx="66" cy="66" r="8"/><circle cx="111" cy="52" r="5"/><circle cx="115" cy="112" r="11"/><circle cx="72" cy="126" r="4"/><circle cx="91" cy="84" r="3"/></g></g></svg></div>
             <div class="moon-facts"><p id="moon-phase-name" class="moon-phase-name" data-i18n="moon.calculating">Calcul en cours…</p><p id="moon-phase-trend" class="muted">—</p><div class="moon-illumination"><div><span data-i18n="moon.illuminatedSurface">Surface éclairée</span><strong id="moon-illumination-value">— %</strong></div><div class="moon-progress"><span id="moon-illumination-bar"></span></div></div><dl class="moon-metrics"><div><dt data-i18n="moon.age">Âge lunaire estimé</dt><dd id="moon-age">—</dd></div><div><dt data-i18n="moon.distance">Distance Terre–Lune</dt><dd id="moon-distance">—</dd></div><div><dt data-i18n="moon.diameter">Diamètre apparent</dt><dd id="moon-diameter">—</dd></div><div><dt data-i18n="moon.altitude">Hauteur locale</dt><dd id="moon-altitude">—</dd></div><div><dt data-i18n="moon.azimuth">Azimut</dt><dd id="moon-azimuth">—</dd></div></dl></div>
@@ -619,7 +616,7 @@
         <div class="jupiter-moons-content">
           <div class="jupiter-moons-controls">
             <label for="jupiter-moons-datetime" data-i18n="jupiterMoons.datetimeLabel">Date et heure</label>
-            <div class="localized-native-field"><input id="jupiter-moons-datetime" type="datetime-local" step="1" lang="fr-FR"><output id="jupiter-moons-datetime-display" class="localized-native-display" aria-hidden="true">JJ/MM/AAAA, --:--:--</output></div>
+            <div class="localized-native-field"><input id="jupiter-moons-datetime" type="datetime-local" step="1" lang="fr-FR"><output id="jupiter-moons-datetime-display" class="localized-native-display" aria-hidden="true" data-i18n="ui.dateTimePlaceholder">JJ/MM/AAAA, HH:MM:SS</output></div>
             <button id="jupiter-moons-now" class="action-button" type="button" aria-pressed="false" data-i18n="jupiterMoons.nowButton">Maintenant</button>
             <button id="jupiter-moons-play" class="action-button" type="button" aria-pressed="false"><span aria-hidden="true">▶</span> <span data-i18n="jupiterMoons.animate">Animer</span></button>
             <label for="jupiter-moons-speed" data-i18n="jupiterMoons.speedLabel">Vitesse</label>
@@ -665,7 +662,7 @@
       <section class="visible-now-panel solar-system-panel" role="dialog" aria-modal="true" aria-labelledby="solar-system-title">
         <header class="visible-now-header"><div><p class="eyebrow" data-i18n="solarSystem.eyebrow">EXPLORATION ORBITALE</p><h2 id="solar-system-title" data-i18n="solarSystem.title">Le Système solaire</h2><p class="muted" data-i18n="solarSystem.subtitle">Vue du dessus · positions orbitales schématiques calculées pour la date choisie</p></div><button id="solar-system-close" class="icon-button" type="button" aria-label="Fermer le Système solaire" data-i18n-aria="solarSystem.closeAria">×</button></header>
         <div class="solar-system-content">
-          <div class="solar-system-controls"><label for="solar-system-datetime" data-i18n="solarSystem.datetimeLabel">Date et heure</label><div class="localized-native-field"><input id="solar-system-datetime" type="datetime-local" step="1" lang="fr-FR"><output id="solar-system-datetime-display" class="localized-native-display" aria-hidden="true">JJ/MM/AAAA, 21:00</output></div><button id="solar-system-now" class="action-button" type="button" data-i18n="solarSystem.nowButton">Maintenant</button><button id="solar-system-play" class="action-button" type="button" aria-pressed="false"><span aria-hidden="true">▶</span> <span data-i18n="solarSystem.animate">Animer</span></button><label class="solar-system-speed-label" for="solar-system-speed" data-i18n="solarSystem.speedLabel">Vitesse</label><select id="solar-system-speed" class="solar-system-speed-select"><option value="1" data-i18n="solarSystem.speed1">1 jour/s</option><option value="7" data-i18n="solarSystem.speed7">7 jours/s</option><option value="30" data-i18n="solarSystem.speed30">30 jours/s</option><option value="365" data-i18n="solarSystem.speed1y">1 an/s</option></select><button id="solar-system-reset" class="action-button" type="button" data-i18n="solarSystem.reset">Retour à la date de départ</button></div>
+          <div class="solar-system-controls"><label for="solar-system-datetime" data-i18n="solarSystem.datetimeLabel">Date et heure</label><div class="localized-native-field"><input id="solar-system-datetime" type="datetime-local" step="1" lang="fr-FR"><output id="solar-system-datetime-display" class="localized-native-display" aria-hidden="true" data-i18n="ui.dateTimePlaceholder">JJ/MM/AAAA, HH:MM:SS</output></div><button id="solar-system-now" class="action-button" type="button" data-i18n="solarSystem.nowButton">Maintenant</button><button id="solar-system-play" class="action-button" type="button" aria-pressed="false"><span aria-hidden="true">▶</span> <span data-i18n="solarSystem.animate">Animer</span></button><label class="solar-system-speed-label" for="solar-system-speed" data-i18n="solarSystem.speedLabel">Vitesse</label><select id="solar-system-speed" class="solar-system-speed-select"><option value="1" data-i18n="solarSystem.speed1">1 jour/s</option><option value="7" data-i18n="solarSystem.speed7">7 jours/s</option><option value="30" data-i18n="solarSystem.speed30">30 jours/s</option><option value="365" data-i18n="solarSystem.speed1y">1 an/s</option></select><button id="solar-system-reset" class="action-button" type="button" data-i18n="solarSystem.reset">Retour à la date de départ</button></div>
           <div class="solar-system-layout">
             <section class="solar-system-orbit-card"><svg id="solar-system-orbit-svg" class="solar-system-orbit-svg" viewBox="0 0 720 520" role="img" aria-label="Vue orbitale interactive du Soleil et des huit planètes" data-i18n-aria="solarSystem.orbitSvgAria"><defs><radialGradient id="solar-system-sun-glow"><stop offset="0" stop-color="#fff9c6"/><stop offset=".48" stop-color="#ffc84c"/><stop offset="1" stop-color="#e98625"/></radialGradient></defs><g id="solar-system-orbits"></g><circle cx="360" cy="260" r="17" fill="url(#solar-system-sun-glow)" stroke="#ffe6a1" stroke-width="1.5"/><text x="360" y="292" class="solar-system-sun-label" text-anchor="middle" data-i18n="solarSystem.sunLabel">Soleil</text><g id="solar-system-planets"></g></svg><p class="solar-system-caption" data-i18n="solarSystem.caption">Clique sur une planète pour en savoir plus. Fais-la glisser le long de son orbite pour explorer une position hypothétique. « Retour à la date de départ » annule un déplacement manuel.</p></section>
             <aside class="solar-system-info" aria-live="polite"><h3 id="solar-system-planet-name" data-i18n="names.planet.mercury">Mercure</h3><p class="eyebrow solar-system-fact-label" data-i18n="solarSystem.factLabel">Description de la planète</p><p id="solar-system-planet-fact" data-i18n="solarSystem.defaultPlanetFact">La planète la plus proche du Soleil.</p><dl><div><dt data-i18n="solarSystem.distance">Distance au Soleil</dt><dd id="solar-system-distance">—</dd></div><div><dt data-i18n="solarSystem.period">Période orbitale</dt><dd id="solar-system-period">—</dd></div><div><dt data-i18n="solarSystem.diameter">Diamètre moyen</dt><dd id="solar-system-diameter">—</dd></div><div><dt data-i18n="solarSystem.longitude">Position orbitale</dt><dd id="solar-system-longitude">—</dd></div><div><dt data-i18n="solarSystem.rotation">Durée du jour</dt><dd id="solar-system-rotation">—</dd></div><div><dt data-i18n="solarSystem.temperature">Température moyenne</dt><dd id="solar-system-temperature">—</dd></div><div><dt data-i18n="solarSystem.composition">Nature</dt><dd id="solar-system-composition">—</dd></div><div><dt data-i18n="solarSystem.moons">Satellites naturels</dt><dd id="solar-system-moons">—</dd></div></dl><p id="solar-system-position-mode" class="solar-system-position-mode" data-i18n="solarSystem.calculatedPositions">Positions calculées pour la date choisie.</p></aside>

@@ -1,9 +1,11 @@
+import { t } from "./i18n.js";
 
 /** Libellé lisible d’une cible sans répéter son identifiant de catalogue. */
 export function formatStarHopTargetLabel(target) {
-  const name = String(target?.proper_name || target?.properName || target?.common_name || target?.commonName || target?.name || target?.id || "Objet").trim();
+  const fallback = t("ui.celestialObject");
+  const name = String(target?.proper_name || target?.properName || target?.common_name || target?.commonName || target?.name || target?.id || fallback).trim();
   const id = String(target?.id || "").trim();
-  if (!id || name.toLocaleLowerCase("fr").includes(id.toLocaleLowerCase("fr"))) return name || id || "Objet";
+  if (!id || name.toLocaleLowerCase().includes(id.toLocaleLowerCase())) return name || id || fallback;
   return `${name} · ${id}`;
 }
 

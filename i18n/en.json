@@ -12,7 +12,8 @@
     "version508Aria": "Version 508 — translated ephemerides",
     "version509Aria": "Version 509 — translated planet descriptions",
     "version510Aria": "Version 510 — catalogue names centralized",
-    "version511Aria": "Version 511 — constellation names centralized"
+    "version511Aria": "Version 511 — constellation names centralized",
+    "version514Aria": "Version 514 — map label correction"
   },
   "conditions": {
     "cardClouds": "Clouds",
@@ -1252,7 +1253,34 @@
     "calculatingSunsetTimes": "Calculating sunset times…",
     "forSelectedLocation": "For the selected location",
     "firstLandmark": "Star 1",
-    "directionLabel": "Direction"
+    "directionLabel": "Direction",
+    "additionalInformation": "Additional information",
+    "cometOrbitType": "Comet type",
+    "catalogueDescription": "About this catalogue",
+    "cardinalDirections": {
+      "north": "N",
+      "northEast": "NE",
+      "east": "E",
+      "southEast": "SE",
+      "south": "S",
+      "southWest": "SW",
+      "west": "W",
+      "northWest": "NW"
+    },
+    "yearAbbreviation": "yr",
+    "spectralColors": {
+      "blueWhite": "blue-white",
+      "yellowWhite": "yellow-white",
+      "blue": "blue",
+      "white": "white",
+      "yellow": "yellow",
+      "red": "red",
+      "orange": "orange"
+    },
+    "dateOnlyPlaceholder": "MM/DD/YYYY",
+    "dateTimePlaceholder": "MM/DD/YYYY, HH:MM:SS",
+    "starLabel": "Star",
+    "currentAltitude": "Current altitude: {altitude}"
   },
   "universe": {
     "cosmicWebPointer": "✦ Our region, among countless clusters",
@@ -1602,6 +1630,31 @@
       "europa": "Europa",
       "ganymede": "Ganymede",
       "callisto": "Callisto"
+    },
+    "minorPlanet": {
+      "ceres": "Ceres",
+      "pallas": "Pallas",
+      "juno": "Juno",
+      "vesta": "Vesta",
+      "hebe": "Hebe",
+      "iris": "Iris",
+      "flora": "Flora",
+      "metis": "Metis",
+      "hygiea": "Hygiea",
+      "eunomia": "Eunomia",
+      "psyche": "Psyche",
+      "amphitrite": "Amphitrite",
+      "eros": "Eros",
+      "pluto": "Pluto",
+      "eris": "Eris",
+      "haumea": "Haumea",
+      "makemake": "Makemake",
+      "encke": "Comet Encke",
+      "halley": "Halley’s Comet",
+      "churyumovGerasimenko": "Comet 67P/Churyumov–Gerasimenko",
+      "haleBopp": "Comet Hale–Bopp",
+      "neowise": "Comet NEOWISE",
+      "hartleyIras": "Comet Hartley–IRAS"
     }
   },
   "zoom": {
@@ -1960,5 +2013,58 @@
     "minorPlanets": "Minor planets",
     "dwarfPlanets": "Dwarf planets",
     "comets": "Comets"
+  },
+  "minorPlanetDetails": {
+    "catalogue": {
+      "description": "Educational selection of numbered asteroids and the five dwarf planets (Ceres, Pluto, Eris, Haumea and Makemake). Orbital elements come from published tables; positions are calculated with a simplified Keplerian model, without planetary perturbations, and are not precision JPL Horizons ephemerides. The comets also use simplified Keplerian propagation from reference orbital elements; their brightness is particularly uncertain and their positions do not replace an up-to-date ephemeris."
+    },
+    "objects": {
+      "ceres": {
+        "classificationNote": "Ceres is also classified as a dwarf planet."
+      },
+      "pluto": {
+        "orbitNote": "Simplified Keplerian elements; not suitable for precision pointing."
+      },
+      "eris": {
+        "orbitNote": "Simplified Keplerian elements; not suitable for precision pointing."
+      },
+      "haumea": {
+        "orbitNote": "Simplified Keplerian elements; not suitable for precision pointing."
+      },
+      "makemake": {
+        "orbitNote": "Simplified Keplerian elements; not suitable for precision pointing."
+      }
+    },
+    "comets": {
+      "encke": {
+        "type": "Periodic",
+        "discoveryNote": "A periodic comet known for its frequent returns; its 2027 apparition is worth watching."
+      },
+      "halley": {
+        "type": "Periodic",
+        "discoveryNote": "A famous periodic comet observed since antiquity; its next perihelion passage is expected in 2061."
+      },
+      "churyumovGerasimenko": {
+        "type": "Periodic",
+        "discoveryNote": "A comet studied up close by ESA’s Rosetta mission."
+      },
+      "haleBopp": {
+        "type": "Long-period",
+        "discoveryNote": "The great comet of 1997, notable for its long orbital period."
+      },
+      "neowise": {
+        "type": "Long-period",
+        "discoveryNote": "A bright comet of summer 2020, now very distant and no longer visually observable."
+      },
+      "hartleyIras": {
+        "type": "Periodic",
+        "discoveryNote": "A comet to look for with a telescope through the end of 2026, according to available forecasts."
+      }
+    }
+  },
+  "gaiaReviewReasons": {
+    "propagationResidual": "Gaia DR3 association retained, but it should be reviewed: the residual between the Gaia position at epoch 2016.0 and the propagated Hipparcos position exceeds the combined formal uncertainties calculated without covariances. The Gaia source has a two-parameter astrometric solution (position only); do not use Gaia proper motion for propagation. Photocentre/component effects may still be present in multiple systems.",
+    "positionOnlyCrossCheck": "Cross-checked with SIMBAD; Gaia DR3 astrometric_params_solved=3 (position only), with no parallax or proper motion. Here, gaia_match_arcsec is the offset from the search centre in catalogue coordinates, not a residual after epoch propagation; do not use it as a definitive astrometric residual.",
+    "propusPositionOnly": "Gaia DR3 association provisionally retained and cross-checked with SIMBAD (η Geminorum / Propus). The historical value 2.262″ previously recorded as gaia_match_arcsec could not be reproduced in the Gaia DR3 Hipparcos cross-match tables and matches phot_g_mean_mag rounded to 2.262; it is therefore retained only as a reported value, not as a verified separation. A search around the currently recorded Hipparcos coordinates finds the source at 1.68281″, but this separation compares positions from different epochs and is not an epoch-corrected astrometric residual. Gaia DR3 provides a position-only solution here, with no parallax or proper motion; do not propagate this source."
   }
 }

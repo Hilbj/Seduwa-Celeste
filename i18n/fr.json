@@ -12,7 +12,8 @@
     "version508Aria": "Version 508 — éphémérides traduites",
     "version509Aria": "Version 509 — descriptions des planètes traduites",
     "version510Aria": "Version 510 — noms des catalogues centralisés",
-    "version511Aria": "Version 511 — noms des constellations centralisés"
+    "version511Aria": "Version 511 — noms des constellations centralisés",
+    "version514Aria": "Version 514 — correction des libellés de la carte"
   },
   "conditions": {
     "cardClouds": "Nuages",
@@ -1252,7 +1253,34 @@
     "calculatingSunsetTimes": "Calcul des horaires du coucher du Soleil…",
     "forSelectedLocation": "Pour la position sélectionnée",
     "firstLandmark": "Étoile 1",
-    "directionLabel": "Direction"
+    "directionLabel": "Direction",
+    "additionalInformation": "Informations complémentaires",
+    "cometOrbitType": "Type de comète",
+    "catalogueDescription": "À propos de ce catalogue",
+    "cardinalDirections": {
+      "north": "N",
+      "northEast": "NE",
+      "east": "E",
+      "southEast": "SE",
+      "south": "S",
+      "southWest": "SO",
+      "west": "O",
+      "northWest": "NO"
+    },
+    "yearAbbreviation": "an",
+    "spectralColors": {
+      "blueWhite": "bleue-blanche",
+      "yellowWhite": "blanche-jaune",
+      "blue": "bleue",
+      "white": "blanche",
+      "yellow": "jaune",
+      "red": "rouge",
+      "orange": "orange"
+    },
+    "dateOnlyPlaceholder": "JJ/MM/AAAA",
+    "dateTimePlaceholder": "JJ/MM/AAAA, HH:MM:SS",
+    "starLabel": "Étoile",
+    "currentAltitude": "Hauteur actuelle : {altitude}"
   },
   "universe": {
     "cosmicWebPointer": "✦ Notre région, parmi d’innombrables amas",
@@ -1602,6 +1630,31 @@
       "europa": "Europe",
       "ganymede": "Ganymède",
       "callisto": "Callisto"
+    },
+    "minorPlanet": {
+      "ceres": "Cérès",
+      "pallas": "Pallas",
+      "juno": "Junon",
+      "vesta": "Vesta",
+      "hebe": "Hébé",
+      "iris": "Iris",
+      "flora": "Flore",
+      "metis": "Métis",
+      "hygiea": "Hygie",
+      "eunomia": "Eunomie",
+      "psyche": "Psyché",
+      "amphitrite": "Amphitrite",
+      "eros": "Éros",
+      "pluto": "Pluton",
+      "eris": "Éris",
+      "haumea": "Hauméa",
+      "makemake": "Makémaké",
+      "encke": "Comète Encke",
+      "halley": "Comète de Halley",
+      "churyumovGerasimenko": "Comète Tchouri",
+      "haleBopp": "Comète Hale-Bopp",
+      "neowise": "Comète NEOWISE",
+      "hartleyIras": "Comète Hartley–IRAS"
     }
   },
   "zoom": {
@@ -1960,5 +2013,58 @@
     "minorPlanets": "Planètes mineures",
     "dwarfPlanets": "Planètes naines",
     "comets": "Comètes"
+  },
+  "minorPlanetDetails": {
+    "catalogue": {
+      "description": "Sélection pédagogique d’astéroïdes numérotés et des cinq planètes naines (Cérès, Pluton, Éris, Hauméa, Makémaké). Les éléments orbitaux proviennent de tables publiées ; les positions sont calculées avec un modèle képlérien simplifié, sans perturbations planétaires, et ne constituent pas des éphémérides de précision JPL Horizons. Les comètes utilisent également une propagation képlérienne simplifiée à partir d’éléments orbitaux de référence ; leur éclat est particulièrement incertain et leurs positions ne remplacent pas une éphéméride actualisée."
+    },
+    "objects": {
+      "ceres": {
+        "classificationNote": "Cérès est également classée comme planète naine."
+      },
+      "pluto": {
+        "orbitNote": "Éléments képlériens simplifiés ; ne conviennent pas au pointage de précision."
+      },
+      "eris": {
+        "orbitNote": "Éléments képlériens simplifiés ; ne conviennent pas au pointage de précision."
+      },
+      "haumea": {
+        "orbitNote": "Éléments képlériens simplifiés ; ne conviennent pas au pointage de précision."
+      },
+      "makemake": {
+        "orbitNote": "Éléments képlériens simplifiés ; ne conviennent pas au pointage de précision."
+      }
+    },
+    "comets": {
+      "encke": {
+        "type": "Périodique",
+        "discoveryNote": "Comète périodique connue pour son retour fréquent ; son passage de 2027 est à surveiller."
+      },
+      "halley": {
+        "type": "Périodique",
+        "discoveryNote": "Comète périodique célèbre, observée depuis l’Antiquité ; son prochain passage au périhélie est prévu en 2061."
+      },
+      "churyumovGerasimenko": {
+        "type": "Périodique",
+        "discoveryNote": "Comète étudiée de près par la mission Rosetta de l’ESA."
+      },
+      "haleBopp": {
+        "type": "À longue période",
+        "discoveryNote": "Grande comète de 1997, remarquable par sa longue période orbitale."
+      },
+      "neowise": {
+        "type": "À longue période",
+        "discoveryNote": "Comète brillante de l’été 2020, désormais très éloignée et non observable visuellement."
+      },
+      "hartleyIras": {
+        "type": "Périodique",
+        "discoveryNote": "Comète à rechercher au télescope jusqu’à la fin de 2026 selon les prévisions disponibles."
+      }
+    }
+  },
+  "gaiaReviewReasons": {
+    "propagationResidual": "Association Gaia DR3 conservée, mais à vérifier : le résidu entre la position Gaia à l’époque 2016.0 et la position Hipparcos propagée dépasse les incertitudes formelles combinées calculées sans covariances. La source Gaia possède une solution astrométrique à deux paramètres (position seulement) ; ne pas utiliser de mouvement propre Gaia pour la propagation. Pour les systèmes multiples, les effets de photocentre/composantes restent possibles.",
+    "positionOnlyCrossCheck": "Association recoupée avec SIMBAD; Gaia DR3 astrometric_params_solved=3 (position seule), sans parallaxe ni mouvement propre. gaia_match_arcsec est ici l’écart au centre de la recherche en coordonnées catalogue, non un résidu après propagation d’époque; ne pas utiliser comme résidu astrométrique définitif.",
+    "propusPositionOnly": "Association Gaia DR3 conservée provisoirement et recoupée avec SIMBAD (η Geminorum / Propus). La valeur historique 2.262″ précédemment enregistrée comme gaia_match_arcsec n’a pas pu être reproduite dans les tables de correspondance Hipparcos de Gaia DR3 et coïncide avec phot_g_mean_mag arrondie à 2.262 ; elle est donc conservée uniquement comme valeur rapportée, non comme séparation vérifiée. Une recherche autour des coordonnées Hipparcos actuellement enregistrées retrouve la source à 1.68281″, mais cette séparation compare des positions d’époques différentes et ne constitue pas un résidu astrométrique corrigé. Gaia DR3 fournit ici une solution de position seule, sans parallaxe ni mouvement propre ; ne pas propager cette source."
   }
 }

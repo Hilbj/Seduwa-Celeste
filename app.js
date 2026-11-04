@@ -21,7 +21,7 @@ import {
 } from "./js/catalogues.js";
 
 import { createSensors } from "./js/sensors.js";
-import { t, getLocale } from "./js/i18n.js";
+import { t, getLocale, getDataLocale } from "./js/i18n.js";
 import { createSolarSystem } from "./js/solar-system.js";
 import { calculateMinorPlanetPosition, calculateMinorPlanetPositions } from "./js/minor-planets.js";
 import { createUI } from "./js/ui.js";
@@ -126,7 +126,20 @@ import { createUI } from "./js/ui.js";
     const catalogueKey = `catalogueNames.${compactId}`;
     const catalogueName = t(catalogueKey);
     if (catalogueName !== catalogueKey) return catalogueName;
-    if (getLocale() === "en") {
+    const minorPlanetId = ({
+      "(1)": "ceres", "(2)": "pallas", "(3)": "juno", "(4)": "vesta", "(6)": "hebe",
+      "(7)": "iris", "(8)": "flora", "(9)": "metis", "(10)": "hygiea", "(15)": "eunomia",
+      "(16)": "psyche", "(29)": "amphitrite", "(433)": "eros", "(134340)": "pluto",
+      "(136199)": "eris", "(136108)": "haumea", "(136472)": "makemake",
+      "2P/ENCKE": "encke", "1P/HALLEY": "halley", "67P/CHURYUMOV-GERASIMENKO": "churyumovGerasimenko",
+      "C/1995O1HALE-BOPP": "haleBopp", "C/2020F3NEOWISE": "neowise", "161P/HARTLEY-IRAS": "hartleyIras"
+    })[compactId.replace(/\s+/g, "")];
+    if (minorPlanetId) {
+      const key = `names.minorPlanet.${minorPlanetId}`;
+      const translated = t(key);
+      if (translated !== key) return translated;
+    }
+    if (getDataLocale() === "en") {
       return object.englishName || object.english_name || object.name_en || object.common_name_en || object.name || object.proper_name || object.designation || fallback;
     }
     return object.name_fr || object.name || object.common_name_fr || object.common_name || object.proper_name || object.designation || fallback;
@@ -1992,7 +2005,7 @@ function drawHorizon() {
   // Repères cardinaux ancrés au véritable azimut, projetés sur la silhouette.
   // Ils ne sont dessinés que lorsque leur direction entre dans le champ.
   const cardinals = [
-    [0, "N"], [90, "E"], [180, "S"], [270, getLocale() === "en" ? "W" : "O"]
+    [0, t("ui.cardinalDirections.north")], [90, t("ui.cardinalDirections.east")], [180, t("ui.cardinalDirections.south")], [270, t("ui.cardinalDirections.west")]
   ];
   ctx.textAlign = "center";
   ctx.textBaseline = "bottom";
@@ -3514,7 +3527,7 @@ function drawConstellationNames(date) {
     const translatedConstellation = constellationKey ? t(constellationKey) : constellationKey;
     const label = translatedConstellation && translatedConstellation !== constellationKey
       ? translatedConstellation
-      : (getLocale() === "en"
+      : (getDataLocale() === "en"
           ? (constellation.englishName || constellation.english_name || constellation.name || constellation.abbreviation || constellation.id)
           : (constellation.name_fr || constellation.name || constellation.abbreviation || constellation.id));
 
@@ -5247,6 +5260,24 @@ function drawDiscoveryReferenceMarker(point, index = 0) {
   ctx.restore();
 }
 
+function localizedDiscoveryMarkerName(object, fallback = "") {
+  if (!object || typeof object !== "object") return String(object || fallback || "");
+  const catalogue = String(object.catalogue || "");
+  const type = String(object.type || "").toLowerCase();
+  const id = String(object.id || object.designation || "").trim();
+
+  // Les étoiles et les objets de catalogue utilisent les résolveurs localisés,
+  // jamais les champs français bruts conservés comme alias de recherche.
+  if (catalogue === "Hipparcos" || type === "star") {
+    return displayStarName(object) || fallback || id;
+  }
+  if (["Messier", "NGC"].includes(catalogue) || /^(?:M|NGC)\s*\d+/i.test(id)) {
+    return localizedMapObjectName(object, fallback || id);
+  }
+  return object.discoveryLabel || localizedMapObjectName(object, fallback) ||
+    object.common_name || object.name || object.proper_name || id || fallback;
+}
+
 function drawDiscoveryMarkerLabel(point, text, color = "#75e6ff", placement = "right") {
   if (!point || !text) return;
   ctx.save();
@@ -5612,7 +5643,7 @@ function renderSkyNow() {
       if (point) {
         drawDiscoveryTargetArrow(point);
         // Le libellé commun choisi dans la recherche prime sur le nom de catalogue.
-        drawDiscoveryMarkerLabel(point, refreshedSelected.discoveryLabel || refreshedSelected.common_name || refreshedSelected.name || refreshedSelected.proper_name || refreshedSelected.id || "Cible choisie", "#ffd447", "arrow-start");
+        drawDiscoveryMarkerLabel(point, localizedDiscoveryMarkerName(refreshedSelected, t("ui.landmark")), "#ffd447", "arrow-start");
       }
     }
     // Repères voisins en cyan, y compris leurs libellés.
@@ -5629,7 +5660,7 @@ function renderSkyNow() {
             ? project(Number(currentReference.az), Number(currentReference.alt)) : null);
         if (point) {
           drawDiscoveryReferenceMarker(point, index);
-          if (discoveryTargetPanelOpen) drawDiscoveryMarkerLabel(point, currentReference.discoveryLabel || currentReference.common_name || currentReference.name || currentReference.proper_name || currentReference.id || t("ui.landmark"), "#75e6ff");
+          if (discoveryTargetPanelOpen) drawDiscoveryMarkerLabel(point, localizedDiscoveryMarkerName(currentReference, t("ui.landmark")), "#75e6ff");
         }
       });
     }

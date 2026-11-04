@@ -1,3 +1,4 @@
+import { t } from "./i18n.js";
 "use strict";
 
 /* ============================================================
@@ -116,7 +117,7 @@ export function normalizeStar(raw) {
 
   return {
     ...raw,
-    name: name || `Étoile ${ra.toFixed(3)}`,
+    name: name || `${t("ui.starLabel")} ${ra.toFixed(3)}`,
     ra,
     dec,
     mag,

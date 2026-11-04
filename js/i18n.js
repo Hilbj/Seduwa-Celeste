@@ -12,8 +12,16 @@
    ========================================================== */
 
 const I18N_STORAGE_KEY = "atlas-celeste-locale";
-const SUPPORTED_LOCALES = ["fr", "en"];
-const DEFAULT_LOCALE = "fr";
+const BUILTIN_LOCALE_CONFIG = {
+  defaultLocale: "fr",
+  locales: [
+    { code: "fr", label: "Français", dataLocale: "fr" },
+    { code: "en", label: "English", dataLocale: "en" }
+  ]
+};
+let localeConfig = BUILTIN_LOCALE_CONFIG;
+let SUPPORTED_LOCALES = localeConfig.locales.map(item => item.code);
+let DEFAULT_LOCALE = localeConfig.defaultLocale;
 
 let currentLocale = DEFAULT_LOCALE;
 let translations = {};
@@ -28,13 +36,46 @@ function resolve(obj, path) {
   );
 }
 
+async function loadLocaleConfig() {
+  try {
+    const response = await fetch("./i18n/locales.json");
+    if (!response.ok) throw new Error(`i18n/locales.json : ${response.status}`);
+    const config = await response.json();
+    const locales = Array.isArray(config.locales) ? config.locales : [];
+    const valid = locales.filter(item =>
+      item && typeof item.code === "string" && /^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(item.code) &&
+      typeof item.label === "string" && item.label.trim() &&
+      ["fr", "en"].includes(item.dataLocale)
+    );
+    const codes = valid.map(item => item.code);
+    if (!codes.length || !codes.includes(config.defaultLocale) || new Set(codes).size !== codes.length) {
+      throw new Error("Configuration des langues invalide.");
+    }
+    localeConfig = { defaultLocale: config.defaultLocale, locales: valid };
+    SUPPORTED_LOCALES = codes;
+    DEFAULT_LOCALE = config.defaultLocale;
+  } catch (error) {
+    console.warn("i18n : configuration des langues indisponible, configuration intégrée utilisée.", error);
+    localeConfig = BUILTIN_LOCALE_CONFIG;
+    SUPPORTED_LOCALES = localeConfig.locales.map(item => item.code);
+    DEFAULT_LOCALE = localeConfig.defaultLocale;
+  }
+}
+
+function getBrowserLocale() {
+  const preferred = (typeof navigator !== "undefined" && navigator.language) || DEFAULT_LOCALE;
+  const exact = SUPPORTED_LOCALES.find(code => code.toLowerCase() === preferred.toLowerCase());
+  if (exact) return exact;
+  const base = preferred.split("-")[0].toLowerCase();
+  return SUPPORTED_LOCALES.find(code => code.toLowerCase() === base) || DEFAULT_LOCALE;
+}
+
 function detectLocale() {
   try {
     const saved = localStorage.getItem(I18N_STORAGE_KEY);
     if (saved && SUPPORTED_LOCALES.includes(saved)) return saved;
   } catch { /* stockage indisponible */ }
-  const nav = (navigator.language || DEFAULT_LOCALE).slice(0, 2).toLowerCase();
-  return SUPPORTED_LOCALES.includes(nav) ? nav : DEFAULT_LOCALE;
+  return getBrowserLocale();
 }
 
 async function fetchLocale(locale) {
@@ -87,6 +128,7 @@ async function loadLocaleInto(locale) {
 /* À appeler une seule fois au démarrage de l'application. */
 async function initI18n() {
   try {
+    await loadLocaleConfig();
     await loadLocaleInto(detectLocale());
     applyTranslations();
     if (typeof MutationObserver !== "undefined" && document.documentElement) {
@@ -123,6 +165,10 @@ async function setLocale(locale) {
 }
 
 function getLocale() { return currentLocale; }
+function getDataLocale() {
+  return localeConfig.locales.find(item => item.code === currentLocale)?.dataLocale || DEFAULT_LOCALE;
+}
 function getSupportedLocales() { return [...SUPPORTED_LOCALES]; }
+function getLocaleOptions() { return localeConfig.locales.map(({ code, label }) => ({ code, label })); }
 
-export { initI18n, t, setLocale, getLocale, getSupportedLocales, applyTranslations };
+export { initI18n, t, setLocale, getLocale, getDataLocale, getSupportedLocales, getLocaleOptions, applyTranslations };

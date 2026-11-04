@@ -1,12 +1,12 @@
 "use strict";
 
-import { initI18n, getLocale, setLocale } from "./i18n.js";
+import { initI18n, getLocale, setLocale, getLocaleOptions } from "./i18n.js";
 
 // Aligne l'attribut lang des sélecteurs de date/heure natifs sur la langue active.
 // Sans cela, le widget du navigateur resterait en français malgré la traduction.
 function syncNativeDateTimeLang() {
   const locale = getLocale();
-  document.querySelectorAll('input[type="datetime-local"]').forEach(input => {
+  document.querySelectorAll('input[type="datetime-local"], input[type="date"]').forEach(input => {
     input.lang = locale;
   });
 }
@@ -15,6 +15,13 @@ function bindLocaleSelect() {
   const localeSelect = document.getElementById("locale-select");
   if (!localeSelect) return;
 
+  localeSelect.replaceChildren();
+  for (const locale of getLocaleOptions()) {
+    const option = document.createElement("option");
+    option.value = locale.code;
+    option.textContent = locale.label;
+    localeSelect.append(option);
+  }
   localeSelect.value = getLocale();
 
   localeSelect.addEventListener("change", () => {

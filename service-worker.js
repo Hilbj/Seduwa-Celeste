@@ -1,7 +1,7 @@
 
 "use strict";
 
-const CACHE_NAME = "atlas-celeste-v511-constellation-names-i18n";
+const CACHE_NAME = "atlas-celeste-v514-correctif-libelles-carte";
 
 const MILKY_WAY_MAP_URL = "https://cdn.eso.org/images/screen/ESA_Gaia_DR2_AllSky_Brightness_Colour_black_bg_8k.jpg";
 
@@ -28,6 +28,7 @@ const APP_FILES = [
   "./js/tonight-recommendations.js",
   "./js/observing-difficulty.js",
   "./js/star-hop-route.js",
+  "./i18n/locales.json",
   "./i18n/fr.json",
   "./i18n/en.json",
 

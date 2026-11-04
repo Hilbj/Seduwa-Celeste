@@ -1,8 +1,6 @@
 {
-  "catalogue": "Planètes mineures",
   "epochJD": 2461200.5,
   "epochDate": "2026-06-09T00:00:00Z",
-  "note": "Sélection pédagogique d’astéroïdes numérotés et des cinq planètes naines (Cérès, Pluton, Éris, Hauméa, Makémaké). Les éléments des objets du catalogue proviennent de tables orbitales publiées ; les positions sont propagées par un modèle képlérien simplifié, sans perturbations planétaires, et ne sont pas des éphémérides de précision JPL Horizons. Les comètes ajoutées utilisent une propagation képlérienne simplifiée à partir d’éléments orbitaux de référence ; leur éclat est particulièrement incertain et les positions ne remplacent pas une éphéméride actualisée.",
   "objects": [
     {
       "number": 1,
@@ -18,9 +16,7 @@
       "H": 3.34,
       "G": 0.12,
       "designation": "(1) Ceres",
-      "dwarfPlanet": true,
-      "dwarfPlanetNote": "Cérès est aussi classée comme planète naine.",
-      "dwarfPlanetNoteEn": "Ceres is also classified as a dwarf planet."
+      "dwarfPlanet": true
     },
     {
       "number": 2,
@@ -218,8 +214,7 @@
       "G": 0.12,
       "epochJD": 2458600.5,
       "designation": "(134340) Pluto",
-      "orbitalElementsSource": "LESIA Lucky Star / NIMA v9 (epoch JD 2458600.5)",
-      "note": "Éléments képlériens simplifiés ; non adaptés au pointage de précision."
+      "orbitalElementsSource": "LESIA Lucky Star / NIMA v9 (epoch JD 2458600.5)"
     },
     {
       "number": 136199,
@@ -237,8 +232,7 @@
       "G": 0.15,
       "epochJD": 2460800.5,
       "designation": "(136199) Eris",
-      "orbitalElementsSource": "LESIA Lucky Star / NIMA v12 (epoch JD 2460800.5)",
-      "note": "Éléments képlériens simplifiés ; non adaptés au pointage de précision."
+      "orbitalElementsSource": "LESIA Lucky Star / NIMA v12 (epoch JD 2460800.5)"
     },
     {
       "number": 136108,
@@ -256,8 +250,7 @@
       "G": 0.15,
       "epochJD": 2460600.5,
       "designation": "(136108) Haumea",
-      "orbitalElementsSource": "LESIA Lucky Star / NIMA v12 (epoch JD 2460600.5)",
-      "note": "Éléments képlériens simplifiés ; non adaptés au pointage de précision."
+      "orbitalElementsSource": "LESIA Lucky Star / NIMA v12 (epoch JD 2460600.5)"
     },
     {
       "number": 136472,
@@ -275,8 +268,7 @@
       "G": 0.15,
       "epochJD": 2460800.5,
       "designation": "(136472) Makemake",
-      "orbitalElementsSource": "LESIA Lucky Star / NIMA v11 (epoch JD 2460800.5)",
-      "note": "Éléments képlériens simplifiés ; non adaptés au pointage de précision."
+      "orbitalElementsSource": "LESIA Lucky Star / NIMA v11 (epoch JD 2460800.5)"
     },
     {
       "id": "2P/Encke",
@@ -284,7 +276,6 @@
       "proper_name": "Comète Encke",
       "designation": "2P/Encke",
       "comet": true,
-      "cometType": "periodique",
       "cometMagnitudeExponent": 4.0,
       "q": 0.3386,
       "e": 0.84732,
@@ -296,12 +287,11 @@
       "G": 0.15,
       "periodYears": 3.3,
       "discoveryYear": 1786,
-      "discoveryNote": "Comète périodique connue pour son retour fréquent ; son passage de 2027 est à surveiller.",
       "a": 2.2177102436468425,
       "M0": 286.5175841841178,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes",
-      "englishName": "2P/Encke"
+      "englishName": "2P/Encke",
+      "cometClass": "periodic"
     },
     {
       "id": "1P/Halley",
@@ -309,7 +299,6 @@
       "proper_name": "Comète de Halley",
       "designation": "1P/Halley",
       "comet": true,
-      "cometType": "periodique",
       "cometMagnitudeExponent": 8.0,
       "q": 0.570914,
       "e": 0.968032,
@@ -321,12 +310,11 @@
       "G": 0.15,
       "periodYears": 75.47,
       "discoveryYear": -240,
-      "discoveryNote": "Comète périodique célèbre, observée depuis l’Antiquité ; son prochain passage au périhélie est prévu en 2061.",
       "a": 17.858921421421424,
       "M0": 192.35324111075678,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes",
-      "englishName": "1P/Halley"
+      "englishName": "1P/Halley",
+      "cometClass": "periodic"
     },
     {
       "id": "67P/Churyumov-Gerasimenko",
@@ -334,7 +322,6 @@
       "proper_name": "Comète Tchouri",
       "designation": "67P/Churyumov-Gerasimenko",
       "comet": true,
-      "cometType": "periodique",
       "cometMagnitudeExponent": 4.0,
       "q": 1.243,
       "e": 0.641,
@@ -346,12 +333,11 @@
       "G": 0.15,
       "periodYears": 6.45,
       "discoveryYear": 1969,
-      "discoveryNote": "Comète étudiée de près par la mission Rosetta de l’ESA.",
       "a": 3.462395543175488,
       "M0": 223.84642145685717,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes",
-      "englishName": "67P/Churyumov–Gerasimenko"
+      "englishName": "67P/Churyumov–Gerasimenko",
+      "cometClass": "periodic"
     },
     {
       "id": "C/1995 O1 Hale-Bopp",
@@ -359,7 +345,6 @@
       "proper_name": "Comète Hale-Bopp",
       "designation": "C/1995 O1",
       "comet": true,
-      "cometType": "longue periode",
       "cometMagnitudeExponent": 4.0,
       "q": 0.914,
       "e": 0.9951,
@@ -371,12 +356,11 @@
       "G": 0.15,
       "periodYears": 2540,
       "discoveryYear": 1995,
-      "discoveryNote": "Grande comète de 1997, remarquable par sa longue période orbitale.",
       "a": 186.53061224489738,
       "M0": 4.122618161743702,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes",
-      "englishName": "C/1995 O1 Hale–Bopp"
+      "englishName": "C/1995 O1 Hale–Bopp",
+      "cometClass": "long-period"
     },
     {
       "id": "C/2020 F3 NEOWISE",
@@ -384,7 +368,6 @@
       "proper_name": "Comète NEOWISE",
       "designation": "C/2020 F3",
       "comet": true,
-      "cometType": "longue periode",
       "cometMagnitudeExponent": 4.0,
       "q": 0.295,
       "e": 0.9992,
@@ -396,12 +379,11 @@
       "G": 0.15,
       "periodYears": 7080,
       "discoveryYear": 2020,
-      "discoveryNote": "Comète brillante de l’été 2020, désormais très éloignée et non observable visuellement.",
       "a": 368.7499999999894,
       "M0": 0.3014841485429769,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes",
-      "englishName": "C/2020 F3 NEOWISE"
+      "englishName": "C/2020 F3 NEOWISE",
+      "cometClass": "long-period"
     },
     {
       "id": "161P/Hartley-IRAS",
@@ -409,7 +391,6 @@
       "proper_name": "Comète Hartley–IRAS",
       "designation": "161P/Hartley-IRAS",
       "comet": true,
-      "cometType": "periodique",
       "cometMagnitudeExponent": 1.0,
       "q": 1.265109,
       "e": 0.836178,
@@ -421,15 +402,12 @@
       "G": 0.15,
       "periodYears": 21.46,
       "discoveryYear": 1983,
-      "discoveryNote": "Comète actuelle, à rechercher au télescope jusqu’à la fin de 2026 selon les prévisions disponibles.",
       "a": 7.722460963728924,
       "M0": 352.138245930918,
       "epochJD": 2461200.5,
-      "catalogue": "Comètes",
-      "englishName": "161P/Hartley–IRAS"
+      "englishName": "161P/Hartley–IRAS",
+      "cometClass": "periodic"
     }
   ],
-  "dwarfPlanetsSource": "IAU: https://www.iau.org/static/archives/releases/pdf/iau0807.pdf ; éléments orbitaux individuels: LESIA Lucky Star / NIMA, URLs consignées dans le code documentaire.",
-  "englishCatalogue": "Minor planets",
-  "englishNote": "Educational selection of numbered asteroids and the five dwarf planets (Ceres, Pluto, Eris, Haumea and Makemake). Catalogue orbital elements come from published tables; positions are propagated with a simplified Keplerian model, without planetary perturbations, and are not precision JPL Horizons ephemerides. Added comets use simplified Keplerian propagation from reference orbital elements; their brightness is particularly uncertain, and the positions do not replace an up-to-date ephemeris."
+  "dwarfPlanetsSource": "IAU: https://www.iau.org/static/archives/releases/pdf/iau0807.pdf ; éléments orbitaux individuels: LESIA Lucky Star / NIMA, URLs consignées dans le code documentaire."
 }

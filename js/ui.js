@@ -9,7 +9,7 @@ import { buildTonightSelection, isPrioritySolarTarget } from "./tonight-recommen
 import { assessObservingDifficulty } from "./observing-difficulty.js";
 import { angularSeparationDeg, buildStarHopRoute, formatStarHopTargetLabel, recommendedStarHopMaxDeg, selectTargetGuideStar } from "./star-hop-route.js";
 import { SOLAR_PLANETS, getLocalizedSolarPlanet, calculateSolarOrbitPosition, calculateSolarOrbitPositions } from "./solar-system-orbits.js";
-import { t, getLocale } from "./i18n.js";
+import { t, getLocale, getDataLocale } from "./i18n.js";
 
 export function createUI({
   state,
@@ -109,7 +109,7 @@ export function createUI({
     const output = document.getElementById(outputId);
     if (!input || !output) return;
     const match = /^(\d{4})-(\d{2})-(\d{2})T(\d{2}):(\d{2})(?::(\d{2}))?/.exec(input.value || "");
-    const datePart = match ? (getLocale() === "en" ? `${match[2]}/${match[3]}/${match[1]}` : `${match[3]}/${match[2]}/${match[1]}`) : t("ui.datePlaceholder");
+    const datePart = match ? new Intl.DateTimeFormat(getLocale(), { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12)) : t("ui.datePlaceholder");
     output.textContent = match ? `${datePart}, ${match[4]}:${match[5]}:${(match[6] || "00").padEnd(2, "0").slice(0, 2)}` : `${datePart}, --:--:--`;
   }
   function setupLocalizedDateTimeDisplays() {
@@ -307,9 +307,8 @@ export function createUI({
     );
 
     // Points cardinaux : SO et O deviennent SW et W en anglais
-    const cardinals = getLocale() === "en"
-      ? ["N", "NE", "E", "SE", "S", "SW", "W", "NW"]
-      : ["N", "NE", "E", "SE", "S", "SO", "O", "NO"];
+    const cardinals = ["north", "northEast", "east", "southEast", "south", "southWest", "west", "northWest"]
+      .map(direction => t(`ui.cardinalDirections.${direction}`));
     setText(
       "cardinal",
       cardinals[Math.round(norm360(heading) / 45) % 8]
@@ -330,7 +329,7 @@ export function createUI({
     // Les catalogues peuvent fournir un nom imbriqué dans un objet. Chercher
     // récursivement une vraie chaîne et refuser explicitement la conversion
     // générique « [object Object] ».
-    const localeKeys = getLocale() === "en"
+    const localeKeys = getDataLocale() === "en"
       ? ["en", "englishName", "english_name", "name_en", "common_name_en", "proper_name_en", "name", "label", "designation", "id", "fr", "name_fr"]
       : ["fr", "name_fr", "common_name_fr", "commonNameFr", "name", "common_name", "commonName", "proper_name", "properName", "label", "designation", "id", "en", "englishName", "english_name"]; 
     const preferredKeys = localeKeys;
@@ -367,7 +366,20 @@ export function createUI({
     const catalogueKey = `catalogueNames.${compactId}`;
     const catalogueName = t(catalogueKey);
     if (catalogueName !== catalogueKey) return catalogueName;
-    if (getLocale() === "en") {
+    const minorPlanetId = ({
+      "(1)": "ceres", "(2)": "pallas", "(3)": "juno", "(4)": "vesta", "(6)": "hebe",
+      "(7)": "iris", "(8)": "flora", "(9)": "metis", "(10)": "hygiea", "(15)": "eunomia",
+      "(16)": "psyche", "(29)": "amphitrite", "(433)": "eros", "(134340)": "pluto",
+      "(136199)": "eris", "(136108)": "haumea", "(136472)": "makemake",
+      "2P/ENCKE": "encke", "1P/HALLEY": "halley", "67P/CHURYUMOV-GERASIMENKO": "churyumovGerasimenko",
+      "C/1995O1HALE-BOPP": "haleBopp", "C/2020F3NEOWISE": "neowise", "161P/HARTLEY-IRAS": "hartleyIras"
+    })[compactId.replace(/\s+/g, "")];
+    if (minorPlanetId) {
+      const key = `names.minorPlanet.${minorPlanetId}`;
+      const translated = t(key);
+      if (translated !== key) return translated;
+    }
+    if (getDataLocale() === "en") {
       const english = object.englishName || object.english_name || object.name_en || object.common_name_en || object.proper_name_en;
       if (english) return displayObjectName(english, fallback);
     }
@@ -378,14 +390,14 @@ export function createUI({
       const translated = t(key);
       if (translated !== key) return translated;
     }
-    return displayObjectName(getLocale() === "en"
+    return displayObjectName(getDataLocale() === "en"
       ? (object.englishName || object.english_name || object.name_en || object.name || object.proper_name || object.id)
       : (object.name_fr || object.name || object.proper_name || object.id), fallback);
   }
 
   function localizedCatalogueName(value) {
     const raw = String(value || "").trim();
-    const normalized = raw.toLocaleLowerCase("fr");
+    const normalized = raw.toLocaleLowerCase(getLocale());
     const keys = {
       "messier": "catalogue.messier", "ngc": "catalogue.ngc", "hipparcos": "catalogue.hipparcos",
       "système solaire": "catalogue.solarSystem", "solar system": "catalogue.solarSystem",
@@ -523,6 +535,29 @@ export function createUI({
       if (object.hip !== undefined && Number.isFinite(Number(object.hip))) add(t("ui.identifier"), `HIP ${object.hip}`);
       else if (object.id && object.id !== name) add(t("ui.catalogue"), object.id);
 
+      // Notes éditoriales des petits corps : leur contenu est centralisé dans i18n.
+      const minorPlanetSlugs = {
+        "(1)": "ceres", "(2)": "pallas", "(3)": "juno", "(4)": "vesta", "(6)": "hebe",
+        "(7)": "iris", "(8)": "flora", "(9)": "metis", "(10)": "hygiea", "(15)": "eunomia",
+        "(16)": "psyche", "(29)": "amphitrite", "(433)": "eros", "(134340)": "pluto",
+        "(136199)": "eris", "(136108)": "haumea", "(136472)": "makemake",
+        "2P/ENCKE": "encke", "1P/HALLEY": "halley", "67P/CHURYUMOV-GERASIMENKO": "churyumovGerasimenko",
+        "C/1995O1HALE-BOPP": "haleBopp", "C/2020F3NEOWISE": "neowise", "161P/HARTLEY-IRAS": "hartleyIras"
+      };
+      const minorPlanetSlug = minorPlanetSlugs[String(object.id || "").toUpperCase().replace(/\s+/g, "")];
+      if (minorPlanetSlug) {
+        const detailPrefix = object.type === "comet"
+          ? `minorPlanetDetails.comets.${minorPlanetSlug}`
+          : `minorPlanetDetails.objects.${minorPlanetSlug}`;
+        const cometType = t(`${detailPrefix}.type`);
+        if (cometType !== `${detailPrefix}.type`) add(t("ui.cometOrbitType"), cometType);
+        const noteKey = object.type === "comet" ? `${detailPrefix}.discoveryNote`
+          : minorPlanetSlug === "ceres" ? `${detailPrefix}.classificationNote`
+          : `${detailPrefix}.orbitNote`;
+        const note = t(noteKey);
+        if (note !== noteKey) add(t("ui.additionalInformation"), note);
+      }
+
       // Distances indicatives pour quelques objets du ciel profond fréquemment observés.
       // Elles ne remplacent pas une mesure propre à chaque objet et restent volontairement arrondies.
       const approximateDistancesLy = {
@@ -574,7 +609,11 @@ export function createUI({
         else if (Number.isFinite(object.temperatureK)) add(t("ui.surfaceTemperature"), `${Math.round(object.temperatureK).toLocaleString(getLocale())} K`);
         if (object.gaia_astrometry_status === "needs_review") {
           add(t("ui.astrometricCheck"), t("ui.toVerifyGaiaAssociation"));
-          add(t("ui.checkReason"), (getLocale() === "en" ? object.gaia_astrometry_review_reason_en : object.gaia_astrometry_review_reason) || object.gaia_astrometry_review_reason || t("ui.astrometricResidualToExamine"));
+          const reasonKey = object.gaia_astrometry_review_reason_key;
+          const localizedReason = reasonKey ? t(`gaiaReviewReasons.${reasonKey}`) : "";
+          add(t("ui.checkReason"), localizedReason && localizedReason !== `gaiaReviewReasons.${reasonKey}`
+            ? localizedReason
+            : (getDataLocale() === "en" ? object.gaia_astrometry_review_reason_en : object.gaia_astrometry_review_reason) || object.gaia_astrometry_review_reason || t("ui.astrometricResidualToExamine"));
           if (Number.isFinite(object.gaia_astrometry_review_residual_arcsec)) {
             add(t("ui.positionResidual"), `${object.gaia_astrometry_review_residual_arcsec.toFixed(3).replace(".", ",")}″`);
           }
@@ -585,8 +624,8 @@ export function createUI({
         const hasPmRa = Number.isFinite(object.pm_ra_cosdec_mas_yr);
         const hasPmDec = Number.isFinite(object.pm_dec_mas_yr);
         if (hasPmRa && hasPmDec) {
-          add(t("ui.properMotionRightAscension"), `${object.pm_ra_cosdec_mas_yr.toLocaleString(getLocale(), { maximumFractionDigits: 2 })} mas/${getLocale() === "en" ? "yr" : "an"}`);
-          add(t("ui.properMotionDeclination"), `${object.pm_dec_mas_yr.toLocaleString(getLocale(), { maximumFractionDigits: 2 })} mas/${getLocale() === "en" ? "yr" : "an"}`);
+          add(t("ui.properMotionRightAscension"), `${object.pm_ra_cosdec_mas_yr.toLocaleString(getLocale(), { maximumFractionDigits: 2 })} mas/${t("ui.yearAbbreviation")}`);
+          add(t("ui.properMotionDeclination"), `${object.pm_dec_mas_yr.toLocaleString(getLocale(), { maximumFractionDigits: 2 })} mas/${t("ui.yearAbbreviation")}`);
         } else if (object.gaia_source_id) {
           add(t("ui.gaiaProperMotion"), t("ui.notAvailableInImportedData"));
         }
@@ -798,16 +837,14 @@ export function createUI({
   }
 
   function localizeSpectralType(value) {
-    const text = String(value || "");
-    if (getLocale() !== "en") return text;
-    return text
-      .replace(/bleue[- ]blanche/gi, "blue-white")
-      .replace(/blanche[- ]jaune/gi, "yellow-white")
-      .replace(/bleue/gi, "blue")
-      .replace(/blanche/gi, "white")
-      .replace(/jaune/gi, "yellow")
-      .replace(/rouge/gi, "red")
-      .replace(/orange/gi, "orange");
+    const translations = {
+      "bleue-blanche": "blueWhite", "bleue blanche": "blueWhite", "blue-white": "blueWhite", "blue white": "blueWhite",
+      "blanche-jaune": "yellowWhite", "blanche jaune": "yellowWhite", "yellow-white": "yellowWhite", "yellow white": "yellowWhite",
+      "bleue": "blue", "blue": "blue", "blanche": "white", "white": "white",
+      "jaune": "yellow", "yellow": "yellow", "rouge": "red", "red": "red", "orange": "orange"
+    };
+    return String(value || "").replace(/bleue[- ]blanche|blue[- ]white|blanche[- ]jaune|yellow[- ]white|bleue|blanche|jaune|rouge|blue|white|yellow|red|orange/gi,
+      token => t(`ui.spectralColors.${translations[token.toLowerCase()] || "orange"}`));
   }
 
   function inferSpectralType(temp) {
@@ -842,7 +879,7 @@ export function createUI({
     const translated = key ? t(key) : key;
     if (translated && translated !== key) return translated;
     // Les champs bilingues restent des alias de recherche et un repli sûr.
-    return getLocale() === "en"
+    return getDataLocale() === "en"
       ? String(item.englishName || item.english_name || item.name || id)
       : String(item.name_fr || item.name || id);
   }
@@ -1034,7 +1071,9 @@ export function createUI({
       return solarName && !/^(?:HIP|HD|HR|SAO|TYC|Gaia)\s*[-#]?\s*\d/i.test(solarName) ? solarName : "";
     }
     const ids = [object.id, object.designation].map(value => String(value || "").trim()).filter(Boolean);
-    const candidates = [object.common_name_en, object.common_name, object.commonName, object.proper_name_en, object.proper_name, object.properName, localizedObjectName(object)];
+    // Le nom déjà résolu selon la langue active doit primer sur les alias
+    // français conservés dans les données pour la recherche.
+    const candidates = [localizedObjectName(object), object.common_name_en, object.common_name, object.commonName, object.proper_name_en, object.proper_name, object.properName];
     for (const rawCandidate of candidates) {
       const candidate = String(rawCandidate || "").trim();
       if (!candidate) continue;
@@ -3073,7 +3112,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           const title = document.createElement("strong");
           title.textContent = `${step.label} : ${step.object.discoveryCommonName}`;
           const note = document.createElement("p");
-          note.textContent = `${step.advice} Hauteur actuelle : ${Number(step.object.alt).toFixed(0)}°.`;
+          note.textContent = `${step.advice} ${t("ui.currentAltitude", { altitude: Number(step.object.alt).toFixed(0) })}°.`;
           const show = document.createElement("button");
           show.type = "button"; show.textContent = t("ui.showOnMap");
           show.addEventListener("click", () => {
@@ -3881,7 +3920,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const setFullDiagramLabel = (node, name, pos) => {
         if (!node || !pos) return;
         // Affiche le nom complet sur plusieurs lignes plutôt que de le tronquer.
-        const words = String(name || "Objet").trim().split(/\s+/);
+        const words = String(name || t("ui.celestialObject")).trim().split(/\s+/);
         const lines = [];
         let line = "";
         for (const word of words) {
@@ -3893,7 +3932,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           else { lines.push(line); line = word; }
         }
         if (line) lines.push(line);
-        const safeLines = lines.length ? lines : ["Objet"];
+        const safeLines = lines.length ? lines : [t("ui.celestialObject")];
         const widest = Math.max(...safeLines.map(item => item.length));
         const estimatedWidth = Math.min(190, widest * 7.2);
         const x = Math.max(estimatedWidth / 2 + 8, Math.min(600 - estimatedWidth / 2 - 8, pos.x));
@@ -3912,7 +3951,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           tspan.textContent = part;
           node.append(tspan);
         });
-        node.setAttribute("aria-label", String(name || "Objet"));
+        node.setAttribute("aria-label", String(name || t("ui.celestialObject")));
       };
       if (starHopDiagramDirection) starHopDiagramDirection.textContent = compass;
       if (starHopSeparation) starHopSeparation.textContent = distance;
@@ -4293,7 +4332,7 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const dateDisplay = $("session-date-display");
       if (dateDisplay) {
         const match = /^(\d{4})-(\d{2})-(\d{2})$/.exec(dateValue);
-        dateDisplay.textContent = match ? (getLocale() === "en" ? `${match[2]}/${match[3]}/${match[1]}` : `${match[3]}/${match[2]}/${match[1]}`) : t("ui.datePlaceholder");
+        dateDisplay.textContent = match ? new Intl.DateTimeFormat(getLocale(), { day: "2-digit", month: "2-digit", year: "numeric" }).format(new Date(Number(match[1]), Number(match[2]) - 1, Number(match[3]), 12)) : t("ui.datePlaceholder");
       }
       for (const [id, outputId, fallback] of [["session-start", "session-start-display", "--:--"], ["session-end", "session-end-display", "--:--"]]) {
         const output = $(outputId);
