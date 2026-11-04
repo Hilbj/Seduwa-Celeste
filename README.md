@@ -1,4 +1,15 @@
-Atlas Céleste Seduwa— version 496
+Atlas Céleste Seduwa— version 498
+
+## v498
+- Ajout des clés de traduction utilisées par les attributs HTML d’accessibilité.
+- Extension du moteur i18n aux attributs `placeholder` et `content`.
+- Traduction de la balise de titre, de la description de page, du libellé accessible du canvas, de plusieurs boutons et libellés statiques.
+- Traduction des textes de guidage dynamiques les plus visibles (cible, nom usuel, progression des cercles, direction droite/gauche, altitude et états de visibilité).
+- Rafraîchissement de plusieurs panneaux dynamiques lors du changement de langue.
+- Formatage des dates, nombres et heures selon la langue active, y compris les horaires de lever, culmination et coucher.
+  
+## v497
+Création des fichiers fr.json et en.json
 
 ## v496
 De 15 minutes avant le lever du Soleil jusqu’à 15 minutes après son coucher, la carte s’ouvre centrée sur l’azimut du Soleil ; le reste du temps elle reste pointée au Nord
