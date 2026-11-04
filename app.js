@@ -80,24 +80,24 @@ import { createUI } from "./js/ui.js";
     // Noms usuels des étoiles les plus brillantes, indexés par numéro HIP.
   // (Doublons supprimés pour éviter les écrasements silencieux)
   const COMMON_STAR_NAMES = {
-    677: "Alphératz", 746: "Caph", 1067: "Algenib", 3179: "Schedar",
-    4427: "Navi", 5447: "Mirach", 6686: "Ruchbah", 7588: "Achernar",
-    8886: "Segin", 9884: "Hamal", 14135: "Menkar", 14576: "Algol",
-    15863: "Mirfak", 21421: "Aldébaran", 24436: "Rigel", 24608: "Capella",
-    25336: "Bellatrix", 25428: "Elnath", 25930: "Mintaka", 26311: "Alnilam",
-    26727: "Alnitak", 27989: "Bételgeuse", 30438: "Canopus", 32349: "Sirius",
-    33579: "Wezen", 36850: "Castor", 37279: "Procyon", 37826: "Pollux",
-    49669: "Régulus", 53910: "Mérak", 54061: "Dubhé", 57632: "Dénébola",
-    60718: "Acrux", 62434: "Gacrux", 63090: "Zosma", 65378: "Mizar",
-    65474: "Spica", 67301: "Alkaïd", 68702: "Hadar", 69673: "Arcturus",
-    71683: "Alpha Centauri", 80763: "Antarès", 91262: "Véga", 97649: "Altaïr",
-    102098: "Deneb", 102488: "Gienah", 113368: "Fomalhaut", 11767: "Étoile Polaire",
-    31592: "Alhena", 39953: "Avior", 41037: "Menkalinan", 46390: "Adhara",
-    59774: "Alphard", 62956: "Gienah Corvi", 65477: "Syrma", 76267: "Kaus Australis",
-    77070: "Shaula", 82273: "Kaus Media", 85927: "Nunki", 86742: "Rasalhague",
-    88635: "Eltanin", 90185: "Peacock", 92855: "Rasalgethi", 94376: "Rastaban",
-    100453: "Sadr", 104732: "Enif", 107315: "Sadalsuud", 109268: "Sadalmelik",
-    110960: "Scheat", 113881: "Markab", 116727: "Mimosa"
+    677: t("names.star.alpheratz"), 746: t("names.star.caph"), 1067: t("names.star.algenib"), 3179: t("names.star.schedar"),
+    4427: t("names.star.navi"), 5447: t("names.star.mirach"), 6686: t("names.star.ruchbah"), 7588: t("names.star.achernar"),
+    8886: t("names.star.segin"), 9884: t("names.star.hamal"), 14135: t("names.star.menkar"), 14576: t("names.star.algol"),
+    15863: t("names.star.mirfak"), 21421: t("names.star.aldebaran"), 24436: t("names.star.rigel"), 24608: t("names.star.capella"),
+    25336: t("names.star.bellatrix"), 25428: t("names.star.elnath"), 25930: t("names.star.mintaka"), 26311: t("names.star.alnilam"),
+    26727: t("names.star.alnitak"), 27989: t("names.star.betelgeuse"), 30438: t("names.star.canopus"), 32349: t("names.star.sirius"),
+    33579: t("names.star.wezen"), 36850: t("names.star.castor"), 37279: t("names.star.procyon"), 37826: t("names.star.pollux"),
+    49669: t("names.star.regulus"), 53910: t("names.star.merak"), 54061: t("names.star.dubhe"), 57632: t("names.star.denebola"),
+    60718: t("names.star.acrux"), 62434: t("names.star.gacrux"), 63090: t("names.star.zosma"), 65378: t("names.star.mizar"),
+    65474: t("names.star.spica"), 67301: t("names.star.alkaid"), 68702: t("names.star.hadar"), 69673: t("names.star.arcturus"),
+    71683: t("names.star.alpha-centauri"), 80763: t("names.star.antares"), 91262: t("names.star.vega"), 97649: t("names.star.altair"),
+    102098: t("names.star.deneb"), 102488: t("names.star.gienah"), 113368: t("names.star.fomalhaut"), 11767: t("names.star.polaris"),
+    31592: t("names.star.alhena"), 39953: t("names.star.avior"), 41037: t("names.star.menkalinan"), 46390: t("names.star.adhara"),
+    59774: t("names.star.alphard"), 62956: t("names.star.gienah-corvi"), 65477: t("names.star.syrma"), 76267: t("names.star.kaus-australis"),
+    77070: t("names.star.shaula"), 82273: t("names.star.kaus-media"), 85927: t("names.star.nunki"), 86742: t("names.star.rasalhague"),
+    88635: t("names.star.eltanin"), 90185: t("names.star.peacock"), 92855: t("names.star.rasalgethi"), 94376: t("names.star.rastaban"),
+    100453: t("names.star.sadr"), 104732: t("names.star.enif"), 107315: t("names.star.sadalsuud"), 109268: t("names.star.sadalmelik"),
+    110960: t("names.star.scheat"), 113881: t("names.star.markab"), 116727: t("names.star.mimosa")
   };
 
   function displayStarName(star) {
@@ -4316,14 +4316,14 @@ function updateSkyGuide(target, camera, distance, nx, ny, message = "") {
   if (modeToggle) modeToggle.textContent = freeMode ? t("ui.targetedGuidance") : t("ui.freeMode");
   if (name) name.textContent = freeMode
     ? (target?._freeGuideLabel || (target?.type === "star" ? t("ui.starInField") : target?.name || target?.id) || t("ui.scanSkyGentlyShort"))
-    : (target?.name || target?.id || "Cible");
+    : (target?.name || target?.id || t("ui.target"));
   const commonName = skyGuideCommonName(target);
   if (commonNameLabel) {
     commonNameLabel.textContent = commonName;
     // En découverte, ne pas dévoiler immédiatement le nom : il apparaît
     // quand l’objet entre dans le cercle intermédiaire (6°), étape pédagogique.
     commonNameLabel.hidden = !(commonName && freeMode);
-    commonNameLabel.setAttribute("aria-label", commonName ? `Nom usuel : ${commonName}` : "");
+    commonNameLabel.setAttribute("aria-label", commonName ? `${t("ui.commonNamePrefix")}${commonName}` : "");
   }
 
   // Dimensionner les cercles dès l'ouverture du mode libre, même avant
@@ -4400,7 +4400,7 @@ function updateSkyGuide(target, camera, distance, nx, ny, message = "") {
   });
   state.skyGuideProgress = acquiredCount;
   if (commonNameLabel) commonNameLabel.hidden = !(commonName && freeMode && acquiredCount >= 2);
-  if (progress) progress.textContent = `${state.skyGuideProgress} / 3 cercles acquis`;
+  if (progress) progress.textContent = t("ui.circlesAcquiredCount", { count: state.skyGuideProgress });
   if (status) status.textContent = message || (state.skyGuideProgress >= 3
     ? t("ui.objectSpottedThreeCircles")
     : Number.isFinite(distance) ? `${t("ui.deviationFromCenter")}: ${distance.toFixed(1).replace(".", ",")}° · ${t("ui.gentlyPointPhone")}`
@@ -4425,7 +4425,7 @@ function updateFinder(date = new Date()) {
 
   if (finderName) {
     finderName.textContent =
-      target?.name || target?.id || "Cible";
+      target?.name || target?.id || t("ui.target");
   }
 
   function resetLock() {
@@ -4470,7 +4470,7 @@ function updateFinder(date = new Date()) {
     !Number.isFinite(target.az) ||
     !Number.isFinite(target.alt)
   ) {
-    showUnavailable("Position de la cible indisponible.");
+    showUnavailable(t("ui.targetPositionUnavailable"));
 
     if (sensor) {
       sensor.textContent =
@@ -4482,11 +4482,11 @@ function updateFinder(date = new Date()) {
 
   // 2. Une cible sous l'horizon ne peut pas être visée.
   if (target.alt <= 0) {
-    showUnavailable("Cette cible est sous l'horizon.");
+    showUnavailable(t("ui.targetBelowHorizon"));
 
     if (sensor) {
       sensor.textContent =
-        `Altitude de la cible : ${target.alt.toFixed(1)}°.`;
+        `${t("ui.targetAltitude")} ${target.alt.toFixed(1)}°.`;
     }
 
     return;
@@ -4554,7 +4554,7 @@ function updateFinder(date = new Date()) {
 
     if (horizontal) {
       horizontal.textContent =
-        `${horizontalError >= 0 ? "Droite" : "Gauche"} · demi-tour`;
+        `${horizontalError >= 0 ? t("ui.right") : t("ui.left")} · ${t("ui.halfTurn")}`;
     }
 
     if (vertical) {
@@ -4609,7 +4609,7 @@ function updateFinder(date = new Date()) {
     horizontal.textContent =
       Math.abs(horizontalError) < 0.5
         ? t("ui.centered")
-        : `${horizontalError > 0 ? "Droite" : "Gauche"} ` +
+        : `${horizontalError > 0 ? t("ui.right") : t("ui.left")} ` +
           `${Math.abs(horizontalError).toFixed(1)}°`;
   }
 
@@ -5109,7 +5109,7 @@ function drawSky() {
             "Vitesse gyro α/β/γ : " + [state.gyroRateAlpha, state.gyroRateBeta, state.gyroRateGamma].map(v => Number.isFinite(v) ? v.toFixed(1) : "—").join(" / ") + " °/s · norme : " + (Number.isFinite(state.gyroRateMagnitude) ? state.gyroRateMagnitude.toFixed(1) + " °/s" : "—"),
             "Décision cap : " + (state.headingDecision || "indisponible") + " · mouvement cohérent : " + (state.headingMotionConfirmed ? "confirmé" : "non confirmé") + " · échantillons : " + (state.headingMotionSamples || 0) + " · déplacement candidat : " + (Number.isFinite(state.headingMotionTravel) ? state.headingMotionTravel.toFixed(2) : "—") + "°",
             "Position : " + state.latitude.toFixed(4) + "°, " + state.longitude.toFixed(4) + "° · lieu : " + (state.locationName || "non nommé"),
-            (() => { const d = state.observationDate || new Date(); const sun = solarObjectsAt(d).find(o => o.type === "sun"); return "Soleil calculé : " + (sun ? "azimut " + sun.az.toFixed(1) + "° · altitude " + sun.alt.toFixed(1) + "°" : "indisponible") + " · heure observée : " + d.toLocaleString("fr-FR"); })(),
+            (() => { const d = state.observationDate || new Date(); const sun = solarObjectsAt(d).find(o => o.type === "sun"); return "Soleil calculé : " + (sun ? "azimut " + sun.az.toFixed(1) + "° · altitude " + sun.alt.toFixed(1) + "°" : "indisponible") + " · heure observée : " + d.toLocaleString(getLocale()); })(),
             "Actualisé toutes les 60 images (?perf=1 pour activer)"
           ].join("\n");
         }

@@ -1,7 +1,10 @@
 {
   "app": {
     "subtitle": "CELESTIAL",
-    "title": "SEDUWA"
+    "title": "SEDUWA",
+    "documentTitle": "SEDUWA — Sky map",
+    "metaDescription": "Atlas Céleste: interactive sky map and astronomical pointing guide.",
+    "canvasAria": "Interactive sky map"
   },
   "conditions": {
     "cardClouds": "Clouds",
@@ -53,7 +56,9 @@
     "unavailable": "Unavailable",
     "unknownPosition": "Unknown position. Use the location icon to authorize geolocation, then refresh.",
     "weatherIndexLabel": "Weather index for observation",
-    "weatherUnavailable": "Weather forecasts unavailable. Check the internet connection; the light pollution map remains accessible below."
+    "weatherUnavailable": "Weather forecasts unavailable. Check the internet connection; the light pollution map remains accessible below.",
+    "sectionAria": "Observing conditions",
+    "closeAria": "Close"
   },
   "constellation": {
     "Cas": "Look for a W or M made of five bright stars; its orientation varies with time and season.",
@@ -96,19 +101,26 @@
       "label": "Discover a constellation",
       "next": "Next →",
       "placeholder": "Choose a constellation…",
-      "prev": "← Previous"
+      "prev": "← Previous",
+      "diagramAria": "Simplified diagram of the selected constellation",
+      "prevAria": "Previous star"
     },
     "evening": {
       "note": "The route is indicative: weather, light pollution and sky transparency can change what is visible.",
       "subtitle": "Targets above the horizon, based on the time and computed positions.",
-      "title": "My evening in 3 steps"
+      "title": "My evening in 3 steps",
+      "sectionAria": "Personalized observing route",
+      "closeAria": "Close route"
     },
     "panel": {
       "handleLabel": "Discovery menu",
       "introSubtitle": "Choose a discovery to get started.",
       "introTitle": "Explore the sky",
       "sectionPrimary": "To get started",
-      "sectionSecondary": "Explore further"
+      "sectionSecondary": "Explore further",
+      "sectionAria": "Explore the sky",
+      "handleAria": "Show the Discovery menu again",
+      "actionsAria": "Discovery actions"
     },
     "search": {
       "filterAll": "All",
@@ -118,11 +130,14 @@
       "filterPlanets": "♄ Planets",
       "inputLabel": "Celestial object name",
       "subtitle": "Search by common name, including objects below the horizon.",
-      "title": "Search for a named object"
+      "title": "Search for a named object",
+      "closeAria": "Close search",
+      "filtersAria": "Filter by object type"
     },
     "start": {
       "note": "Indicative selection: real visibility also depends on clouds, transparency and light pollution.",
-      "title": "Visible now"
+      "title": "Visible now",
+      "closeAria": "Close recommendations"
     },
     "walks": {
       "andromedaSub": "M31, away from city lights",
@@ -145,8 +160,15 @@
       "summerTitle": "The Summer Triangle",
       "title": "Celestial walks",
       "winterhexSub": "Sirius · Rigel · Capella · six bright stars",
-      "winterhexTitle": "The Winter Hexagon"
-    }
+      "winterhexTitle": "The Winter Hexagon",
+      "sectionAria": "Guided sky tours",
+      "closeTitle": "Close the list",
+      "closeAria": "Close the sky tours list",
+      "listAria": "Choose a sky tour",
+      "detailCloseTitle": "Return to the list",
+      "detailCloseAria": "Close the guided tour and return to the list"
+    },
+    "close": "Close"
   },
   "events": {
     "annularSolarEclipse": "Annular solar eclipse",
@@ -198,7 +220,10 @@
     "ursidsMax": "Ursids maximum",
     "southernTauridsMax": "Southern Taurids maximum",
     "northernTauridsMax": "Northern Taurids maximum",
-    "marsJupiterApproach": "Mars–Jupiter approach"
+    "marsJupiterApproach": "Mars–Jupiter approach",
+    "sectionAria": "Celestial events calendar",
+    "closeAria": "Close",
+    "filtersAria": "Filter celestial events"
   },
   "jupiterMoons": {
     "animate": "Animate",
@@ -239,7 +264,12 @@
     "positionsCalculated": "Apparent positions calculated for",
     "live": "Live",
     "beyondJupiter": "Beyond Jupiter.",
-    "betweenEarthAndJupiter": "Between Earth and Jupiter."
+    "betweenEarthAndJupiter": "Between Earth and Jupiter.",
+    "sectionAria": "Jupiter’s Galilean moons",
+    "closeAria": "Close the Jupiter moons diagram",
+    "chartAria": "Diagram of the moons as seen from Earth",
+    "svgAria": "Side view of Jupiter and the apparent positions of its four Galilean moons",
+    "detailsAria": "Moon positions"
   },
   "locationDialog": {
     "apply": "Choose this location",
@@ -248,7 +278,8 @@
     "note": "The chosen location is used to compute the sky map and the weather conditions. GPS remains available at any time.",
     "presetLabel": "Preset locations",
     "selectPlaceholder": "Select a location…",
-    "title": "Choose a location"
+    "title": "Choose a location",
+    "closeAria": "Close"
   },
   "moon": {
     "age": "Estimated lunar age",
@@ -277,7 +308,8 @@
       "earth": "Earth",
       "phaseDepends": "The phase depends on the Sun–Earth–Moon angle",
       "schematic": "Schematic lunar orbit",
-      "sun": "Sun"
+      "sun": "Sun",
+      "sliderAria": "Move the Moon along its orbit to explore its phases"
     },
     "orbitExplanation": "Drag the Moon or use ←/→ to explore the phases. ‘Now’ activates live tracking, updated every second. Diagram not to scale; the real orbital inclination is not represented.",
     "orbitSubtitle": "Orbital diagram viewed from above · distances not to scale",
@@ -294,7 +326,13 @@
     "aboveHorizonSuffix": "Its influence on the deep sky also depends on its illumination, transparency and light pollution.",
     "aboveHorizon": "above the horizon",
     "belowHorizonShort": "below the horizon",
-    "dynamicSchemaLabel": "on the dynamic diagram: Moon"
+    "dynamicSchemaLabel": "on the dynamic diagram: Moon",
+    "sectionAria": "Moon astronomy panel",
+    "closeAria": "Close Moon panel",
+    "phaseSvgAria": "Moon disc illuminated according to the calculated phase",
+    "orbitSvgAria": "Interactive diagram of the Moon’s orbital position relative to Earth and the Sun",
+    "sideInfoAria": "Additional information about the lunar phase",
+    "showCurrentTimeAndTrackPhase": "Show the current time and track the phase live"
   },
   "observationDialog": {
     "apply": "Confirm date",
@@ -303,14 +341,16 @@
     "label": "Choose the local date and time",
     "note": "Sky positions will be recomputed for this moment.",
     "realtime": "Real time",
-    "title": "Observation date and time"
+    "title": "Observation date and time",
+    "closeAria": "Close"
   },
   "readout": {
     "direction": "OBSERVED DIRECTION",
     "pitch": "Pitch"
   },
   "review": {
-    "label": "To verify"
+    "label": "To verify",
+    "title": "Show stars whose astrometry needs review"
   },
   "session": {
     "checkClothes": "Bring warm clothes and a drink",
@@ -369,7 +409,12 @@
     "title": "Observing session",
     "weatherLabel": "Weather",
     "illuminated": "illuminated",
-    "moonWord": "Moon"
+    "moonWord": "Moon",
+    "sectionAria": "Observing session",
+    "closeAria": "Close",
+    "indicesAria": "Observing condition scores",
+    "weatherAria": "Weather score",
+    "moonAria": "Moon score"
   },
   "settings": {
     "button": "Settings",
@@ -390,7 +435,9 @@
     "starLabels": "Bright star names",
     "stars": "Stars",
     "sun": "Sun",
-    "title": "Map settings"
+    "title": "Map settings",
+    "close": "Close",
+    "closePanel": "Close settings"
   },
   "solarSystem": {
     "animate": "Animate",
@@ -423,7 +470,10 @@
     "naturalSatellites": "Natural satellites",
     "knownSatellites": "{count} known",
     "natureIceGiant": "Ice giant rich in water, ammonia and methane",
-    "descUranus": "Uranus rotates almost on its side, which causes extreme seasons. Methane in its atmosphere absorbs part of the red light and contributes to its blue-green hue."
+    "descUranus": "Uranus rotates almost on its side, which causes extreme seasons. Methane in its atmosphere absorbs part of the red light and contributes to its blue-green hue.",
+    "sectionAria": "Solar system exploration",
+    "closeAria": "Close the Solar System",
+    "orbitSvgAria": "Interactive orbital view of the Sun and the eight planets"
   },
   "starHop": {
     "anchorLabel": "1. Anchor star",
@@ -489,7 +539,14 @@
     "remainsIndicative": "remains indicative",
     "noReliableRouteFound": "No reliable route found with hops of",
     "maxHopsDottedLine": "° maximum. The dotted line shows only the indicative direct direction, not a validated route.",
-    "celestialDirection": "Celestial direction"
+    "celestialDirection": "Celestial direction",
+    "sectionAria": "Star-hopping guide",
+    "closeAria": "Close",
+    "sphereControlsAria": "Celestial sphere controls",
+    "zoomOutAria": "Zoom out",
+    "zoomInAria": "Zoom in",
+    "routeCardAria": "Star-hop route steps",
+    "sphereInfoAria": "Information about the celestial sphere"
   },
   "status": {
     "manual": "Manual mode",
@@ -499,7 +556,10 @@
   "summary": {
     "celestialObjects": "celestial objects",
     "localTime": "LOCAL TIME",
-    "objectsInField": "OBJECTS IN FIELD"
+    "objectsInField": "OBJECTS IN FIELD",
+    "count": "{n} objects",
+    "clickToChoose": "Click to choose the date and time",
+    "changeDateTime": "Change the observation date and time"
   },
   "ui": {
     "absoluteMagnitude": "Estimated absolute magnitude",
@@ -761,7 +821,7 @@
     "surfaceTemperature": "Surface temperature",
     "switchToDiscoveryMode": "Switch to Discovery mode",
     "switchToExpertMode": "Switch to Expert mode",
-    "target": "target",
+    "target": "Target",
     "targetEasierToObserveWhenHigher": "The target will generally be easier to observe when it is higher.",
     "targetIsBehindYou": "The target is behind you. Turn around to face it.",
     "targetLockedKeepPhoneStable": "Target locked! Keep the phone stable.",
@@ -815,7 +875,42 @@
     "guidedWalk": "GUIDED WALK",
     "days": "days",
     "day": "day",
-    "horizonContrastNote": "Proximity to the horizon often reduces contrast and sharpness. Even a bright target may twinkle or appear weakened."
+    "horizonContrastNote": "Proximity to the horizon often reduces contrast and sharpness. Even a bright target may twinkle or appear weakened.",
+    "commonNamePrefix": "Common name: ",
+    "circlesAcquiredCount": "{count} / 3 circles acquired",
+    "right": "Right",
+    "left": "Left",
+    "halfTurn": "turn around",
+    "showInterface": "Show interface",
+    "starHopAnchor": "Reference star",
+    "starHopTarget": "Target",
+    "starHopDirection": "Direction",
+    "starHopChoosePair": "Choose a reference star and a target to plan the star hop.",
+    "discoverySearchPlaceholder": "E.g. Vega, Andromeda, Saturn…",
+    "catalogueSearchPlaceholder": "E.g. M27, M57, Ring Nebula",
+    "sessionNotesPlaceholder": "Objects to observe, sky conditions, impressions…",
+    "catalogue": "Catalogue",
+    "sunsetUnavailable": "Sunset time is unavailable for this location or date.",
+    "live": "Live",
+    "pause": "Pause",
+    "skyGuideAria": "Guidance to the selected object",
+    "finishGuidance": "End guidance",
+    "guideSelected": "Guide to this object",
+    "guidedTour": "GUIDED TOUR",
+    "constellationPickerHint": "Choose a figure to highlight it on the map.",
+    "finishGuidanceShort": "Finish",
+    "belowHorizonForNow": "Below the horizon at the moment",
+    "positionUnavailableForNow": "Position unavailable at the moment",
+    "onMap": "on the map",
+    "sunsetLabel": "Sunset:",
+    "targetPositionUnavailable": "Target position unavailable.",
+    "targetBelowHorizon": "This target is below the horizon.",
+    "targetAltitude": "Target altitude:",
+    "finderMode": "FINDER MODE",
+    "returnToMap": "Back to the map",
+    "recenterGuidance": "Recenter guidance",
+    "exitImmersion": "Exit immersion",
+    "moonOrbitLabel": "Moon"
   },
   "universe": {
     "cosmicWebPointer": "✦ Our region, among countless clusters",
@@ -856,7 +951,17 @@
     "unitBillion": "In billions of km",
     "unitKm": "In kilometers",
     "unitLy": "In light-years",
-    "unitMillion": "In millions of km"
+    "unitMillion": "In millions of km",
+    "sectionAria": "Journey through the Universe",
+    "closeAria": "Close the journey through the Universe",
+    "zoomOut": "Zoom out",
+    "zoomOutAria": "Zoom out to a larger scale",
+    "zoomRangeAria": "Cosmic journey scale",
+    "zoomIn": "Zoom in",
+    "zoomInAria": "Zoom in towards our Solar System",
+    "stageAria": "Continuous cosmic scene; only object names are shown in the scene",
+    "distancePanelAria": "Distance markers for the selected scale",
+    "levelsAria": "Choose a scale"
   },
   "visibleNow": {
     "advancedSummary": "Search and advanced filters",
@@ -905,7 +1010,14 @@
     "title": "Visible now",
     "aboveHorizon": "above the horizon",
     "show": "Show",
-    "magnitudeFilterNote": "The magnitude filter uses the catalogue value; for galaxies and nebulae, it is not enough to predict real visibility."
+    "magnitudeFilterNote": "The magnitude filter uses the catalogue value; for galaxies and nebulae, it is not enough to predict real visibility.",
+    "sectionAria": "Objects visible now",
+    "closeAria": "Close",
+    "timeControlsAria": "Date and time for visible objects",
+    "controlsAria": "Select objects to observe",
+    "modeAria": "List mode",
+    "searchAria": "Search the deep-sky catalogue",
+    "filtersAria": "Filter and sort visible objects"
   },
   "walk": {
     "andromedaConstellation": "andromeda",
@@ -952,6 +1064,7 @@
   },
   "toolbar": {
     "locale": "Language",
+    "locate": "Location",
     "displaySettings": "Display settings",
     "visibleNow": "Visible now",
     "starHop": "Star hopping",
@@ -959,7 +1072,18 @@
     "session": "Session",
     "moon": "Moon",
     "events": "Events",
-    "hideInterface": "Hide interface"
+    "hideInterface": "Hide interface",
+    "locateLong": "Set location",
+    "compass": "Compass",
+    "compassLong": "Enable compass",
+    "displaySettingsLong": "Customize display",
+    "visibleNowLong": "Visible now",
+    "starHopLong": "Star-hopping guide",
+    "conditionsLong": "Observing conditions",
+    "sessionLong": "Prepare an observing session",
+    "moonLong": "Moon astronomy panel",
+    "eventsLong": "Celestial events calendar",
+    "hideInterfaceLong": "Hide interface"
   },
   "compass": {
     "north": "North",
@@ -970,5 +1094,165 @@
     "northwest": "Northwest",
     "southeast": "Southeast",
     "southwest": "Southwest"
+  },
+  "names": {
+    "star": {
+      "alpheratz": "Alpheratz",
+      "caph": "Caph",
+      "algenib": "Algenib",
+      "schedar": "Schedar",
+      "navi": "Navi",
+      "mirach": "Mirach",
+      "ruchbah": "Ruchbah",
+      "achernar": "Achernar",
+      "segin": "Segin",
+      "hamal": "Hamal",
+      "menkar": "Menkar",
+      "algol": "Algol",
+      "mirfak": "Mirfak",
+      "albireo": "Albireo",
+      "aldebaran": "Aldebaran",
+      "rigel": "Rigel",
+      "capella": "Capella",
+      "bellatrix": "Bellatrix",
+      "elnath": "Elnath",
+      "mintaka": "Mintaka",
+      "alnilam": "Alnilam",
+      "alnitak": "Alnitak",
+      "betelgeuse": "Betelgeuse",
+      "canopus": "Canopus",
+      "sirius": "Sirius",
+      "wezen": "Wezen",
+      "castor": "Castor",
+      "procyon": "Procyon",
+      "pollux": "Pollux",
+      "regulus": "Regulus",
+      "merak": "Merak",
+      "dubhe": "Dubhe",
+      "denebola": "Denebola",
+      "acrux": "Acrux",
+      "gacrux": "Gacrux",
+      "zosma": "Zosma",
+      "mizar": "Mizar",
+      "spica": "Spica",
+      "alkaid": "Alkaid",
+      "hadar": "Hadar",
+      "arcturus": "Arcturus",
+      "alpha-centauri": "Alpha Centauri",
+      "antares": "Antares",
+      "vega": "Vega",
+      "altair": "Altair",
+      "deneb": "Deneb",
+      "gienah": "Gienah",
+      "gienah-corvi": "Gienah (Corvi)",
+      "fomalhaut": "Fomalhaut",
+      "polaris": "Polaris",
+      "polaris-full": "Polaris · North Star",
+      "alhena": "Alhena",
+      "avior": "Avior",
+      "menkalinan": "Menkalinan",
+      "adhara": "Adhara",
+      "alphard": "Alphard",
+      "syrma": "Syrma",
+      "kaus-australis": "Kaus Australis",
+      "kaus-media": "Kaus Media",
+      "shaula": "Shaula",
+      "nunki": "Nunki",
+      "rasalhague": "Rasalhague",
+      "eltanin": "Eltanin",
+      "peacock": "Peacock",
+      "rasalgethi": "Rasalgethi",
+      "rastaban": "Rastaban",
+      "sadr": "Sadr",
+      "enif": "Enif",
+      "sadalsuud": "Sadalsuud",
+      "sadalmelik": "Sadalmelik",
+      "scheat": "Scheat",
+      "markab": "Markab",
+      "mimosa": "Mimosa",
+      "pleione": "Pleione",
+      "saiph": "Saiph",
+      "meissa": "Meissa",
+      "sheratan": "Sheratan",
+      "almach": "Almach",
+      "alcyone": "Alcyone"
+    },
+    "constellation": {
+      "cygnus": "Cygnus",
+      "scorpius": "Scorpius",
+      "auriga": "Auriga",
+      "eridanus": "Eridanus",
+      "taurus": "Taurus",
+      "orion": "Orion",
+      "lyra": "Lyra",
+      "aquila": "Aquila",
+      "pegasus": "Pegasus",
+      "andromeda": "Andromeda",
+      "ursa-major": "Ursa Major",
+      "ursa-minor": "Ursa Minor",
+      "leo": "Leo",
+      "virgo": "Virgo",
+      "bootes": "Boötes",
+      "gemini": "Gemini",
+      "canis-major": "Canis Major",
+      "canis-minor": "Canis Minor",
+      "cassiopeia": "Cassiopeia",
+      "milky-way": "Milky Way",
+      "crux": "Crux"
+    },
+    "asterism": {
+      "big-dipper": "Big Dipper",
+      "little-dipper": "Little Dipper"
+    },
+    "object": {
+      "pleiades": "The Pleiades",
+      "orion-nebula": "Orion Nebula",
+      "andromeda-galaxy": "Andromeda Galaxy",
+      "lagoon-nebula": "Lagoon Nebula",
+      "heart-nebula": "Heart Nebula",
+      "horsehead-nebula": "Horsehead Nebula",
+      "north-america-nebula": "North America Nebula",
+      "california-nebula": "California Nebula",
+      "proxima-centauri": "Proxima Centauri",
+      "alpha-centauri-ab": "Alpha Centauri A/B",
+      "barnards-star": "Barnard's Star",
+      "wolf-359": "Wolf 359",
+      "lalande-21185": "Lalande 21185"
+    },
+    "planet": {
+      "mercury": "Mercury",
+      "venus": "Venus",
+      "earth": "Earth",
+      "mars": "Mars",
+      "jupiter": "Jupiter",
+      "saturn": "Saturn",
+      "uranus": "Uranus",
+      "neptune": "Neptune",
+      "sun": "Sun",
+      "moon": "Moon"
+    },
+    "moon": {
+      "io": "Io",
+      "europa": "Europa",
+      "ganymede": "Ganymede",
+      "callisto": "Callisto"
+    }
+  },
+  "zoom": {
+    "group": "Map zoom controls",
+    "in": "Zoom in",
+    "out": "Zoom out",
+    "reset": "Reset zoom"
+  },
+  "mode": {
+    "toDiscovery": "Switch to Discovery mode"
+  },
+  "nightVision": {
+    "activate": "Enable red night vision"
+  },
+  "riseTransit": {
+    "rise": "Rise",
+    "transit": "Transit",
+    "set": "Set"
   }
 }

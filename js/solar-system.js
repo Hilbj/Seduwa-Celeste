@@ -1,5 +1,7 @@
 "use strict";
 
+import { t } from "./i18n.js";
+
 export function createSolarSystem({
   state,
   norm360
@@ -33,55 +35,55 @@ export function createSolarSystem({
     if (!solarSystemBodies) {
       solarSystemBodies = [
           {
-            name: "Soleil",
+            name: t("names.planet.sun"),
             body: A.Body.Sun,
             type: "sun",
             mag: -26.74
           },
           {
-            name: "Lune",
+            name: t("names.planet.moon"),
             body: A.Body.Moon,
             type: "moon",
             mag: -12
           },
           {
-            name: "Mercure",
+            name: t("names.planet.mercury"),
             body: A.Body.Mercury,
             type: "planet",
             mag: 0
           },
           {
-            name: "Vénus",
+            name: t("names.planet.venus"),
             body: A.Body.Venus,
             type: "planet",
             mag: -4
           },
           {
-            name: "Mars",
+            name: t("names.planet.mars"),
             body: A.Body.Mars,
             type: "planet",
             mag: 1
           },
           {
-            name: "Jupiter",
+            name: t("names.planet.jupiter"),
             body: A.Body.Jupiter,
             type: "planet",
             mag: -2
           },
           {
-            name: "Saturne",
+            name: t("names.planet.saturn"),
             body: A.Body.Saturn,
             type: "planet",
             mag: 1
           },
           {
-            name: "Uranus",
+            name: t("names.planet.uranus"),
             body: A.Body.Uranus,
             type: "planet",
             mag: 5.7
           },
           {
-            name: "Neptune",
+            name: t("names.planet.neptune"),
             body: A.Body.Neptune,
             type: "planet",
             mag: 7.8

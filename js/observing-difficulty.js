@@ -1,5 +1,7 @@
 "use strict";
 
+import { t } from "./i18n.js";
+
 /**
  * Indication pédagogique de repérage, et non garantie de visibilité.
  * Les magnitudes intégrées des objets diffus ne permettent pas, à elles seules,
@@ -41,7 +43,7 @@ export function assessObservingDifficulty(object, instrument = "all") {
   if (Number.isFinite(altitude) && altitude < 10) {
     return {
       level: "low",
-      label: "Très bas sur l’horizon",
+      label: t("ui.veryLowOnHorizon"),
       explanation: "L’atmosphère absorbe et brouille davantage la lumière près de l’horizon. La cible peut être difficile à discerner ; attendre qu’elle monte aide souvent."
     };
   }
@@ -49,7 +51,7 @@ export function assessObservingDifficulty(object, instrument = "all") {
     return {
       level: "low",
       label: "Bas sur l’horizon",
-      explanation: "La proximité de l’horizon réduit souvent le contraste et la netteté. Même une cible brillante peut scintiller ou paraître affaiblie."
+      explanation: t("ui.horizonContrastNote")
     };
   }
 
@@ -71,7 +73,7 @@ export function assessObservingDifficulty(object, instrument = "all") {
     }
     return {
       level: "medium",
-      label: "Visibilité incertaine",
+      label: t("ui.uncertainVisibility"),
       explanation: "Cette planète est peut-être visible, mais cela dépend de son éclat et des conditions du ciel. Un instrument peut aider à examiner ses détails."
     };
   }

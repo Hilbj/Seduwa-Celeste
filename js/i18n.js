@@ -65,6 +65,12 @@ function applyTranslations(root = document) {
   root.querySelectorAll("[data-i18n-aria]").forEach(el => {
     el.setAttribute("aria-label", t(el.dataset.i18nAria));
   });
+  root.querySelectorAll("[data-i18n-placeholder]").forEach(el => {
+    el.setAttribute("placeholder", t(el.dataset.i18nPlaceholder));
+  });
+  root.querySelectorAll("[data-i18n-content]").forEach(el => {
+    el.setAttribute("content", t(el.dataset.i18nContent));
+  });
 }
 
 async function loadLocaleInto(locale) {
@@ -83,6 +89,21 @@ async function initI18n() {
   try {
     await loadLocaleInto(detectLocale());
     applyTranslations();
+    if (typeof MutationObserver !== "undefined" && document.documentElement) {
+      const observer = new MutationObserver(records => {
+        for (const record of records) {
+          for (const node of record.addedNodes) {
+            if (node.nodeType !== Node.ELEMENT_NODE) continue;
+            if (node.matches?.("[data-i18n], [data-i18n-title], [data-i18n-aria], [data-i18n-placeholder], [data-i18n-content]")) {
+              applyTranslations(node.parentElement || document);
+            } else if (node.querySelector?.("[data-i18n], [data-i18n-title], [data-i18n-aria], [data-i18n-placeholder], [data-i18n-content]")) {
+              applyTranslations(node);
+            }
+          }
+        }
+      });
+      observer.observe(document.documentElement, { childList: true, subtree: true });
+    }
   } catch (error) {
     console.warn("i18n : repli sur les textes du HTML.", error);
   }

@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <meta name="theme-color" content="#050914">
   <meta name="color-scheme" content="dark">
-  <meta name="description" content="Atlas Céleste : carte du ciel et guidage astronomique interactif.">
+  <meta name="description" content="Atlas Céleste : carte du ciel et guidage astronomique interactif." data-i18n-content="app.metaDescription">
 
   <!-- PWA / iOS -->
   <meta name="mobile-web-app-capable" content="yes">
@@ -19,16 +19,16 @@
   <link rel="apple-touch-icon" sizes="167x167" href="icons/apple-touch-icon-167.png">
   <link rel="apple-touch-icon" sizes="152x152" href="icons/apple-touch-icon-152.png">
 
-  <title>SEDUWA — Carte du ciel</title>
-  <link rel="stylesheet" href="style.css?v=496-ios">
+  <title data-i18n="app.documentTitle">SEDUWA — Carte du ciel</title>
+  <link rel="stylesheet" href="style.css?v=498-i18n-ui">
   <link rel="manifest" href="manifest.json">
 </head>
 <body>
   <main id="app">
-    <canvas id="sky" aria-label="Carte du ciel interactive"></canvas>
+    <canvas id="sky" aria-label="Carte du ciel interactive" data-i18n-aria="app.canvasAria"></canvas>
 
-    <section id="sky-guide" class="sky-guide" hidden aria-label="Guidage vers l’objet sélectionné">
-      <header class="sky-guide-header"><div><p id="sky-guide-eyebrow" class="eyebrow">GUIDAGE CÉLESTE</p><strong id="sky-guide-name">Cible</strong></div><div class="sky-guide-header-actions"><button id="sky-guide-exit" type="button" aria-label="Terminer le guidage" title="Terminer le guidage">×</button></div></header>
+    <section id="sky-guide" class="sky-guide" hidden aria-label="Guidage vers l’objet sélectionné" data-i18n-aria="ui.skyGuideAria">
+      <header class="sky-guide-header"><div><p id="sky-guide-eyebrow" class="eyebrow">GUIDAGE CÉLESTE</p><strong id="sky-guide-name">Cible</strong></div><div class="sky-guide-header-actions"><button id="sky-guide-exit" type="button" aria-label="Terminer le guidage" title="Terminer le guidage" data-i18n-aria="ui.finishGuidance" data-i18n-title="ui.finishGuidance">×</button></div></header>
       <div class="sky-guide-reticle">
         <div class="sky-guide-ring sky-guide-ring-outer" data-guide-ring="0"></div>
         <div class="sky-guide-ring sky-guide-ring-middle" data-guide-ring="1"></div>
@@ -38,7 +38,7 @@
         <div class="sky-guide-center"></div>
       </div>
       <p id="sky-guide-status" class="sky-guide-status" aria-live="polite">Active la boussole pour commencer.</p>
-      <div class="sky-guide-progress"><span id="sky-guide-progress">0 / 3 cercles acquis</span><button id="sky-guide-mode-toggle" type="button" aria-label="Activer le mode libre" title="Basculer entre le mode libre et le guidage ciblé">Mode libre</button><button id="sky-guide-finish" type="button">Terminer</button></div>
+      <div class="sky-guide-progress"><span id="sky-guide-progress">0 / 3 cercles acquis</span><button id="sky-guide-mode-toggle" type="button" aria-label="Activer le mode libre" title="Basculer entre le mode libre et le guidage ciblé">Mode libre</button><button id="sky-guide-finish" type="button" data-i18n="ui.finishGuidanceShort">Terminer</button></div>
     </section>
 
     <button id="interface-toggle" type="button" aria-pressed="false"
@@ -49,7 +49,7 @@
 
         <header class="topbar">
       <div class="brand">
-        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 487 — fiches enrichies et pointage épuré">v496</span></div>
+        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 498 — interface bilingue enrichie">v498</span></div>
         <div>
           <div class="brand-title-row">
             <h1><span data-i18n="app.title">SEDUWA</span> <span data-i18n="app.subtitle">CÉLESTE</span></h1>
@@ -125,7 +125,7 @@
       <section id="discovery-search-panel" class="discovery-search-panel" hidden aria-label="Rechercher un objet nommé" data-i18n-aria="discovery.search.title">
         <div class="discovery-search-heading"><div><strong data-i18n="discovery.search.title">Rechercher un objet nommé</strong><p data-i18n="discovery.search.subtitle">Recherche par nom commun, y compris pour les objets sous l’horizon.</p></div><button id="discovery-search-close" type="button" class="icon-button" aria-label="Fermer la recherche" title="Fermer" data-i18n-aria="discovery.search.closeAria" data-i18n-title="discovery.close">×</button></div>
         <label class="visually-hidden" for="discovery-search-input" data-i18n="discovery.search.inputLabel">Nom de l’objet céleste</label>
-        <input id="discovery-search-input" type="search" placeholder="Ex. Véga, Andromède, Saturne…" autocomplete="off" spellcheck="false">
+        <input id="discovery-search-input" type="search" placeholder="Ex. Véga, Andromède, Saturne…" data-i18n-placeholder="ui.discoverySearchPlaceholder" autocomplete="off" spellcheck="false">
         <div class="discovery-search-filters" role="group" aria-label="Filtrer par type d’objet" data-i18n-aria="discovery.search.filtersAria">
           <button type="button" class="discovery-search-filter is-active" data-search-filter="all" aria-pressed="true" data-i18n="discovery.search.filterAll">Tout</button>
           <button type="button" class="discovery-search-filter" data-search-filter="comet" aria-pressed="false" data-i18n="discovery.search.filterComets">☄ Comètes</button>
@@ -154,7 +154,7 @@
           <button type="button" data-sky-walk="dippertoarcturus"><span class="walk-symbol">↗</span><span><strong data-i18n="discovery.walks.dippertoarcturusTitle">De la Grande Ourse à Arcturus</strong><small data-i18n="discovery.walks.dippertoarcturusSub">Suivre l’arc jusqu’à Arcturus puis Spica</small></span><span aria-hidden="true">›</span></button>
         </div>
         <article id="discovery-walk-detail" class="discovery-walk-detail" hidden aria-live="polite">
-          <div class="discovery-walk-detail-heading"><div><p id="discovery-walk-kicker" class="eyebrow">VISITE GUIDÉE</p><h3 id="discovery-walk-title"></h3></div><button id="discovery-walk-detail-close" type="button" class="icon-button" aria-label="Fermer la visite guidée et revenir à la liste des balades" title="Revenir à la liste" data-i18n-aria="discovery.walks.detailCloseAria" data-i18n-title="discovery.walks.detailCloseTitle">×</button></div><p id="discovery-walk-intro"></p>
+          <div class="discovery-walk-detail-heading"><div><p id="discovery-walk-kicker" class="eyebrow" data-i18n="ui.guidedTour">VISITE GUIDÉE</p><h3 id="discovery-walk-title"></h3></div><button id="discovery-walk-detail-close" type="button" class="icon-button" aria-label="Fermer la visite guidée et revenir à la liste des balades" title="Revenir à la liste" data-i18n-aria="discovery.walks.detailCloseAria" data-i18n-title="discovery.walks.detailCloseTitle">×</button></div><p id="discovery-walk-intro"></p>
           <div class="discovery-walk-step"><span id="discovery-walk-step-count"></span><p id="discovery-walk-step-text"></p></div><p id="discovery-walk-mobile-text" class="discovery-walk-mobile-text"></p>
           <div class="discovery-walk-controls"><button id="discovery-walk-prev" type="button" data-i18n="discovery.walks.prev">← Précédente</button><button id="discovery-walk-next" type="button" data-i18n="discovery.walks.next">Étape suivante →</button></div>
           <button id="discovery-walk-show-constellation" class="action-button" type="button" data-i18n="discovery.walks.showOnMap">Montrer sur la carte</button>
@@ -209,7 +209,7 @@
         <span>ALTITUDE<strong id="object-alt">—</strong></span>
       </div>
       <div id="object-extra" class="object-extra"></div>
-      <button id="guide-selected" class="action-button">
+      <button id="guide-selected" class="action-button" data-i18n="ui.guideSelected">
         Guider vers cet objet
       </button>
     </aside>
@@ -217,7 +217,7 @@
     <section id="finder" aria-label="Mode chercheur" hidden>
       <header class="finder-header">
         <div>
-          <p class="eyebrow">MODE CHERCHEUR</p>
+          <p class="eyebrow" data-i18n="ui.finderMode">MODE CHERCHEUR</p>
           <h2 id="finder-name">Choisir une cible</h2>
         </div>
         <button id="finder-exit" class="action-button">
@@ -481,7 +481,7 @@
             <summary data-i18n="visibleNow.advancedSummary">Recherche et filtres avancés</summary>
             <section class="catalogue-quick-search" aria-label="Rechercher dans le catalogue du ciel profond" data-i18n-aria="visibleNow.searchAria">
               <label for="visible-now-search" data-i18n="visibleNow.searchLabel">Rechercher un objet, même sous l'horizon</label>
-              <input id="visible-now-search" type="search" placeholder="Ex. M27, M57, Nébuleuse de l'Anneau" autocomplete="off">
+              <input id="visible-now-search" type="search" placeholder="Ex. M27, M57, Nébuleuse de l'Anneau" data-i18n-placeholder="ui.catalogueSearchPlaceholder" autocomplete="off">
               <div id="visible-now-search-results" class="visible-now-search-results" aria-live="polite"></div>
             </section>
             <section class="visible-now-filters" aria-label="Filtrer et trier les objets visibles" data-i18n-aria="visibleNow.filtersAria">
@@ -585,7 +585,7 @@
             <label><input type="checkbox" data-session-check="optics"> <span data-i18n="session.checkOptics">Préparer jumelles ou télescope</span></label>
             <label><input type="checkbox" data-session-check="clothes"> <span data-i18n="session.checkClothes">Prévoir vêtements chauds et boisson</span></label>
           </div></section>
-          <label class="session-notes-label" for="session-notes"><span data-i18n="session.notesLabel">Cibles et notes de terrain</span><textarea id="session-notes" rows="3" placeholder="Objets à observer, conditions du ciel, impressions…"></textarea></label>
+          <label class="session-notes-label" for="session-notes"><span data-i18n="session.notesLabel">Cibles et notes de terrain</span><textarea id="session-notes" rows="3" placeholder="Objets à observer, conditions du ciel, impressions…" data-i18n-placeholder="ui.sessionNotesPlaceholder"></textarea></label>
         </div>
         <div class="observation-dialog-actions session-actions"><button id="session-reset" class="action-button" type="button" data-i18n="session.reset">Réinitialiser la liste</button><button id="session-save" class="action-button primary" type="button" data-i18n="session.save">Enregistrer la soirée</button></div>
       </section>
@@ -602,7 +602,7 @@
             <div class="moon-facts"><p id="moon-phase-name" class="moon-phase-name">Calcul en cours…</p><p id="moon-phase-trend" class="muted">—</p><div class="moon-illumination"><div><span data-i18n="moon.illuminatedSurface">Surface éclairée</span><strong id="moon-illumination-value">— %</strong></div><div class="moon-progress"><span id="moon-illumination-bar"></span></div></div><dl class="moon-metrics"><div><dt data-i18n="moon.age">Âge lunaire estimé</dt><dd id="moon-age">—</dd></div><div><dt data-i18n="moon.distance">Distance Terre–Lune</dt><dd id="moon-distance">—</dd></div><div><dt data-i18n="moon.diameter">Diamètre apparent</dt><dd id="moon-diameter">—</dd></div><div><dt data-i18n="moon.altitude">Hauteur locale</dt><dd id="moon-altitude">—</dd></div><div><dt data-i18n="moon.azimuth">Azimut</dt><dd id="moon-azimuth">—</dd></div></dl></div>
           </div>
           <div class="moon-orbit-layout"><section class="moon-orbit-section"><div class="moon-orbit-heading"><div class="moon-orbit-title-block"><h3 class="moon-orbit-heading-title" data-i18n="moon.orbitTitle">Position par rapport au Soleil et à la Terre</h3><p class="muted" data-i18n="moon.orbitSubtitle">Schéma orbital vu du dessus · distances non à l’échelle</p></div></div>
-            <svg id="moon-orbit-svg" class="moon-orbit-svg" viewBox="0 0 360 230" role="img" aria-label="Schéma interactif de la position orbitale de la Lune par rapport à la Terre et au Soleil" data-i18n-aria="moon.orbitSvgAria"><defs><radialGradient id="moon-sun-glow"><stop offset="0" stop-color="#fff2a8"/><stop offset="1" stop-color="#f4b942"/></radialGradient><marker id="moon-ray-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6Z" fill="#f3c65f"/></marker></defs><circle cx="180" cy="115" r="68" fill="none" stroke="#7890a9" stroke-dasharray="4 5"/><path d="M26 115 H98" stroke="#f3c65f" stroke-width="1.8" marker-end="url(#moon-ray-arrow)"/><circle cx="25" cy="115" r="16" fill="url(#moon-sun-glow)"/><g fill="#e7edf5" font-size="11"><text x="25" y="145" text-anchor="middle" data-i18n="moon.orbit.sun">Soleil</text><text x="180" y="151" text-anchor="middle" data-i18n="moon.orbit.earth">Terre</text><text x="180" y="17" text-anchor="middle" data-i18n="moon.orbit.schematic">Orbite lunaire schématique</text><text x="180" y="216" text-anchor="middle" data-i18n="moon.orbit.phaseDepends">La phase dépend de l’angle Soleil–Terre–Lune</text></g><circle cx="180" cy="115" r="17" fill="#287eb6" stroke="#a9dcff" stroke-width="1.2"/><path d="M170 105l9-5 7 7-4 6 5 7-10 7-5-9-6-4z" fill="#62ad7b"/><g id="moon-orbit-position" class="moon-orbit-draggable" tabindex="0" role="slider" aria-label="Déplacer la Lune sur son orbite pour explorer les phases" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0" data-i18n-aria="moon.orbit.sliderAria"><circle cx="0" cy="0" r="8" fill="#202a39" stroke="#f4f6fa" stroke-width="1.2"/><path id="moon-orbit-lit-shape" fill="#e7e5dc" d="M0 -8 A8 8 0 0 1 0 8 A8 8 0 0 1 0 -8Z"/><text id="moon-orbit-label" x="0" y="-14" text-anchor="middle" fill="#f3f5f8" font-size="11" pointer-events="none">Lune</text></g></svg>
+            <svg id="moon-orbit-svg" class="moon-orbit-svg" viewBox="0 0 360 230" role="img" aria-label="Schéma interactif de la position orbitale de la Lune par rapport à la Terre et au Soleil" data-i18n-aria="moon.orbitSvgAria"><defs><radialGradient id="moon-sun-glow"><stop offset="0" stop-color="#fff2a8"/><stop offset="1" stop-color="#f4b942"/></radialGradient><marker id="moon-ray-arrow" markerWidth="6" markerHeight="6" refX="5" refY="3" orient="auto"><path d="M0,0 L6,3 L0,6Z" fill="#f3c65f"/></marker></defs><circle cx="180" cy="115" r="68" fill="none" stroke="#7890a9" stroke-dasharray="4 5"/><path d="M26 115 H98" stroke="#f3c65f" stroke-width="1.8" marker-end="url(#moon-ray-arrow)"/><circle cx="25" cy="115" r="16" fill="url(#moon-sun-glow)"/><g fill="#e7edf5" font-size="11"><text x="25" y="145" text-anchor="middle" data-i18n="moon.orbit.sun">Soleil</text><text x="180" y="151" text-anchor="middle" data-i18n="moon.orbit.earth">Terre</text><text x="180" y="17" text-anchor="middle" data-i18n="moon.orbit.schematic">Orbite lunaire schématique</text><text x="180" y="216" text-anchor="middle" data-i18n="moon.orbit.phaseDepends">La phase dépend de l’angle Soleil–Terre–Lune</text></g><circle cx="180" cy="115" r="17" fill="#287eb6" stroke="#a9dcff" stroke-width="1.2"/><path d="M170 105l9-5 7 7-4 6 5 7-10 7-5-9-6-4z" fill="#62ad7b"/><g id="moon-orbit-position" class="moon-orbit-draggable" tabindex="0" role="slider" aria-label="Déplacer la Lune sur son orbite pour explorer les phases" aria-valuemin="0" aria-valuemax="359" aria-valuenow="0" data-i18n-aria="moon.orbit.sliderAria"><circle cx="0" cy="0" r="8" fill="#202a39" stroke="#f4f6fa" stroke-width="1.2"/><path id="moon-orbit-lit-shape" fill="#e7e5dc" d="M0 -8 A8 8 0 0 1 0 8 A8 8 0 0 1 0 -8Z"/><text id="moon-orbit-label" data-i18n="ui.moonOrbitLabel" x="0" y="-14" text-anchor="middle" fill="#f3f5f8" font-size="11" pointer-events="none">Lune</text></g></svg>
             <p id="moon-orbit-explanation" class="muted">Faites glisser la Lune sur son orbite, ou utilisez les flèches du clavier, pour explorer les phases. La date sélectionnée s’ajuste et les données se recalculent.</p>
           </section><aside class="moon-orbit-side-info" aria-label="Informations complémentaires sur la phase lunaire" data-i18n-aria="moon.sideInfoAria"><div class="moon-orbit-info-subblock"><p class="moon-orbit-info-label" data-i18n="moon.observationConditionsLabel">Conditions d’observation</p><p id="moon-observation-note" class="moon-observation-note" aria-live="polite">Calcul des conditions d’observation…</p></div><div class="moon-orbit-info-subblock moon-phase-angle-subblock"><p class="moon-orbit-info-label" data-i18n="moon.phaseAngleLabel">Angle de phase</p><p id="moon-phase-angle-note" class="moon-phase-angle-note">Calcul en cours…</p></div></aside></div>
         </div>
@@ -715,6 +715,5 @@
 
   <script src="./js/astronomy.browser.min.js"></script>
   <script type="module" src="./js/locale-init.js"></script>
-  <script type="module" src="app.js?v=496-cap-soleil"></script>
 </body>
 </html>

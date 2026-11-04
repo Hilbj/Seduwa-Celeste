@@ -2096,16 +2096,6 @@ button:disabled, input:disabled, select:disabled {
     font-size: 10px;
     line-height: 1.1;
   }
-  #app > .toolbar #locate-btn::after { content: "Position"; }
-  #app > .toolbar #orientation-btn::after { content: "Boussole"; }
-  #app > .toolbar #display-settings-open::after { content: "Affichage"; }
-  #app > .toolbar #night-vision-btn::after { content: "Vision rouge"; }
-  #app > .toolbar #visible-now-open::after { content: "Visibles"; }
-  #app > .toolbar #star-hop-open::after { content: "Cheminement"; }
-  #app > .toolbar #conditions-open::after { content: "Conditions"; }
-  #app > .toolbar #session-open::after { content: "Soirée"; }
-  #app > .toolbar #events-open::after { content: "Événements"; }
-  #app > .toolbar #hide-interface-btn::after { content: "Masquer"; }
   #app > .toolbar .tool-button:hover {
     border-color: rgba(160, 195, 247, .24);
     background: rgba(107, 143, 197, .13);

@@ -1,6 +1,8 @@
 
 "use strict";
 
+import { t } from "./i18n.js";
+
 export function createSensors({
   state,
   $,
@@ -610,7 +612,7 @@ function stopListening() {
   state.lastOrientationTime = 0;
   state.lastPitchTime = 0;
 
-  setStatus("Capteurs désactivés");
+  setStatus(t("ui.sensorsDisabled"));
   drawSky();
 }
 

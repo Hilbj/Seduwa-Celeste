@@ -31,6 +31,11 @@ async function start() {
   await initI18n();
   syncNativeDateTimeLang();
   bindLocaleSelect();
+
+  // Charger l’application seulement lorsque les dictionnaires sont prêts.
+  // Ses dépendances (orbites, système solaire, etc.) évaluent certaines
+  // traductions dès leur chargement.
+  await import("../app.js");
 }
 
 if (document.readyState === "loading") {
