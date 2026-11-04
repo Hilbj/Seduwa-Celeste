@@ -38,7 +38,7 @@ Limites : le modèle reste képlérien simplifié, sans perturbations planétair
 - Bug du parcours « Ma soirée en 3 étapes » sur mobile corrigé (scrollTop)
 
 ## v493
-- Visée par défaut mobile à 25° (app.js, ligne 256)
+- Visée par défaut mobile à 25° (app.js)
 - Optimisation PWA pour iPhone/iPad (manifest, icônes Apple touch, meta tags).
 - Correction du bug du « Parcours du soir » sur mobile (le menu ne bloquait plus).
 - Visée par défaut ajustée à 25° sur mobile pour un meilleur confort.
