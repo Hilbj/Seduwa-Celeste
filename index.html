@@ -49,10 +49,10 @@
 
         <header class="topbar">
       <div class="brand">
-        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 514 — correction des libellés de carte" data-i18n-aria="app.version514Aria">v514</span></div>
+        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 520 — traduction du libellé GPS" data-i18n-aria="app.version520Aria">v1.2</span></div>
         <div>
           <div class="brand-title-row">
-            <h1><span data-i18n="app.title">SEDUWA</span> <span data-i18n="app.subtitle">CÉLESTE</span></h1>
+            <h1><span data-i18n="app.title">SEDUWA</span> <span data-i18n="app.subtitle">SKY</span></h1>
             <div class="zoom-controls controls" role="group" aria-label="Zoom de la carte" data-i18n-aria="zoom.group">
               <button id="zoom-in" type="button" aria-label="Zoom avant" title="Zoom avant" data-i18n-aria="zoom.in" data-i18n-title="zoom.in">+</button>
               <span id="zoom-level" aria-live="polite">1,0×</span>
@@ -66,6 +66,11 @@
           </div>
           <p id="location" data-i18n="ui.locationUndefined">Localisation non définie</p>
           <p id="location-coordinates" class="location-coordinates">48.0000°, 4.2000°</p>
+          <div class="place-local-time" aria-live="off">
+            <span class="place-local-time-label" data-i18n="summary.placeTime">HEURE DU LIEU</span>
+            <strong id="place-clock">--:--:--</strong>
+            <span id="place-date">--</span>
+          </div>
         </div>
       </div>
       <div class="live-status">
@@ -104,12 +109,12 @@
         <div class="discovery-section-label discovery-section-primary" data-i18n="discovery.panel.sectionPrimary">Pour commencer</div>
         <button type="button" class="discovery-action-primary" data-discovery-action="free"><span aria-hidden="true">⊙</span><span data-i18n="discovery.actions.free">Pointer le ciel</span></button>
         <button type="button" class="discovery-action-primary" data-discovery-action="search" aria-expanded="false" aria-controls="discovery-search-panel"><span aria-hidden="true">⌕</span><span data-i18n="discovery.actions.search">Trouver un objet</span></button>
-        <button type="button" class="discovery-action-primary" data-discovery-action="start"><span aria-hidden="true">✧</span><span data-i18n="discovery.actions.start">Visible maintenant</span></button>
+        <button type="button" class="discovery-action-primary" data-discovery-action="start" aria-expanded="false"><span aria-hidden="true">✧</span><span data-i18n="discovery.actions.start">Visible maintenant</span></button>
         <div class="discovery-section-label discovery-section-secondary" data-i18n="discovery.panel.sectionSecondary">Explorer davantage</div>
         <button type="button" data-discovery-action="orient"><span aria-hidden="true">⌖</span><span data-i18n="discovery.actions.orient">Me repérer</span></button>
         <button type="button" data-discovery-action="constellations"><span aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="m5 23 7-14 8 8 7-10M12 9l8 8M20 17l7 7"/><circle cx="5" cy="23" r="2.2"/><circle cx="12" cy="9" r="2.2"/><circle cx="20" cy="17" r="2.2"/><circle cx="27" cy="7" r="2.2"/><circle cx="27" cy="24" r="2.2"/></svg></span><span data-i18n="discovery.actions.constellations">Constellations</span></button>
         <button type="button" data-discovery-action="walks"><span aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M5 26c5-1 5-7 10-8s5-8 12-12"/><path d="m21 6 6 0 0 6"/><circle cx="5" cy="26" r="2"/><circle cx="15" cy="18" r="2"/><circle cx="22" cy="10" r="2"/><path d="M7 7h.01M10 11h.01M23 26h.01"/></svg></span><span data-i18n="discovery.actions.walks">Balade guidée</span></button>
-        <button type="button" data-discovery-action="evening-route"><span aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M5 25 12 17 19 21 27 7"/><circle cx="5" cy="25" r="2.4"/><circle cx="12" cy="17" r="2.4"/><circle cx="19" cy="21" r="2.4"/><path d="m21 7 6 0 0 6"/></svg></span><span data-i18n="discovery.actions.evening">Ma soirée en 3 étapes</span></button>
+        <button type="button" data-discovery-action="evening-route" aria-expanded="false"><span aria-hidden="true"><svg viewBox="0 0 32 32" focusable="false"><path d="M5 25 12 17 19 21 27 7"/><circle cx="5" cy="25" r="2.4"/><circle cx="12" cy="17" r="2.4"/><circle cx="19" cy="21" r="2.4"/><path d="m21 7 6 0 0 6"/></svg></span><span data-i18n="discovery.actions.evening">Ma soirée en 3 étapes</span></button>
         <button type="button" data-discovery-action="tonight"><span aria-hidden="true">☄</span><span data-i18n="discovery.actions.tonight">À observer</span></button>
         <button type="button" data-discovery-action="moon"><span aria-hidden="true">☾</span><span data-i18n="discovery.actions.moon">La Lune</span></button>
         <button type="button" id="discovery-jupiter-moons-open" data-discovery-action="jupiter-moons" class="discovery-jupiter-moons-action"><span aria-hidden="true">♃</span><span data-i18n="discovery.actions.jupiterMoons">Lunes de Jupiter</span></button>
@@ -374,6 +379,16 @@
           <option value="paris">Paris</option>
           <option value="villarivon">Villarivon</option>
           <option value="villers-sur-mer">Villers-sur-Mer</option>
+          <option value="kleine-scheidegg">Kleine Scheidegg</option>
+          <option value="jayyus">Jayyus · Palestine</option>
+          <option value="seduwa">Seduwa</option>
+          <option value="labutta">Labutta</option>
+          <option value="longyearbyen">Longyearbyen · Svalbard</option>
+          <option value="pelican-point">Pelican Point</option>
+          <option value="tokyo">Tokyo</option>
+          <option value="townsville">Townsville</option>
+          <option value="cerro-paranal">Cerro Paranal · VLT</option>
+          <option value="ushuaia">Ushuaia</option>
         </select>
         <div class="observation-dialog-actions">
           <button id="location-gps-btn" class="action-button" type="button" data-i18n="locationDialog.gps">Utiliser ma position GPS</button>

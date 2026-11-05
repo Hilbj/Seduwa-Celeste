@@ -155,6 +155,25 @@ button:focus-visible, input:focus-visible {
 .brand h1 { font-size: 13px; letter-spacing: .22em; margin: 0; }
 .brand h1 span { color: var(--accent); font-weight: 400; }
 .brand p { font-size: 11px; color: var(--muted); margin: 6px 0 0; }
+.place-local-time {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: 3px 7px;
+  margin-top: 4px;
+  color: var(--muted);
+  font-size: 9px;
+  line-height: 1.25;
+  font-variant-numeric: tabular-nums;
+}
+.place-local-time-label {
+  color: rgba(190, 211, 242, .62);
+  font-size: 8px;
+  letter-spacing: .1em;
+}
+.place-local-time strong { color: #9eddbb; font-size: 11px; font-weight: 600; }
+.place-local-time #place-date { color: var(--muted); }
+
 
 .live-status {
   display: flex;
@@ -537,6 +556,9 @@ button:focus-visible, input:focus-visible {
   .brand-mark { font-size: 24px; }
   .brand h1 { font-size: 10px; }
   .brand p, .live-status { font-size: 9px; }
+  .place-local-time { gap: 2px 5px; margin-top: 3px; font-size: 8px; }
+  .place-local-time-label { font-size: 7px; }
+  .place-local-time strong { font-size: 10px; }
   .sky-readout { top: 21%; left: 18px; }
   .compass-ring { top: 43%; width: 62vw; }
   .horizon-label { top: 58%; font-size: 8px; padding: 0 12px; }
@@ -5306,11 +5328,13 @@ button:disabled, input:disabled, select:disabled {
 .jupiter-moons-controls input { width: 100%; min-height: 38px; box-sizing: border-box; border: 1px solid var(--border); border-radius: 9px; background: rgba(15,26,46,.95); color: var(--text); padding: 8px; font: inherit; }
 .jupiter-moons-speed { min-height: 38px; border: 1px solid var(--border); border-radius: 9px; background: rgba(15,26,46,.95); color: var(--text); padding: 7px 28px 7px 9px; font: inherit; }
 .jupiter-moons-chart-card { min-width: 0; padding: 14px 16px 11px; border: 1px solid rgba(150,177,210,.18); border-radius: 16px; background: rgba(6,15,28,.68); }
-.jupiter-moons-chart-heading { display: flex; justify-content: space-between; align-items: center; gap: 12px; }
+.jupiter-moons-chart-heading { display: flex; flex-wrap: wrap; justify-content: space-between; align-items: center; gap: 12px; min-width: 0; }
+.jupiter-moons-chart-heading > div { flex: 1 1 220px; min-width: 0; }
 .jupiter-moons-chart-heading h3 { margin: 0 0 4px; font-size: 16px; }
 .jupiter-moons-chart-heading p { margin: 0; color: var(--muted, #a9b6c9); font-size: 12px; line-height: 1.4; }
 .jupiter-moons-live-pill { display: inline-flex; align-items: center; gap: 6px; padding: 6px 9px; border: 1px solid rgba(135,214,184,.18); border-radius: 999px; color: #a5e8cc; font-size: 11px; white-space: nowrap; }
-.jupiter-moons-live-pill span { width: 6px; height: 6px; border-radius: 50%; background: #85d9b6; box-shadow: 0 0 8px rgba(133,217,182,.55); }
+.jupiter-moons-live-pill > span:first-child { flex: 0 0 6px; width: 6px; height: 6px; border-radius: 50%; background: #85d9b6; box-shadow: 0 0 8px rgba(133,217,182,.55); }
+.jupiter-moons-live-pill > span:last-child { flex: 0 1 auto; width: auto; height: auto; background: none; border-radius: 0; min-width: 0; }
 .jupiter-moons-svg { display: block; width: min(100%, 760px); max-width: 100%; height: auto; max-height: none; margin: 6px auto 0; overflow: visible; }
 .jupiter-moons-axis line { stroke: rgba(157,185,221,.34); stroke-width: 1; }
 .jupiter-moons-axis line:first-child { stroke: rgba(150,180,222,.52); stroke-dasharray: 5 6; }
@@ -5340,6 +5364,9 @@ button:disabled, input:disabled, select:disabled {
   .jupiter-moons-controls { gap: 6px; }
   .jupiter-moons-controls .localized-native-field { flex: 1 1 100%; min-width: 0; }
   .jupiter-moons-chart-card { padding: 9px 8px; overflow: visible; }
+  .jupiter-moons-chart-heading { align-items: flex-start; gap: 7px; }
+  .jupiter-moons-chart-heading > div { flex-basis: 100%; }
+  .jupiter-moons-live-pill { align-self: flex-start; max-width: 100%; box-sizing: border-box; }
   .jupiter-moons-chart-heading h3 { font-size: 14px; }
   .jupiter-moons-svg { display: block; width: 100%; min-width: 0; max-width: 100%; height: auto; max-height: none; }
   #jupiter-moons-svg .jupiter-moons-axis text { font-size: 15px; }

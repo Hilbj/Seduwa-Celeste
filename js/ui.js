@@ -50,6 +50,10 @@ export function createUI({
   // Renseigné par bindControls : replie le menu Découverte quand le guidage démarre.
   let collapseDiscoveryPanelAfterGuideStart = () => {};
   let refreshLocalePanels = () => {};
+  let placeTimeZone = null;
+  let placeTimeZoneKey = "";
+  const placeTimeZoneCache = new Map();
+  let placeTimeZoneRequest = 0;
 
   /* ==========================================================
      OUTILS
@@ -171,8 +175,63 @@ export function createUI({
         year: "numeric"
       })
     );
+    refreshPlaceClock();
     refreshVisibleNow();
     refreshSkyWalkAvailability();
+  }
+
+  function refreshPlaceClock() {
+    const clock = $("place-clock");
+    const date = $("place-date");
+    if (!clock || !date) return;
+    const now = new Date();
+    const options = placeTimeZone ? { timeZone: placeTimeZone } : {};
+    try {
+      clock.textContent = now.toLocaleTimeString(getLocale(), {
+        ...options, hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+      });
+      date.textContent = now.toLocaleDateString(getLocale(), {
+        ...options, weekday: "short", day: "2-digit", month: "short", year: "numeric"
+      });
+    } catch {
+      clock.textContent = now.toLocaleTimeString(getLocale(), { hourCycle: "h23" });
+      date.textContent = now.toLocaleDateString(getLocale(), { weekday: "short", day: "2-digit", month: "short", year: "numeric" });
+    }
+  }
+
+  function resolvePlaceTimeZone() {
+    const latitude = Number(state.latitude);
+    const longitude = Number(state.longitude);
+    if (!Number.isFinite(latitude) || !Number.isFinite(longitude)) return;
+    const key = `${latitude.toFixed(3)},${longitude.toFixed(3)}`;
+    if (key === placeTimeZoneKey) return;
+    placeTimeZoneKey = key;
+    const requestId = ++placeTimeZoneRequest;
+    if (placeTimeZoneCache.has(key)) {
+      placeTimeZone = placeTimeZoneCache.get(key);
+      refreshPlaceClock();
+      return;
+    }
+    placeTimeZone = null;
+    refreshPlaceClock();
+    const url = `https://api.open-meteo.com/v1/forecast?latitude=${encodeURIComponent(latitude)}&longitude=${encodeURIComponent(longitude)}&current=temperature_2m&timezone=auto&forecast_days=1`;
+    fetch(url).then(response => {
+      if (!response.ok) throw new Error(`HTTP ${response.status}`);
+      return response.json();
+    }).then(data => {
+      const zone = typeof data.timezone === "string" && data.timezone ? data.timezone : Intl.DateTimeFormat().resolvedOptions().timeZone;
+      placeTimeZoneCache.set(key, zone);
+      if (requestId !== placeTimeZoneRequest) return;
+      placeTimeZone = zone;
+      refreshPlaceClock();
+    }).catch(error => {
+      console.warn("[Atlas] Fuseau horaire du lieu indisponible :", error);
+      const fallback = Intl.DateTimeFormat().resolvedOptions().timeZone || "UTC";
+      placeTimeZoneCache.set(key, fallback);
+      if (requestId !== placeTimeZoneRequest) return;
+      placeTimeZone = fallback;
+      refreshPlaceClock();
+    });
   }
 
   /* ==========================================================
@@ -180,6 +239,8 @@ export function createUI({
      ========================================================== */
 
   function refreshLocationLabel() {
+    if (state.locationNameKey) state.locationName = t(state.locationNameKey);
+    resolvePlaceTimeZone();
     if (typeof updateLocationLabel === "function") {
       updateLocationLabel();
     }
@@ -3149,13 +3210,21 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const searchPanel = $("discovery-search-panel");
         const eveningRoutePanel = $("discovery-evening-route");
         if (action !== "evening-route" && eveningRoutePanel) eveningRoutePanel.hidden = true;
+        if (action !== "evening-route") {
+          const eveningButton = document.querySelector('[data-discovery-action="evening-route"]');
+          eveningButton?.classList.remove("is-active");
+          eveningButton?.setAttribute("aria-expanded", "false");
+        }
         if (action !== "start" && startPanel) startPanel.hidden = true;
         if (action === "evening-route") {
-          buildDiscoveryEveningRoute();
-          document.querySelectorAll("[data-discovery-action]").forEach(item => item.classList.toggle("is-active", item === button));
+          const opening = Boolean(eveningRoutePanel?.hidden);
+          if (opening) buildDiscoveryEveningRoute();
+          else if (eveningRoutePanel) eveningRoutePanel.hidden = true;
+          document.querySelectorAll("[data-discovery-action]").forEach(item => item.classList.toggle("is-active", item === button && opening));
+          button.setAttribute("aria-expanded", String(opening));
           // « Ma soirée » se trouve plus bas que « Visible maintenant ».
           // Revenir en haut pour conserver visibles l'en-tête et la poignée.
-          if (window.matchMedia("(max-width: 600px)").matches) {
+          if (opening && window.matchMedia("(max-width: 600px)").matches) {
             window.requestAnimationFrame(() => {
               discoveryPanel?.scrollTo({ top: 0, behavior: "auto" });
               eveningRoutePanel?.scrollTo({ top: 0, behavior: "auto" });
@@ -3208,7 +3277,9 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           }
         }
         if (action !== "start") {
-          document.querySelector('[data-discovery-action="start"]')?.classList.remove("is-active");
+          const startButton = document.querySelector('[data-discovery-action="start"]');
+          startButton?.classList.remove("is-active");
+          startButton?.setAttribute("aria-expanded", "false");
           state.discoveryStartReferences = [];
         }
         if (action === "free") {
@@ -3273,11 +3344,12 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
           if (picker) picker.hidden = true;
           const panel = $("discovery-start-tonight");
           const opening = Boolean(panel?.hidden);
-          // Une fois ouverte, la liste reste présente : cliquer à nouveau sur
-          // la même rubrique ne la masque pas pendant la navigation.
-          if (panel) panel.hidden = false;
+          // Même logique de bascule que « Trouver un objet » : un second clic
+          // sur la rubrique active replie sa fiche.
+          if (panel) panel.hidden = !opening;
           if (opening) renderDiscoveryStartTonight();
-          button.classList.add("is-active");
+          button.classList.toggle("is-active", opening);
+          button.setAttribute("aria-expanded", String(opening));
           document.querySelectorAll('[data-discovery-action="walks"], [data-discovery-action="constellations"]').forEach(item => item.classList.remove("is-active"));
           return;
         }
@@ -3610,18 +3682,30 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         "villarivon": { name: "Villarivon · Les Chapelles", latitude: 45.58053, longitude: 6.72339 },
         "macon": { name: "Mâcon", latitude: 46.3067, longitude: 4.8283 },
         "paris": { name: "Paris", latitude: 48.8566, longitude: 2.3522 },
-        "la-hacquiniere": { name: "La Hacquinière · Bures-sur-Yvette", latitude: 48.694712, longitude: 2.153166 }
+        "la-hacquiniere": { name: "La Hacquinière · Bures-sur-Yvette", latitude: 48.694712, longitude: 2.153166 },
+        "kleine-scheidegg": { name: "Kleine Scheidegg", latitude: 46.585015, longitude: 7.961225 },
+        "jayyus": { name: "Jayyus · Palestine", latitude: 32.20125, longitude: 35.03416 },
+        "seduwa": { name: "Seduwa", latitude: 27.584388, longitude: 87.264320 },
+        "labutta": { name: "Labutta", latitude: 16.146667, longitude: 94.761111 },
+        "longyearbyen": { name: "Longyearbyen · Svalbard", latitude: 78.22334, longitude: 15.64689 },
+        "pelican-point": { name: "Pelican Point", latitude: -22.867950, longitude: 14.448679 },
+        "tokyo": { name: "Tokyo", latitude: 35.68, longitude: 139.68 },
+        "townsville": { name: "Townsville", latitude: -19.257622, longitude: 146.817879 },
+        "cerro-paranal": { name: "Cerro Paranal · VLT", latitude: -24.627499, longitude: -70.404722 },
+        "ushuaia": { name: "Ushuaia", latitude: -54.801912, longitude: -68.302951 }
       };
       const place = places[select?.value];
       if (!place) { showToast(t("ui.choosePlaceFromList")); return; }
       state.latitude = place.latitude;
       state.longitude = place.longitude;
       state.locationName = place.name;
+      state.locationNameKey = null;
       state.locationReady = true;
       try {
         localStorage.setItem("atlas-celeste-last-observation-location", JSON.stringify({
           latitude: state.latitude,
           longitude: state.longitude,
+          locationNameKey: null,
           locationName: state.locationName
         }));
       } catch { /* Le lieu choisi reste utilisable sans stockage local. */ }

@@ -157,11 +157,17 @@ import { createUI } from "./js/ui.js";
       if (saved && Number.isFinite(saved.latitude) && Number.isFinite(saved.longitude) &&
           saved.latitude >= -90 && saved.latitude <= 90 &&
           saved.longitude >= -180 && saved.longitude <= 180) {
+        const savedName = typeof saved.locationName === "string" ? saved.locationName.trim() : "";
+        // Les anciennes versions mémorisaient le libellé GPS déjà traduit.
+        // On le convertit en clé stable pour suivre les changements de langue.
+        const locationNameKey = saved.locationNameKey === "ui.gpsPosition" ||
+          ["Position GPS", "GPS location", "GPS-Position"].includes(savedName)
+          ? "ui.gpsPosition" : null;
         return {
           latitude: saved.latitude,
           longitude: saved.longitude,
-          locationName: typeof saved.locationName === "string" && saved.locationName.trim()
-            ? saved.locationName.trim() : t("ui.savedPosition")
+          locationNameKey,
+          locationName: locationNameKey ? t(locationNameKey) : (savedName || t("ui.savedPosition"))
         };
       }
     } catch { /* Stockage indisponible : Paris reste le lieu de repli. */ }
@@ -172,7 +178,8 @@ import { createUI } from "./js/ui.js";
       localStorage.setItem(LOCATION_STORAGE_KEY, JSON.stringify({
         latitude: state.latitude,
         longitude: state.longitude,
-        locationName: state.locationName || t("ui.savedPosition")
+        locationNameKey: state.locationNameKey || null,
+        locationName: state.locationNameKey ? t(state.locationNameKey) : (state.locationName || t("ui.savedPosition"))
       }));
     } catch { /* La position reste utilisable même sans stockage local. */ }
   }
@@ -280,6 +287,7 @@ import { createUI } from "./js/ui.js";
     latitude: initialLocation.latitude,
     longitude: initialLocation.longitude,
     locationName: initialLocation.locationName,
+    locationNameKey: initialLocation.locationNameKey || null,
     locationReady: true,
     observationDate: null,
 
@@ -287,7 +295,7 @@ import { createUI } from "./js/ui.js";
     // Bureau (grand écran, souris) : sans capteur d'orientation, une visée à 0° place
     // l'horizon au milieu de l'écran et réserve la moitié de la carte au sol vide.
     // On démarre plus haut ; les capteurs et les gestes reprennent ensuite la main.
-    pitch: (typeof window.matchMedia === "function" && window.matchMedia("(min-width: 901px) and (pointer: fine)").matches) ? 20 : 0,
+    pitch: (typeof window.matchMedia === "function" && window.matchMedia("(min-width: 901px) and (pointer: fine)").matches) ? 20 : 25,
     // Diagnostics capteur facultatifs : ne modifient pas le rendu.
     rawHeading: null,
     headingSource: "indisponible",
@@ -4834,7 +4842,8 @@ function locateUser() {
 
       state.latitude = latitude;
       state.longitude = longitude;
-      state.locationName = t("ui.gpsPosition");
+      state.locationNameKey = "ui.gpsPosition";
+      state.locationName = t(state.locationNameKey);
       state.locationReady = true;
       refreshAutoHeading();
       persistLastObservationLocation();
@@ -6040,6 +6049,7 @@ function renderSkyNow() {
   // du bloc « Direction observée », avec un petit espace entre les deux.
   const discoveryClockElement = $("discovery-local-time");
   const discoveryPanelElement = $("discovery-panel");
+  const discoveryTopbarElement = document.querySelector("#app .topbar");
   const skyReadoutElement = document.querySelector("#app .sky-readout");
   // appElement est déjà défini en tête de ce module.
 
@@ -6048,6 +6058,7 @@ function renderSkyNow() {
     if (!appElement.classList.contains("discovery-mode")) {
       // Hors mode Découverte, rendre à « Direction observée » sa position CSS d'origine.
       skyReadoutElement?.style.removeProperty("top");
+      discoveryPanelElement?.style.removeProperty("top");
       return;
     }
     if (getComputedStyle(discoveryClockElement).display === "none") return;
@@ -6060,6 +6071,7 @@ function renderSkyNow() {
     discoveryClockElement.style.setProperty("bottom", "auto");
 
     if (mobileLayout) {
+      discoveryPanelElement?.style.removeProperty("top");
       skyReadoutElement?.style.removeProperty("top");
       // La largeur reste compacte sur téléphone ; on aligne son bord droit sur le menu.
       discoveryClockElement.style.removeProperty("width");
@@ -6092,6 +6104,20 @@ function renderSkyNow() {
       return;
     }
 
+    // Bureau : descendre le menu général sous l’en-tête complet (lieu, coordonnées
+    // et heure locale). L’horloge d’observation est ensuite alignée sur ce menu.
+    // Le calcul suit la hauteur réelle du titre, sans modifier les dispositions mobile.
+    if (discoveryTopbarElement && discoveryPanelElement) {
+      const topbarRect = discoveryTopbarElement.getBoundingClientRect();
+      if (topbarRect.height > 0) {
+        const menuTop = Math.max(102, Math.ceil(topbarRect.bottom + 12));
+        const menuTopValue = `${menuTop}px`;
+        if (discoveryPanelElement.style.getPropertyValue("top") !== menuTopValue ||
+            discoveryPanelElement.style.getPropertyPriority("top") !== "important") {
+          discoveryPanelElement.style.setProperty("top", menuTopValue, "important");
+        }
+      }
+    }
     // Bureau : copie les dimensions et le bord gauche du bloc Direction observée.
     if (!skyReadoutElement) return;
     const readoutRect = skyReadoutElement.getBoundingClientRect();

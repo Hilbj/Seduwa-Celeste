@@ -1,6 +1,6 @@
 {
   "app": {
-    "subtitle": "CÉLESTE",
+    "subtitle": "CIEL",
     "title": "SEDUWA",
     "documentTitle": "SEDUWA — Carte du ciel",
     "metaDescription": "Atlas Céleste : carte du ciel et guidage astronomique interactif.",
@@ -13,7 +13,11 @@
     "version509Aria": "Version 509 — descriptions des planètes traduites",
     "version510Aria": "Version 510 — noms des catalogues centralisés",
     "version511Aria": "Version 511 — noms des constellations centralisés",
-    "version514Aria": "Version 514 — correction des libellés de la carte"
+    "version514Aria": "Version 514 — correction des libellés de la carte",
+    "version515Aria": "Version 515 — rétablissement de la visée mobile à 25°",
+    "version517Aria": "Version 517 — ajout de nouveaux lieux prédéfinis",
+    "version519Aria": "Version 519 — espacement de l’en-tête Découverte",
+    "version520Aria": "Version 520 — traduction du libellé GPS"
   },
   "conditions": {
     "cardClouds": "Nuages",
@@ -643,7 +647,8 @@
   },
   "summary": {
     "celestialObjects": "objets célestes",
-    "localTime": "HEURE LOCALE",
+    "localTime": "HEURE D’OBSERVATION",
+    "placeTime": "HEURE DU LIEU",
     "objectsInField": "OBJETS DANS LE CHAMP",
     "count": "{n} objets",
     "clickToChoose": "Cliquer pour choisir la date et l’heure",

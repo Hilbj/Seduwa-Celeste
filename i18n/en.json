@@ -1,6 +1,6 @@
 {
   "app": {
-    "subtitle": "CELESTIAL",
+    "subtitle": "SKY",
     "title": "SEDUWA",
     "documentTitle": "SEDUWA — Sky map",
     "metaDescription": "Atlas Céleste: interactive sky map and astronomical pointing guide.",
@@ -13,7 +13,11 @@
     "version509Aria": "Version 509 — translated planet descriptions",
     "version510Aria": "Version 510 — catalogue names centralized",
     "version511Aria": "Version 511 — constellation names centralized",
-    "version514Aria": "Version 514 — map label correction"
+    "version514Aria": "Version 514 — map label correction",
+    "version515Aria": "Version 515 — mobile default pointing restored to 25°",
+    "version517Aria": "Version 517 — additional preset observing locations",
+    "version519Aria": "Version 519 — Discovery header spacing",
+    "version520Aria": "Version 520 — GPS label localization"
   },
   "conditions": {
     "cardClouds": "Clouds",
@@ -643,7 +647,8 @@
   },
   "summary": {
     "celestialObjects": "celestial objects",
-    "localTime": "LOCAL TIME",
+    "localTime": "OBSERVATION TIME",
+    "placeTime": "TIME AT LOCATION",
     "objectsInField": "OBJECTS IN FIELD",
     "count": "{n} objects",
     "clickToChoose": "Click to choose the date and time",
