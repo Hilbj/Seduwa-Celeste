@@ -1,7 +1,7 @@
 
 "use strict";
 
-const CACHE_NAME = "atlas-celeste-v520-libelle-gps-traduit";
+const CACHE_NAME = "atlas-celeste-v1.2";
 
 const MILKY_WAY_MAP_URL = "https://cdn.eso.org/images/screen/ESA_Gaia_DR2_AllSky_Brightness_Colour_black_bg_8k.jpg";
 
@@ -31,6 +31,7 @@ const APP_FILES = [
   "./i18n/locales.json",
   "./i18n/fr.json",
   "./i18n/en.json",
+  "./i18n/de.json",
 
   // Icônes de l’application
   "./icons/icon.svg",

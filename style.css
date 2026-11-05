@@ -6074,6 +6074,8 @@ button:disabled, input:disabled, select:disabled {
 #app.discovery-mode .discovery-object-level.is-challenge { border-color: rgba(255,190,130,.32); }
 #app.discovery-mode .discovery-object-level.is-challenge strong { color: #ffc58c; }
 #app.discovery-mode .discovery-object-level.is-warning strong { color: #ffb0a6; }
+#app.discovery-mode .discovery-object-level.is-instrument { border-color: rgba(255,92,92,.58); background: rgba(75,18,25,.42); }
+#app.discovery-mode .discovery-object-level.is-instrument strong { color: #ff7777; }
 #app.discovery-mode .discovery-evening-route { margin-top: 10px; padding: 11px; border: 1px solid rgba(145,191,255,.28); border-radius: 14px; background: rgba(7,15,32,.9); color: #eaf1ff; text-align: left; max-height: min(54dvh, 430px); overflow-y: auto; overscroll-behavior: contain; }
 #app.discovery-mode .discovery-evening-route[hidden] { display: none !important; }
 #app.discovery-mode .discovery-evening-route-heading { display: flex; align-items: flex-start; justify-content: space-between; gap: 10px; margin-bottom: 8px; }

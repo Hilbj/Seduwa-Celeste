@@ -726,6 +726,10 @@ export function createUI({
       if (Number.isFinite(object.alt)) {
         const altitudeLabel = object.alt > 0 ? t("ui.aboveHorizonState") : t("ui.belowHorizonState");
         add(t("ui.skyState"), `${altitudeLabel} (${object.alt.toLocaleString(getLocale(), { maximumFractionDigits: 1 })}°)`);
+        add(t("ui.objectAltitude"), `${object.alt.toLocaleString(getLocale(), { maximumFractionDigits: 1 })}°`);
+      }
+      if (object.mag !== null && object.mag !== undefined && object.mag !== "" && Number.isFinite(Number(object.mag))) {
+        add(t("ui.apparentMagnitude"), Number(object.mag).toLocaleString(getLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 2 }));
       }
 
       const nearby = findNearbyObjects(object);
@@ -734,7 +738,10 @@ export function createUI({
       if (object.type === "planet") add(t("ui.ephemeris"), t("ui.positionCalculatedForSelectedDate"));
       if (object.type === "sun" || object.type === "moon") add(t("ui.position"), t("ui.calculatedForSelectedDate"));
 
-      const discoveryLabels = new Set(["Constellation", t("ui.nearbyObjects")]);
+      const discoveryLabels = new Set([
+        "Constellation", t("ui.nearbyObjects"),
+        t("ui.objectAltitude"), t("ui.apparentMagnitude")
+      ]);
       const visibleRows = discoveryMode ? rows.filter(([label]) => discoveryLabels.has(label)) : rows;
       const recognitionWasOpen = Boolean(extra.querySelector(".discovery-recognition-help")?.open);
       extra.replaceChildren();
@@ -816,6 +823,10 @@ export function createUI({
           beginnerLevel = "warning";
           beginnerLabel = t("ui.specializedObservation");
           beginnerExplanation = t("ui.sunOnlyWithCertifiedProtection");
+        } else if (object.mag !== null && object.mag !== undefined && String(object.mag).trim() !== "" && Number.isFinite(Number(object.mag)) && Number(object.mag) >= 6) {
+          beginnerLevel = "instrument";
+          beginnerLabel = t("ui.level4InstrumentRequired");
+          beginnerExplanation = t("ui.level4InstrumentExplanation");
         } else if (rawLevel === "easy") {
           beginnerLevel = "easy";
           beginnerLabel = t("ui.level1Easy");
@@ -1843,6 +1854,26 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       const factor = Math.exp(Math.max(-250, Math.min(250, event.deltaY)) * 0.0015);
       applyZoomFactor(factor);
     }, { passive: false });
+
+    // Navigation clavier de la carte : même état de caméra que le glissement tactile/souris.
+    // Ne pas intercepter les flèches lorsqu'un contrôle ou un champ de formulaire est utilisé.
+    document.addEventListener("keydown", event => {
+      const directions = ["ArrowUp", "ArrowDown", "ArrowLeft", "ArrowRight"];
+      if (!directions.includes(event.key) || event.altKey || event.ctrlKey || event.metaKey) return;
+      const target = event.target;
+      if (target instanceof Element && target.closest(
+        'input, textarea, select, button, a, summary, [contenteditable="true"], [role="slider"], [role="textbox"]'
+      )) return;
+      if ($("app")?.hidden || !canvas || !canvas.isConnected) return;
+      event.preventDefault();
+      const step = event.shiftKey ? 8 : 3;
+      if (event.key === "ArrowUp") state.pitch = clamp(state.pitch + step, -90, 90);
+      if (event.key === "ArrowDown") state.pitch = clamp(state.pitch - step, -90, 90);
+      if (event.key === "ArrowLeft") state.heading = norm360(state.heading - step);
+      if (event.key === "ArrowRight") state.heading = norm360(state.heading + step);
+      refreshReadout();
+      drawSky();
+    });
 
     canvas.style.cursor = "grab";
     canvas.style.touchAction = "none";

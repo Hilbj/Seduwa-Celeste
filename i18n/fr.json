@@ -1,6 +1,6 @@
 {
   "app": {
-    "subtitle": "CIEL",
+    "subtitle": "CÉLESTE",
     "title": "SEDUWA",
     "documentTitle": "SEDUWA — Carte du ciel",
     "metaDescription": "Atlas Céleste : carte du ciel et guidage astronomique interactif.",
@@ -17,7 +17,8 @@
     "version515Aria": "Version 515 — rétablissement de la visée mobile à 25°",
     "version517Aria": "Version 517 — ajout de nouveaux lieux prédéfinis",
     "version519Aria": "Version 519 — espacement de l’en-tête Découverte",
-    "version520Aria": "Version 520 — traduction du libellé GPS"
+    "version521Aria": "Version 521 — hauteur, magnitude et pilotage au clavier",
+    "version522Aria": "Version 522 — niveau instrument pour les objets de magnitude 6 ou plus"
   },
   "conditions": {
     "cardClouds": "Nuages",
@@ -1062,6 +1063,7 @@
     },
     "azimuth": "Azimut",
     "altitude": "Altitude",
+    "objectAltitude": "Hauteur par rapport à l’horizon",
     "dayUnit": "jours",
     "level1Easy": "Niveau 1 · Facile",
     "objectName": "Nom de l’objet",
@@ -1285,7 +1287,9 @@
     "dateOnlyPlaceholder": "JJ/MM/AAAA",
     "dateTimePlaceholder": "JJ/MM/AAAA, HH:MM:SS",
     "starLabel": "Étoile",
-    "currentAltitude": "Hauteur actuelle : {altitude}"
+    "currentAltitude": "Hauteur actuelle : {altitude}",
+    "level4InstrumentRequired": "Niveau 4 · Instrument requis",
+    "level4InstrumentExplanation": "Avec une magnitude apparente de 6 ou plus, cet objet nécessite généralement un instrument. Pour les objets étendus, la visibilité dépend aussi de leur luminosité surfacique et des conditions du ciel."
   },
   "universe": {
     "cosmicWebPointer": "✦ Notre région, parmi d’innombrables amas",

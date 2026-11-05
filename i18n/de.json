@@ -1059,6 +1059,7 @@
     },
     "azimuth": "Azimut",
     "altitude": "Höhe",
+    "objectAltitude": "Höhe über dem Horizont",
     "dayUnit": "Tage",
     "level1Easy": "Stufe 1 · Einfach",
     "objectName": "Objektname",
@@ -1282,7 +1283,9 @@
     "dateOnlyPlaceholder": "TT/MM/JJJJ",
     "dateTimePlaceholder": "TT/MM/JJJJ, HH:MM:SS",
     "starLabel": "Stern",
-    "currentAltitude": "Aktuelle Höhe: {altitude}"
+    "currentAltitude": "Aktuelle Höhe: {altitude}",
+    "level4InstrumentRequired": "Stufe 4 · Instrument erforderlich",
+    "level4InstrumentExplanation": "Bei einer scheinbaren Helligkeit von 6 mag oder mehr benötigt dieses Objekt in der Regel ein Instrument. Bei ausgedehnten Objekten hängt die Sichtbarkeit außerdem von ihrer Flächenhelligkeit und den Himmelsbedingungen ab."
   },
   "universe": {
     "cosmicWebPointer": "✦ Unsere Region unter unzähligen Galaxienhaufen",
