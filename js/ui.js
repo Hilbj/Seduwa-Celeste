@@ -754,11 +754,32 @@ export function createUI({
         const photo = photoById[id.replace(/[^A-Z0-9]/g, "")];
         if (photo) {
           const figure = document.createElement("figure"); figure.className = "discovery-object-photo";
-          const img = document.createElement("img"); img.src = `https://seduwa.ch/mysky/photos/${photo}`;
-          img.alt = localizedObjectName(object); img.loading = "lazy"; img.decoding = "async";
-          img.addEventListener("error", () => figure.remove(), { once: true });
+          const showOfflineMessage = () => {
+            figure.replaceChildren();
+            figure.classList.add("is-image-unavailable");
+            const message = document.createElement("figcaption");
+            message.textContent = t("ui.discoveryImageUnavailableOffline");
+            message.setAttribute("role", "status");
+            message.setAttribute("aria-live", "polite");
+            figure.append(message);
+          };
+
+          // Ne pas lancer une requête distante inutile lorsque le navigateur
+          // sait déjà qu'il est hors ligne : ces photos ne font pas partie du cache.
+          if (typeof navigator !== "undefined" && navigator.onLine === false) {
+            showOfflineMessage();
+          } else {
+            const img = document.createElement("img");
+            img.src = `https://seduwa.ch/mysky/photos/${photo}`;
+            img.alt = localizedObjectName(object); img.loading = "lazy"; img.decoding = "async";
+            img.addEventListener("error", () => {
+              if (typeof navigator !== "undefined" && navigator.onLine === false) showOfflineMessage();
+              else figure.remove();
+            }, { once: true });
+            figure.append(img);
+          }
           // Le nom commun est déjà indiqué dans la fiche : pas de légende redondante sous la photo.
-          figure.append(img); extra.append(figure);
+          extra.append(figure);
         }
       }
       if (discoveryMode) {

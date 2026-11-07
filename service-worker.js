@@ -1,7 +1,7 @@
 
 "use strict";
 
-const CACHE_NAME = "atlas-celeste-v525-secours-http-i18n";
+const CACHE_NAME = "atlas-celeste-v526-images-decouverte-hors-ligne";
 
 const MILKY_WAY_MAP_URL = "https://cdn.eso.org/images/screen/ESA_Gaia_DR2_AllSky_Brightness_Colour_black_bg_8k.jpg";
 

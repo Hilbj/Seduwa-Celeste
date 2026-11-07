@@ -19,7 +19,8 @@
     "version519Aria": "Version 519 — Discovery header spacing",
     "version521Aria": "Version 521 — altitude, magnitude and keyboard navigation",
     "version522Aria": "Version 522 — instrument level for objects of magnitude 6 or fainter",
-    "version525Aria": "Version 525 — show the offline fallback when a page is not found"
+    "version525Aria": "Version 525 — show the offline fallback when a page is not found",
+    "version526Aria": "Version 526 — explicit message when a Discovery sheet image is unavailable offline"
   },
   "conditions": {
     "cardClouds": "Clouds",
@@ -1290,7 +1291,8 @@
     "starLabel": "Star",
     "currentAltitude": "Current altitude: {altitude}",
     "level4InstrumentRequired": "Level 4 · Instrument required",
-    "level4InstrumentExplanation": "At an apparent magnitude of 6 or fainter, this object generally requires an instrument. For extended objects, visibility also depends on surface brightness and sky conditions."
+    "level4InstrumentExplanation": "At an apparent magnitude of 6 or fainter, this object generally requires an instrument. For extended objects, visibility also depends on surface brightness and sky conditions.",
+    "discoveryImageUnavailableOffline": "Image unavailable offline"
   },
   "universe": {
     "cosmicWebPointer": "✦ Our region, among countless clusters",
