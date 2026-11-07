@@ -16,8 +16,8 @@ const BUILTIN_LOCALE_CONFIG = {
   defaultLocale: "fr",
   locales: [
     { code: "fr", label: "Français", dataLocale: "fr" },
-    { code: "de", label: "Deutsch", dataLocale: "de" },
-    { code: "en", label: "English", dataLocale: "en" }
+    { code: "en", label: "English", dataLocale: "en" },
+    { code: "de", label: "Deutsch", dataLocale: "de" }
   ]
 };
 let localeConfig = BUILTIN_LOCALE_CONFIG;
@@ -46,7 +46,7 @@ async function loadLocaleConfig() {
     const valid = locales.filter(item =>
       item && typeof item.code === "string" && /^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(item.code) &&
       typeof item.label === "string" && item.label.trim() &&
-      ["fr", "de", "en"].includes(item.dataLocale)
+      typeof item.dataLocale === "string" && /^[a-z]{2,3}(?:-[A-Za-z0-9]{2,8})*$/.test(item.dataLocale)
     );
     const codes = valid.map(item => item.code);
     if (!codes.length || !codes.includes(config.defaultLocale) || new Set(codes).size !== codes.length) {

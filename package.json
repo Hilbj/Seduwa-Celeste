@@ -1,5 +1,9 @@
 {
   "name": "atlas-celeste",
   "private": true,
-  "version": "1.2.0"
+  "type": "module",
+  "scripts": {
+    "test": "node --test audit/tests/*.test.js"
+  },
+  "version": "0.524.0"
 }

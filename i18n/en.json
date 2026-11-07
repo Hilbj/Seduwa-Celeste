@@ -1,6 +1,6 @@
 {
   "app": {
-    "subtitle": "Sky",
+    "subtitle": "SKY",
     "title": "SEDUWA",
     "documentTitle": "SEDUWA — Sky map",
     "metaDescription": "Atlas Céleste: interactive sky map and astronomical pointing guide.",
@@ -18,7 +18,8 @@
     "version517Aria": "Version 517 — additional preset observing locations",
     "version519Aria": "Version 519 — Discovery header spacing",
     "version521Aria": "Version 521 — altitude, magnitude and keyboard navigation",
-    "version522Aria": "Version 522 — instrument level for objects of magnitude 6 or fainter"
+    "version522Aria": "Version 522 — instrument level for objects of magnitude 6 or fainter",
+    "version525Aria": "Version 525 — show the offline fallback when a page is not found"
   },
   "conditions": {
     "cardClouds": "Clouds",
@@ -649,7 +650,7 @@
   "summary": {
     "celestialObjects": "celestial objects",
     "localTime": "OBSERVATION TIME",
-    "placeTime": "LOCAL TIME AT LOCATION",
+    "placeTime": "TIME AT LOCATION",
     "objectsInField": "OBJECTS IN FIELD",
     "count": "{n} objects",
     "clickToChoose": "Click to choose the date and time",
@@ -2075,5 +2076,14 @@
     "propagationResidual": "Gaia DR3 association retained, but it should be reviewed: the residual between the Gaia position at epoch 2016.0 and the propagated Hipparcos position exceeds the combined formal uncertainties calculated without covariances. The Gaia source has a two-parameter astrometric solution (position only); do not use Gaia proper motion for propagation. Photocentre/component effects may still be present in multiple systems.",
     "positionOnlyCrossCheck": "Cross-checked with SIMBAD; Gaia DR3 astrometric_params_solved=3 (position only), with no parallax or proper motion. Here, gaia_match_arcsec is the offset from the search centre in catalogue coordinates, not a residual after epoch propagation; do not use it as a definitive astrometric residual.",
     "propusPositionOnly": "Gaia DR3 association provisionally retained and cross-checked with SIMBAD (η Geminorum / Propus). The historical value 2.262″ previously recorded as gaia_match_arcsec could not be reproduced in the Gaia DR3 Hipparcos cross-match tables and matches phot_g_mean_mag rounded to 2.262; it is therefore retained only as a reported value, not as a verified separation. A search around the currently recorded Hipparcos coordinates finds the source at 1.68281″, but this separation compares positions from different epochs and is not an epoch-corrected astrometric residual. Gaia DR3 provides a position-only solution here, with no parallax or proper motion; do not propagate this source."
+  },
+  "offline": {
+    "eyebrow": "SEDUWA CELESTIAL",
+    "title": "No connection available",
+    "message": "This page could not be loaded because there is currently no network connection.",
+    "hint": "Check your connection and try again. The sky map may still work offline if it has already been loaded.",
+    "retry": "Try again",
+    "home": "Back to the sky map",
+    "status": "Offline mode"
   }
 }

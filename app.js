@@ -6187,13 +6187,21 @@ function renderSkyNow() {
     "serviceWorker" in navigator &&
     location.protocol !== "file:"
   ) {
-    window.addEventListener("load", () => {
+    const registerServiceWorker = () => {
       navigator.serviceWorker
         .register("./service-worker.js")
         .catch(error => {
           console.warn("Service worker :", error);
         });
-    });
+    };
+
+    // app.js est importé après l'initialisation asynchrone de i18n.js.
+    // L'événement load peut donc déjà être passé lorsque ce module démarre.
+    if (document.readyState === "complete") {
+      registerServiceWorker();
+    } else {
+      window.addEventListener("load", registerServiceWorker, { once: true });
+    }
   }
 
   /*
