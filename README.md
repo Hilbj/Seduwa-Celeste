@@ -1,4 +1,19 @@
-Seduwa Ciel — version 1.2
+Seduwa Ciel — version 1.4
+
+## v1.4 — Calendrier céleste dynamique sur 12 mois glissants
+
+- Le calendrier utilise maintenant la date réelle du lieu d’observation sélectionné, indépendamment de la date de session choisie pour l'observation.
+- La fenêtre couvre les 12 prochains mois civils et avance automatiquement à mesure que le temps passe ; les événements passés sont retirés.
+- Les 4 phases lunaires sont calculées avec "Astronomy Engine". Les fenêtres favorables au ciel profond sont générées autour des nouvelles Lunes.
+- Les essaims météoritiques sont récurrents : Quadrantides, Lyrides, Êta-Aquarides, δ-Aquarides du Sud, α-Capricornides, Perséides, Draconides, Orionides, Taurides du Sud et du Nord, Léonides, Géminides et Ursides.
+- Les éclipses lunaires sont calculées et les éclipses solaires ne sont proposées que si une phase est au-dessus de l’horizon du lieu sélectionné.
+- Les oppositions des planètes extérieures et les élongations maximales de Mercure et Vénus sont calculées dynamiquement.
+
+## v1.3 — Balades guidées selon l’hémisphère
+
+- Les balades de l’hémisphère nord ne sont plus proposées aux observateurs situés dans l’hémisphère sud, et inversement.
+- Ajout des balades australes : la Croix du Sud, 3 grands repères stellaires (Canopus, Achernar, Fomalhaut), Oméga du Centaure, les trésors de la Carène, et les amas de la Voile et de la Poupe.
+- Les balades sont filtrées selon la saison de l’année d’observation et la visibilité depuis le lieu sélectionné.
 
 ## v1.2 — Niveau 4 « Instrument requis »
 
