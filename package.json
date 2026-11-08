@@ -1,9 +1,9 @@
 {
-  "name": "atlas-celeste",
+  "name": "seduwa-celeste",
   "private": true,
   "type": "module",
   "scripts": {
     "test": "node --test audit/tests/*.test.js"
   },
-  "version": "0.526.0"
+  "version": "1.2.0"
 }

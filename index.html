@@ -49,7 +49,7 @@
 
         <header class="topbar">
       <div class="brand">
-        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 526 — message si une photo Découverte est indisponible hors ligne" data-i18n-aria="app.version526Aria">v1.2</span></div>
+        <div class="brand-emblem"><span class="brand-mark" aria-hidden="true">✳</span><span class="brand-version" aria-label="Version 528 — calendrier céleste dynamique sur 12 mois" data-i18n-aria="app.version528Aria">v1.2</span></div>
         <div>
           <div class="brand-title-row">
             <h1><span data-i18n="app.title">SEDUWA</span> <span data-i18n="app.subtitle">CIEL</span></h1>
@@ -157,6 +157,11 @@
           <button type="button" data-sky-walk="winterhex"><span class="walk-symbol">⬡</span><span><strong data-i18n="discovery.walks.winterhexTitle">Le grand hexagone d’hiver</strong><small data-i18n="discovery.walks.winterhexSub">Sirius · Rigel · Capella · six étoiles brillantes</small></span><span aria-hidden="true">›</span></button>
           <button type="button" data-sky-walk="springtriangle"><span class="walk-symbol">△</span><span><strong data-i18n="discovery.walks.springtriangleTitle">Le triangle du printemps</strong><small data-i18n="discovery.walks.springtriangleSub">Arcturus · Spica · Régulus</small></span><span aria-hidden="true">›</span></button>
           <button type="button" data-sky-walk="dippertoarcturus"><span class="walk-symbol">↗</span><span><strong data-i18n="discovery.walks.dippertoarcturusTitle">De la Grande Ourse à Arcturus</strong><small data-i18n="discovery.walks.dippertoarcturusSub">Suivre l’arc jusqu’à Arcturus puis Spica</small></span><span aria-hidden="true">›</span></button>
+          <button type="button" data-sky-walk="southerncross" data-sky-walk-hemisphere="south"><span class="walk-symbol">✧</span><span><strong data-i18n="discovery.walks.southerncrossTitle">Découvrir la Croix du Sud</strong><small data-i18n="discovery.walks.southerncrossSub">Gacrux · Acrux · les étoiles du Centaure</small></span><span aria-hidden="true">›</span></button>
+          <button type="button" data-sky-walk="southernbeacons" data-sky-walk-hemisphere="south"><span class="walk-symbol">✦</span><span><strong data-i18n="discovery.walks.southernbeaconsTitle">Trois repères du ciel austral</strong><small data-i18n="discovery.walks.southernbeaconsSub">Canopus · Achernar · Fomalhaut</small></span><span aria-hidden="true">›</span></button>
+          <button type="button" data-sky-walk="southernomega" data-sky-walk-hemisphere="south"><span class="walk-symbol">✧</span><span><strong data-i18n="discovery.walks.southernomegaTitle">Explorer Oméga du Centaure</strong><small data-i18n="discovery.walks.southernomegaSub">Alpha Centauri · Hadar · NGC 5139</small></span><span aria-hidden="true">›</span></button>
+          <button type="button" data-sky-walk="southerncarina" data-sky-walk-hemisphere="south"><span class="walk-symbol">✦</span><span><strong data-i18n="discovery.walks.southerncarinaTitle">Les trésors de la Carène</strong><small data-i18n="discovery.walks.southerncarinaSub">Canopus · Nébuleuse de la Carène · NGC 3532</small></span><span aria-hidden="true">›</span></button>
+          <button type="button" data-sky-walk="southernclusters" data-sky-walk-hemisphere="south"><span class="walk-symbol">⁙</span><span><strong data-i18n="discovery.walks.southernclustersTitle">Les amas de la Voile et de la Poupe</strong><small data-i18n="discovery.walks.southernclustersSub">NGC 2451 · NGC 2516 · NGC 2547</small></span><span aria-hidden="true">›</span></button>
         </div>
         <article id="discovery-walk-detail" class="discovery-walk-detail" hidden aria-live="polite">
           <div class="discovery-walk-detail-heading"><div><p id="discovery-walk-kicker" class="eyebrow" data-i18n="ui.guidedTour">VISITE GUIDÉE</p><h3 id="discovery-walk-title"></h3></div><button id="discovery-walk-detail-close" type="button" class="icon-button" aria-label="Fermer la visite guidée et revenir à la liste des balades" title="Revenir à la liste" data-i18n-aria="discovery.walks.detailCloseAria" data-i18n-title="discovery.walks.detailCloseTitle">×</button></div><p id="discovery-walk-intro"></p>
@@ -706,12 +711,13 @@
     <section id="events-dialog" class="visible-now-dialog" hidden aria-label="Calendrier des événements célestes" data-i18n-aria="events.sectionAria">
       <div class="visible-now-backdrop" data-close-events></div>
       <section class="visible-now-panel session-panel" role="dialog" aria-modal="true" aria-labelledby="events-title">
-        <header class="visible-now-header"><div><p class="eyebrow" data-i18n="events.eyebrow">À NE PAS MANQUER</p><h2 id="events-title" data-i18n="events.title">Calendrier céleste</h2><p class="muted" data-i18n="events.subtitle">Événements à venir et phases lunaires calculées</p></div><button id="events-close" class="icon-button" type="button" aria-label="Fermer" data-i18n-aria="events.closeAria">×</button></header>
+        <header class="visible-now-header"><div><p class="eyebrow" data-i18n="events.eyebrow">À NE PAS MANQUER</p><h2 id="events-title" data-i18n="events.title">Calendrier céleste</h2><p class="muted" data-i18n="events.subtitle">Événements calculés et récurrents sur 12 mois glissants</p></div><button id="events-close" class="icon-button" type="button" aria-label="Fermer" data-i18n-aria="events.closeAria">×</button></header>
         <div class="events-filters" role="group" aria-label="Filtrer les événements célestes" data-i18n-aria="events.filtersAria">
           <button class="action-button is-active" type="button" data-event-filter="all" aria-pressed="true" data-i18n="events.filterAll">Tout</button>
           <button class="action-button" type="button" data-event-filter="moon" aria-pressed="false" data-i18n="events.filterMoon">Lune</button>
           <button class="action-button" type="button" data-event-filter="meteor" aria-pressed="false" data-i18n="events.filterMeteor">Météores</button>
           <button class="action-button" type="button" data-event-filter="planet" aria-pressed="false" data-i18n="events.filterPlanet">Planètes</button>
+          <button class="action-button" type="button" data-event-filter="eclipse" aria-pressed="false" data-i18n="events.filterEclipse">Éclipses</button>
           <button class="action-button" type="button" data-event-filter="dark-sky" aria-pressed="false" data-i18n="events.filterDarkSky">Ciel profond</button>
         </div>
         <div id="events-list" class="events-list"></div>

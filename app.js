@@ -88,7 +88,7 @@ import { createUI } from "./js/ui.js";
     26727: "names.star.alnitak", 27989: "names.star.betelgeuse", 30438: "names.star.canopus", 32349: "names.star.sirius",
     33579: "names.star.wezen", 36850: "names.star.castor", 37279: "names.star.procyon", 37826: "names.star.pollux",
     49669: "names.star.regulus", 53910: "names.star.merak", 54061: "names.star.dubhe", 57632: "names.star.denebola",
-    60718: "names.star.acrux", 62434: "names.star.gacrux", 63090: "names.star.zosma", 65378: "names.star.mizar",
+    59747: "names.star.delta-crucis", 60718: "names.star.acrux", 61084: "names.star.mimosa", 62434: "names.star.gacrux", 63090: "names.star.zosma", 65378: "names.star.mizar",
     65474: "names.star.spica", 67301: "names.star.alkaid", 68702: "names.star.hadar", 69673: "names.star.arcturus",
     71683: "names.star.alpha-centauri", 80763: "names.star.antares", 91262: "names.star.vega", 97649: "names.star.altair",
     102098: "names.star.deneb", 102488: "names.star.gienah", 113368: "names.star.fomalhaut", 11767: "names.star.polaris",
@@ -97,7 +97,7 @@ import { createUI } from "./js/ui.js";
     77070: "names.star.shaula", 82273: "names.star.kaus-media", 85927: "names.star.nunki", 86742: "names.star.rasalhague",
     88635: "names.star.eltanin", 90185: "names.star.peacock", 92855: "names.star.rasalgethi", 94376: "names.star.rastaban",
     100453: "names.star.sadr", 104732: "names.star.enif", 107315: "names.star.sadalsuud", 109268: "names.star.sadalmelik",
-    110960: "names.star.scheat", 113881: "names.star.markab", 116727: "names.star.mimosa"
+    110960: "names.star.scheat", 113881: "names.star.markab"
   };
 
   function displayStarName(star) {
@@ -3175,7 +3175,10 @@ function drawMilkyWay(date) {
       Altair: 97649, "Altaïr": 97649, Deneb: 102098, Aldebaran: 21421,
       "Aldébaran": 21421, Alcyone: 17702, "Alpheratz": 677, "Alphératz": 677,
       Mirach: 5447, Betelgeuse: 27989, "Bételgeuse": 27989, Rigel: 24436,
-      Mintaka: 25930, Alnilam: 26311, Alnitak: 26727
+      Mintaka: 25930, Alnilam: 26311, Alnitak: 26727,
+      Canopus: 30438, Achernar: 7588, Fomalhaut: 113368, "Alpha Centauri": 71683,
+      Hadar: 68702, Avior: 39953, Gacrux: 62434, Acrux: 60718, Mimosa: 61084,
+      "Delta Crucis": 59747
     };
     const starsByHip = new Map(state.stars.map(star => [Number(star.hip ?? String(star.id || "").match(/^HIP[_\s-]*(\d+)$/i)?.[1]), star]));
     for (const [alias, hip] of Object.entries(walkStarHipAliases)) {

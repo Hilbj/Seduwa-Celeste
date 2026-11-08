@@ -1904,29 +1904,101 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
      BRANCHEMENT DES BOUTONS
      ========================================================== */
 
-  const getCelestialEvents = () => [
-    { date: "2026-10-21", title: t("events.orionidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailOrionids"), category: "meteor" },
-    { date: "2026-10-28", title: t("events.moonNearPleiades"), type: t("events.typeCelestialApproach"), detail: t("events.detailMoonNearPleiades"), category: "moon", targets: ["moon"] },
-    { date: "2026-11-05", title: t("events.southernTauridsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailSouthernTaurids"), category: "meteor" },
-    { date: "2026-11-11", title: t("events.northernTauridsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailNorthernTaurids"), category: "meteor" },
-    { date: "2026-11-16", title: t("events.marsJupiterApproach"), type: t("events.typePlanets"), detail: t("events.detailMarsJupiter"), category: "planet", targets: ["mars", "jupiter"] },
-    { date: "2026-11-17", title: t("events.leonidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailLeonids"), category: "meteor" },
-    { date: "2026-12-14", title: t("events.geminidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailGeminids"), category: "meteor" },
-    { date: "2026-12-22", title: t("events.ursidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailUrsids"), category: "meteor" },
-    { date: "2027-01-04", title: t("events.quadrantidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailQuadrantids"), category: "meteor" },
-    { date: "2027-02-06", title: t("events.annularSolarEclipse"), type: t("events.typeSolarEclipse"), detail: t("events.detailAnnularSolar"), category: "other" },
-    { date: "2027-02-21", title: t("events.penumbralLunarEclipse"), type: t("events.typeLunarEclipse"), detail: t("events.detailPenumbralLunar"), category: "moon", targets: ["moon"] },
-    { date: "2027-04-23", title: t("events.lyridsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailLyrids"), category: "meteor" },
-    { date: "2027-05-06", title: t("events.etaAquariidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailEtaAquariids"), category: "meteor" },
-    { date: "2027-08-02", title: t("events.totalSolarEclipse"), type: t("events.typeSolarEclipse"), detail: t("events.detailTotalSolar"), category: "other" },
-    { date: "2027-08-12", title: t("events.perseidsMax"), type: t("events.typeMeteorShower"), detail: t("events.detailPerseids"), category: "meteor" }
+  const CELESTIAL_CALENDAR_MONTHS = 12;
+  const METEOR_SHOWER_CATALOG = [
+    { month: 1, day: 4, title: "quadrantidsMax", detail: "detailQuadrantids" },
+    { month: 4, day: 22, title: "lyridsMax", detail: "detailLyrids" },
+    { month: 5, day: 6, title: "etaAquariidsMax", detail: "detailEtaAquariids" },
+    { month: 7, day: 30, title: "deltaAquariidsMax", detail: "detailDeltaAquariids" },
+    { month: 7, day: 30, title: "alphaCapricornidsMax", detail: "detailAlphaCapricornids" },
+    { month: 8, day: 12, title: "perseidsMax", detail: "detailPerseids" },
+    { month: 10, day: 8, title: "draconidsMax", detail: "detailDraconids" },
+    { month: 10, day: 21, title: "orionidsMax", detail: "detailOrionids" },
+    { month: 11, day: 5, title: "southernTauridsMax", detail: "detailSouthernTaurids" },
+    { month: 11, day: 12, title: "northernTauridsMax", detail: "detailNorthernTaurids" },
+    { month: 11, day: 17, title: "leonidsMax", detail: "detailLeonids" },
+    { month: 12, day: 14, title: "geminidsMax", detail: "detailGeminids" },
+    { month: 12, day: 22, title: "ursidsMax", detail: "detailUrsids" }
   ];
 
-  // Phases lunaires calculées à partir d’une nouvelle Lune de référence et
-  // de la durée moyenne du mois synodique. Les dates sont indicatives (± quelques heures).
-  function generatedLunarEvents(fromDate = new Date(), days = 120) {
-    const synodicMonth = 29.530588853;
-    const referenceNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+  function calendarDateKey(date) {
+    const value = date instanceof Date ? date : new Date(date);
+    if (!Number.isFinite(value.getTime())) return "";
+    try {
+      const parts = new Intl.DateTimeFormat("en-CA", {
+        timeZone: placeTimeZone || undefined,
+        year: "numeric", month: "2-digit", day: "2-digit"
+      }).formatToParts(value);
+      const part = type => parts.find(item => item.type === type)?.value || "";
+      return `${part("year")}-${part("month")}-${part("day")}`;
+    } catch {
+      return `${value.getFullYear()}-${String(value.getMonth() + 1).padStart(2, "0")}-${String(value.getDate()).padStart(2, "0")}`;
+    }
+  }
+
+  function calendarDateFromKey(key) {
+    const [year, month, day] = String(key).split("-").map(Number);
+    return new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+  }
+
+  function calendarDateTimeAtPlace(key, hour = 21) {
+    const [year, month, day] = String(key).split("-").map(Number);
+    if (!placeTimeZone) return new Date(year, month - 1, day, hour, 0, 0);
+    const desiredUtc = Date.UTC(year, month - 1, day, hour, 0, 0);
+    try {
+      const parts = new Intl.DateTimeFormat("en-US", {
+        timeZone: placeTimeZone, year: "numeric", month: "2-digit", day: "2-digit",
+        hour: "2-digit", minute: "2-digit", second: "2-digit", hourCycle: "h23"
+      }).formatToParts(new Date(desiredUtc));
+      const part = type => Number(parts.find(item => item.type === type)?.value || 0);
+      const representedUtc = Date.UTC(part("year"), part("month") - 1, part("day"), part("hour"), part("minute"), part("second"));
+      return new Date(desiredUtc + desiredUtc - representedUtc);
+    } catch {
+      return new Date(year, month - 1, day, hour, 0, 0);
+    }
+  }
+
+  function getCelestialCalendarRange() {
+    // Le calendrier suit la date réelle au lieu de la date de session choisie
+    // pour une observation passée ou future. Les bornes sont des dates civiles
+    // du lieu sélectionné, indépendantes du fuseau horaire de l'appareil.
+    const todayKey = calendarDateKey(new Date());
+    const [year, month, day] = todayKey.split("-").map(Number);
+    const start = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
+    const end = new Date(start);
+    end.setUTCMonth(end.getUTCMonth() + CELESTIAL_CALENDAR_MONTHS);
+    const endKey = `${end.getUTCFullYear()}-${String(end.getUTCMonth() + 1).padStart(2, "0")}-${String(end.getUTCDate()).padStart(2, "0")}`;
+    return { start, end, startKey: todayKey, endKey };
+  }
+
+  function getCelestialEvents(range = getCelestialCalendarRange()) {
+    const events = [];
+    const firstYear = range.start.getUTCFullYear();
+    const lastYear = range.end.getUTCFullYear();
+    for (let year = firstYear; year <= lastYear; year++) {
+      for (const shower of METEOR_SHOWER_CATALOG) {
+        const key = `${year}-${String(shower.month).padStart(2, "0")}-${String(shower.day).padStart(2, "0")}`;
+        if (key < range.startKey || key >= range.endKey) continue;
+        events.push({
+          date: key,
+          title: t(`events.${shower.title}`),
+          type: t("events.typeMeteorShower"),
+          detail: t(`events.${shower.detail}`),
+          category: "meteor"
+        });
+      }
+    }
+    return events;
+  }
+
+  function eventDateFromAstronomyTime(value) {
+    const date = value?.date instanceof Date ? value.date : value instanceof Date ? value : null;
+    return date && Number.isFinite(date.getTime()) ? calendarDateKey(date) : "";
+  }
+
+  function generatedLunarEvents(range = getCelestialCalendarRange()) {
+    const astronomy = window.Astronomy;
+    const events = [];
     const phaseNames = [t("moon.newMoon"), t("moon.firstQuarter"), t("moon.fullMoon"), t("moon.lastQuarter")];
     const phaseDetails = [
       t("events.detailMinimalMoonlight"),
@@ -1934,33 +2006,195 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       t("events.detailWaxingGibbous"),
       t("events.detailWaningCrescent")
     ];
-    const start = new Date(fromDate); start.setHours(0, 0, 0, 0);
-    const end = new Date(start); end.setDate(end.getDate() + days);
-    const startAge = ((start.getTime() - referenceNewMoon) / 86400000 / synodicMonth % 1 + 1) % 1;
-    const firstCycle = Math.floor((start.getTime() - referenceNewMoon) / 86400000 / synodicMonth) - 1;
-    const events = [];
-    for (let cycle = firstCycle; ; cycle++) {
-      let addedFuture = false;
+
+    if (typeof astronomy?.SearchMoonQuarter === "function" && typeof astronomy?.NextMoonQuarter === "function") {
+      try {
+        let quarter = astronomy.SearchMoonQuarter(new Date(range.start.getTime() - 2 * 86400000));
+        let guard = 0;
+        while (quarter?.time?.date instanceof Date && guard++ < 60) {
+          const date = quarter.time.date;
+          const key = eventDateFromAstronomyTime(quarter.time);
+          if (!key || key >= range.endKey) break;
+          if (key >= range.startKey) {
+            const phase = Number(quarter.quarter);
+            events.push({
+              date: key,
+              title: phaseNames[phase] || phaseNames[0],
+              type: t("events.typeMoonPhase"),
+              detail: phaseDetails[phase] || phaseDetails[0],
+              category: "moon",
+              targets: ["moon"]
+            });
+            if (phase === 0) {
+              for (const offset of [-1, 1]) {
+                const dark = new Date(date.getTime() + offset * 86400000);
+                const darkKey = calendarDateKey(dark);
+                if (darkKey >= range.startKey && darkKey < range.endKey) {
+                  events.push({
+                    date: darkKey,
+                    title: t("events.deepSkyWindow"),
+                    type: t("events.typeObservationSuggestion"),
+                    detail: t("events.detailDeepSkyWindow"),
+                    category: "dark-sky"
+                  });
+                }
+              }
+            }
+          }
+          quarter = astronomy.NextMoonQuarter(quarter);
+        }
+        return events;
+      } catch (error) {
+        console.warn("Calendrier céleste : calcul précis des phases lunaires indisponible, repli sur l'approximation.", error);
+      }
+    }
+
+    // Repli autonome si la bibliothèque astronomique n'est pas chargée.
+    const synodicMonth = 29.530588853;
+    const referenceNewMoon = Date.UTC(2000, 0, 6, 18, 14);
+    const startTime = range.start.getTime();
+    const endTime = range.end.getTime();
+    const firstCycle = Math.floor((startTime - referenceNewMoon) / 86400000 / synodicMonth) - 1;
+    for (let cycle = firstCycle; cycle < firstCycle + 18; cycle++) {
       for (let phase = 0; phase < 4; phase++) {
-        const timestamp = referenceNewMoon + (cycle + phase / 4) * synodicMonth * 86400000;
-        const date = new Date(timestamp);
-        if (date < start || date >= end) continue;
-        addedFuture = true;
-        const localDate = new Date(date.getTime());
-        const iso = `${localDate.getFullYear()}-${String(localDate.getMonth()+1).padStart(2,'0')}-${String(localDate.getDate()).padStart(2,'0')}`;
-        events.push({ date: iso, title: phaseNames[phase], type: t("events.typeMoonPhase"), detail: phaseDetails[phase], category: "moon" });
+        const date = new Date(referenceNewMoon + (cycle + phase / 4) * synodicMonth * 86400000);
+        const key = calendarDateKey(date);
+        if (key < range.startKey || key >= range.endKey) continue;
+        events.push({ date: key, title: phaseNames[phase], type: t("events.typeMoonPhase"), detail: phaseDetails[phase], category: "moon", targets: ["moon"] });
         if (phase === 0) {
           for (const offset of [-1, 1]) {
-            const dark = new Date(date); dark.setDate(dark.getDate() + offset);
-            if (dark >= start && dark < end) {
-              const darkIso = `${dark.getFullYear()}-${String(dark.getMonth()+1).padStart(2,'0')}-${String(dark.getDate()).padStart(2,'0')}`;
-              events.push({ date: darkIso, title: t("events.deepSkyWindow"), type: t("events.typeObservationSuggestion"), detail: t("events.detailDeepSkyWindow"), category: "dark-sky" });
-            }
+            const dark = new Date(date.getTime() + offset * 86400000);
+            const darkKey = calendarDateKey(dark);
+            if (darkKey >= range.startKey && darkKey < range.endKey) events.push({ date: darkKey, title: t("events.deepSkyWindow"), type: t("events.typeObservationSuggestion"), detail: t("events.detailDeepSkyWindow"), category: "dark-sky" });
           }
         }
       }
-      if (cycle * synodicMonth * 86400000 + referenceNewMoon > end.getTime()) break;
-      if (cycle > firstCycle + 10) break;
+    }
+    return events;
+  }
+
+  function generatedEclipseEvents(range = getCelestialCalendarRange()) {
+    const astronomy = window.Astronomy;
+    const events = [];
+    if (!astronomy) return events;
+    const eclipseKind = astronomy.EclipseKind || {};
+    const kindKey = kind => kind === eclipseKind.Penumbral ? "penumbral" : kind === eclipseKind.Partial ? "partial" : kind === eclipseKind.Total ? "total" : "partial";
+
+    if (typeof astronomy.SearchLunarEclipse === "function" && typeof astronomy.NextLunarEclipse === "function") {
+      try {
+        let eclipse = astronomy.SearchLunarEclipse(new Date(range.start.getTime() - 2 * 86400000));
+        let guard = 0;
+        while (eclipse?.peak?.date instanceof Date && guard++ < 12) {
+          const key = eventDateFromAstronomyTime(eclipse.peak);
+          if (!key || key >= range.endKey) break;
+          if (key >= range.startKey) {
+            const kind = kindKey(eclipse.kind);
+            const titleKey = kind === "penumbral" ? "penumbralLunarEclipse" : kind === "total" ? "totalLunarEclipse" : "partialLunarEclipse";
+            events.push({ date: key, title: t(`events.${titleKey}`), type: t("events.typeLunarEclipse"), detail: t("events.detailLunarEclipse"), category: "eclipse", targets: ["moon"] });
+          }
+          eclipse = astronomy.NextLunarEclipse(eclipse.peak);
+        }
+      } catch (error) {
+        console.warn("Calendrier céleste : calcul des éclipses lunaires indisponible.", error);
+      }
+    }
+
+    // Les éclipses solaires sont calculées pour le lieu sélectionné : seules
+    // celles dont au moins une phase se déroule au-dessus de l'horizon sont listées.
+    if (typeof astronomy.SearchLocalSolarEclipse === "function" && typeof astronomy.NextLocalSolarEclipse === "function" && typeof astronomy.Observer === "function") {
+      try {
+        const latitude = Number(state.latitude);
+        const longitude = Number(state.longitude);
+        if (Number.isFinite(latitude) && Number.isFinite(longitude)) {
+          const observer = new astronomy.Observer(latitude, longitude, 0);
+          let eclipse = astronomy.SearchLocalSolarEclipse(new Date(range.start.getTime() - 2 * 86400000), observer);
+          let guard = 0;
+          while (eclipse?.peak?.time?.date instanceof Date && guard++ < 12) {
+            const key = eventDateFromAstronomyTime(eclipse.peak.time);
+            if (!key || key >= range.endKey) break;
+            const visible = [eclipse.partial_begin, eclipse.peak, eclipse.partial_end].some(phase => Number(phase?.altitude) > 0);
+            if (key >= range.startKey && visible) {
+              const kind = kindKey(eclipse.kind);
+              const titleKey = kind === "annular" ? "annularSolarEclipse" : kind === "total" ? "totalSolarEclipse" : "partialSolarEclipse";
+              const percent = Number.isFinite(eclipse.obscuration) ? Math.round(eclipse.obscuration * 100) : null;
+              events.push({
+                date: key,
+                title: t(`events.${titleKey}`),
+                type: t("events.typeSolarEclipse"),
+                detail: percent === null ? t("events.detailLocalSolarEclipse") : t("events.detailLocalSolarEclipsePercent", { percent }),
+                category: "eclipse",
+                targets: ["sun"]
+              });
+            }
+            eclipse = astronomy.NextLocalSolarEclipse(eclipse.peak.time, observer);
+          }
+        }
+      } catch (error) {
+        console.warn("Calendrier céleste : calcul des éclipses solaires locales indisponible.", error);
+      }
+    }
+    return events;
+  }
+
+  function generatedPlanetEvents(range = getCelestialCalendarRange()) {
+    const astronomy = window.Astronomy;
+    const events = [];
+    if (!astronomy?.Body) return events;
+    const planetNames = ["mars", "jupiter", "saturn", "uranus", "neptune"];
+    const startSearch = new Date(range.start.getTime() - 2 * 86400000);
+
+    if (typeof astronomy.SearchRelativeLongitude === "function") {
+      for (const key of planetNames) {
+        const body = astronomy.Body[key[0].toUpperCase() + key.slice(1)];
+        if (body === undefined) continue;
+        try {
+          const opposition = astronomy.SearchRelativeLongitude(body, 0, startSearch);
+          const dateKey = eventDateFromAstronomyTime(opposition);
+          if (dateKey && dateKey >= range.startKey && dateKey < range.endKey) {
+            const planet = t(`names.planet.${key}`);
+            events.push({
+              date: dateKey,
+              title: t("events.planetOppositionTitle", { planet }),
+              type: t("events.typePlanets"),
+              detail: t("events.planetOppositionDetail", { planet }),
+              category: "planet",
+              targets: [key]
+            });
+          }
+        } catch (error) {
+          console.warn(`Calendrier céleste : opposition de ${key} non calculée.`, error);
+        }
+      }
+    }
+
+    if (typeof astronomy.SearchMaxElongation === "function") {
+      for (const key of ["mercury", "venus"]) {
+        const body = astronomy.Body[key[0].toUpperCase() + key.slice(1)];
+        if (body === undefined) continue;
+        try {
+          let event = astronomy.SearchMaxElongation(body, startSearch);
+          let guard = 0;
+          while (event?.time?.date instanceof Date && guard++ < 8) {
+            const dateKey = eventDateFromAstronomyTime(event.time);
+            if (!dateKey || dateKey >= range.endKey) break;
+            if (dateKey >= range.startKey) {
+              const planet = t(`names.planet.${key}`);
+              const visibility = event.visibility === "morning" ? t("events.morningSky") : t("events.eveningSky");
+              events.push({
+                date: dateKey,
+                title: t("events.planetElongationTitle", { planet }),
+                type: t("events.typePlanets"),
+                detail: t("events.planetElongationDetail", { planet, visibility }),
+                category: "planet",
+                targets: [key]
+              });
+            }
+            event = astronomy.SearchMaxElongation(body, new Date(event.time.date.getTime() + 86400000));
+          }
+        } catch (error) {
+          console.warn(`Calendrier céleste : élongation de ${key} non calculée.`, error);
+        }
+      }
     }
     return events;
   }
@@ -1984,7 +2218,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
   function prepareEventObservationDate(item) {
     if (!item?.date || typeof onObservationDateChange !== "function") return;
     // Les événements n'ayant pas tous une heure précise sont préparés à 21 h locale.
-    const date = new Date(`${item.date}T21:00:00`);
+    const date = calendarDateTimeAtPlace(item.date, 21);
     if (Number.isFinite(date.getTime())) onObservationDateChange(date);
   }
 
@@ -2008,12 +2242,9 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     const list = $("events-list");
     if (!list) return;
     list.replaceChildren();
-    const referenceDate = new Date(state.observationDate || new Date());
-    referenceDate.setHours(0, 0, 0, 0);
-    const end = new Date(referenceDate); end.setDate(end.getDate() + 120);
-    const generated = generatedLunarEvents(referenceDate, 120);
-    const upcoming = [...getCelestialEvents(), ...generated]
-      .filter(item => { const date = new Date(`${item.date}T12:00:00`); return date >= referenceDate && date < end; })
+    const range = getCelestialCalendarRange();
+    const upcoming = [...getCelestialEvents(range), ...generatedLunarEvents(range), ...generatedEclipseEvents(range), ...generatedPlanetEvents(range)]
+      .filter(item => item.date >= range.startKey && item.date < range.endKey)
       .filter(item => celestialEventFilter === "all" || eventCategory(item) === celestialEventFilter)
       .sort((a, b) => a.date.localeCompare(b.date) || a.title.localeCompare(b.title));
     if (!upcoming.length) {
@@ -2021,23 +2252,18 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     }
     for (const item of upcoming) {
       const card = document.createElement("article"); card.className = "event-card";
-      const date = document.createElement("time"); date.dateTime = item.date; date.textContent = new Intl.DateTimeFormat(getLocale(), { day: "numeric", month: "long", year: "numeric" }).format(new Date(`${item.date}T12:00:00`));
+      const date = document.createElement("time"); date.dateTime = item.date; date.textContent = new Intl.DateTimeFormat(getLocale(), { day: "numeric", month: "long", year: "numeric", timeZone: "UTC" }).format(calendarDateFromKey(item.date));
       const title = document.createElement("h3"); title.textContent = item.title;
       const type = document.createElement("span"); type.className = "event-type"; type.textContent = item.type;
       const detail = document.createElement("p"); detail.textContent = item.detail;
       const actions = document.createElement("div"); actions.className = "event-card-actions";
       const linkedTargets = [];
-      if (item.targets?.includes("moon")) {
-        const moon = findEventTarget(t("names.planet.moon")) || findEventTarget("Moon");
-        if (moon) linkedTargets.push({ target: moon, label: t("events.viewMoon") });
-      }
-      if (item.targets?.includes("mars")) {
-        const mars = findEventTarget(t("names.planet.mars"));
-        if (mars) linkedTargets.push({ target: mars, label: t("events.sheetMars") });
-      }
-      if (item.targets?.includes("jupiter")) {
-        const jupiter = findEventTarget(t("names.planet.jupiter"));
-        if (jupiter) linkedTargets.push({ target: jupiter, label: t("events.sheetJupiter") });
+      for (const targetKey of item.targets || []) {
+        const localizedName = t(`names.planet.${targetKey}`);
+        const target = findEventTarget(localizedName) || (targetKey === "moon" ? findEventTarget("Moon") : null);
+        if (!target) continue;
+        const label = targetKey === "moon" ? t("events.viewMoon") : t("events.sheetPlanet", { planet: localizedName });
+        linkedTargets.push({ target, label });
       }
       for (const linked of linkedTargets) {
         const button = document.createElement("button"); button.type = "button"; button.className = "action-button"; button.textContent = linked.label;
@@ -2522,6 +2748,31 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         t("walk.dipperToArcturusStep2"),
         t("walk.dipperToArcturusStep3")
       ], tip: t("walk.dipperToArcturusTip"), search: ["grande ourse", "bouvier", "vierge"] },
+      southernbeacons: { title: t("discovery.walks.southernbeaconsTitle"), constellation: "carina", overlay: { color: "#ff514d", segments: [{ from: t("names.star.canopus"), to: t("names.star.achernar"), dashed: true }, { from: t("names.star.achernar"), to: t("names.star.fomalhaut"), dashed: true }], target: t("names.star.canopus") }, stepOverlays: [
+        { color: "#ff514d", segments: [], target: t("names.star.canopus") },
+        { color: "#ff514d", segments: [{ from: t("names.star.canopus"), to: t("names.star.achernar"), dashed: true }], target: t("names.star.achernar") },
+        { color: "#ff514d", segments: [{ from: t("names.star.canopus"), to: t("names.star.achernar"), dashed: true }, { from: t("names.star.achernar"), to: t("names.star.fomalhaut"), dashed: true }], target: t("names.star.fomalhaut") }
+      ], intro: t("walk.southernBeaconsIntro"), steps: [t("walk.southernBeaconsStep1"), t("walk.southernBeaconsStep2"), t("walk.southernBeaconsStep3")], tip: t("walk.southernBeaconsTip"), search: ["carène", "carina"] },
+      southernomega: { title: t("discovery.walks.southernomegaTitle"), constellation: "centaurus", overlay: { color: "#ff514d", segments: [{ from: t("names.star.alpha-centauri"), to: t("names.star.hadar"), dashed: true }], targetObject: "NGC5139" }, stepOverlays: [
+        { color: "#ff514d", segments: [], target: t("names.star.alpha-centauri") },
+        { color: "#ff514d", segments: [{ from: t("names.star.alpha-centauri"), to: t("names.star.hadar"), dashed: true }], target: t("names.star.hadar") },
+        { color: "#ff514d", segments: [{ from: t("names.star.alpha-centauri"), to: t("names.star.hadar"), dashed: true }], targetObject: "NGC5139" }
+      ], intro: t("walk.southernOmegaIntro"), steps: [t("walk.southernOmegaStep1"), t("walk.southernOmegaStep2"), t("walk.southernOmegaStep3")], tip: t("walk.southernOmegaTip"), search: ["centaure", "centaurus"] },
+      southerncarina: { title: t("discovery.walks.southerncarinaTitle"), constellation: "carina", overlay: { color: "#ff514d", segments: [{ from: t("names.star.canopus"), to: t("names.star.avior"), dashed: true }], targetObject: "NGC3532" }, stepOverlays: [
+        { color: "#ff514d", segments: [], target: t("names.star.canopus") },
+        { color: "#ff514d", segments: [{ from: t("names.star.canopus"), to: t("names.star.avior"), dashed: true }], targetObject: "NGC3372" },
+        { color: "#ff514d", segments: [{ from: t("names.star.canopus"), to: t("names.star.avior"), dashed: true }], targetObject: "NGC3532" }
+      ], intro: t("walk.southernCarinaIntro"), steps: [t("walk.southernCarinaStep1"), t("walk.southernCarinaStep2"), t("walk.southernCarinaStep3")], tip: t("walk.southernCarinaTip"), search: ["carène", "carina"] },
+      southernclusters: { title: t("discovery.walks.southernclustersTitle"), constellation: "vela", overlay: { color: "#ff514d", segments: [{ from: t("names.star.avior"), to: t("names.star.canopus"), dashed: true }], targetObject: "NGC2547" }, stepOverlays: [
+        { color: "#ff514d", segments: [{ from: t("names.star.avior"), to: t("names.star.canopus"), dashed: true }], targetObject: "NGC2451" },
+        { color: "#ff514d", segments: [{ from: t("names.star.avior"), to: t("names.star.canopus"), dashed: true }], targetObject: "NGC2516" },
+        { color: "#ff514d", segments: [{ from: t("names.star.avior"), to: t("names.star.canopus"), dashed: true }], targetObject: "NGC2547" }
+      ], intro: t("walk.southernClustersIntro"), steps: [t("walk.southernClustersStep1"), t("walk.southernClustersStep2"), t("walk.southernClustersStep3")], tip: t("walk.southernClustersTip"), search: ["voile", "vela", "poupe", "puppis"] },
+      southerncross: { title: t("discovery.walks.southerncrossTitle"), constellation: "crux", overlay: { color: "#ff514d", segments: [{ from: t("names.star.gacrux"), to: t("names.star.acrux") }, { from: t("names.star.mimosa"), to: t("names.star.delta-crucis") }, { from: t("names.star.acrux"), to: t("names.star.hadar"), dashed: true }, { from: t("names.star.acrux"), to: t("names.star.alpha-centauri"), dashed: true }], target: t("names.star.acrux") }, stepOverlays: [
+        { color: "#ff514d", segments: [{ from: t("names.star.gacrux"), to: t("names.star.acrux") }], target: t("names.star.gacrux") },
+        { color: "#ff514d", segments: [{ from: t("names.star.gacrux"), to: t("names.star.acrux") }, { from: t("names.star.mimosa"), to: t("names.star.delta-crucis") }], target: t("names.star.mimosa") },
+        { color: "#ff514d", segments: [{ from: t("names.star.gacrux"), to: t("names.star.acrux") }, { from: t("names.star.mimosa"), to: t("names.star.delta-crucis") }, { from: t("names.star.acrux"), to: t("names.star.hadar"), dashed: true }, { from: t("names.star.acrux"), to: t("names.star.alpha-centauri"), dashed: true }], target: t("names.star.alpha-centauri") }
+      ], intro: t("walk.southernCrossIntro"), steps: [t("walk.southernCrossStep1"), t("walk.southernCrossStep2"), t("walk.southernCrossStep3")], tip: t("walk.southernCrossTip"), search: ["croix du sud", "crux", "croix du nord"] },
       andromeda: { title: t("ui.findAndromedaGalaxy"), constellation: "andromeda", overlay: { color: "#ff514d", segments: [{ from: "Alpheratz", to: "Mirach" }, { from: "Mirach", to: "Mu Andromedae", dashed: true }], targetObject: "M31" }, stepOverlays: [
         { color: "#ff514d", segments: [], target: "Alpheratz" },
         { color: "#ff514d", segments: [{ from: "Alpheratz", to: t("names.star.mirach") }], target: "Mirach" },
@@ -2535,8 +2786,8 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     // Filtrage limité à la liste des balades. On réutilise les positions
     // calculées par le moteur de l'atlas ; aucune modification de drawSky.
     refreshSkyWalkAvailability = () => {
-      const catalog = typeof getCatalogObjects === "function" ? getCatalogObjects() : null;
-      if (!Array.isArray(catalog) || !catalog.length) return;
+      const catalogResult = typeof getCatalogObjects === "function" ? getCatalogObjects() : null;
+      const catalog = Array.isArray(catalogResult) ? catalogResult : [];
       const normalize = value => String(value || "").normalize("NFD").replace(/[\u0300-\u036f]/g, "").toLowerCase().replace(/[^a-z0-9]/g, "");
       const m45 = catalog.find(object => normalize(object.id) === "m45" || normalize(object.name) === "pleiades" || normalize(object.name) === "pleiadesamas");
       // M45 doit être suffisamment haute, et son étoile repère Aldébaran
@@ -2563,9 +2814,59 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         const position = typeof getStarPosition === "function" ? getStarPosition(star) : null;
         return Number.isFinite(position?.alt) && position.alt > 0;
       });
+      const latitude = Number(state.latitude);
+      const southernHemisphere = Number.isFinite(latitude) && latitude < -5;
+      const northernHemisphere = Number.isFinite(latitude) && latitude > 5;
+      const month = new Date(state.observationDate || new Date()).getMonth() + 1;
+      const northSeason = {
+        summer: month >= 4 && month <= 9,
+        orion: month >= 10 || month <= 3,
+        pleiades: month >= 9 || month <= 3,
+        winterhex: month >= 10 || month <= 3,
+        springtriangle: month >= 2 && month <= 7,
+        dippertoarcturus: month >= 2 && month <= 8,
+        andromeda: month >= 8 || month <= 1,
+        polaris: true
+      };
+      const southernCrossHips = new Set([59747, 60718, 61084, 62434]); // Delta Crucis, Acrux, Mimosa, Gacrux
+      const southernCrossStars = (state.stars || []).filter(star => southernCrossHips.has(Number(star.hip)));
+      const southernCrossVisible = southernCrossStars.filter(star => {
+        const position = typeof getStarPosition === "function" ? getStarPosition(star) : null;
+        return Number.isFinite(position?.alt) && position.alt > 5;
+      }).length >= 2;
+      const southernBeaconHips = new Set([30438, 7588, 113368]); // Canopus, Achernar, Fomalhaut
+      const southernBeaconStars = (state.stars || []).filter(star => southernBeaconHips.has(Number(star.hip)));
+      const southernBeaconsVisible = southernBeaconStars.filter(star => {
+        const position = typeof getStarPosition === "function" ? getStarPosition(star) : null;
+        return Number.isFinite(position?.alt) && position.alt > 5;
+      }).length >= 2;
+      const southernCrossSeason = month >= 3 && month <= 8;
+      const southernBeaconSeason = month >= 11 || month <= 3;
+      const catalogObjectVisible = id => {
+        const wanted = normalize(id);
+        const object = catalog.find(item => normalize(item.id) === wanted || normalize(item.name) === wanted || normalize(item.englishName) === wanted);
+        return Boolean(object && Number.isFinite(Number(object.alt)) && Number(object.alt) > 5);
+      };
+      const southernOmegaVisible = catalogObjectVisible("NGC 5139");
+      const southernCarinaVisible = catalogObjectVisible("NGC 3372") && catalogObjectVisible("NGC 3532");
+      const southernClustersVisible = ["NGC 2451", "NGC 2516", "NGC 2547"].filter(catalogObjectVisible).length >= 2;
+      const southernOmegaSeason = month >= 3 && month <= 8;
+      const southernCarinaSeason = month >= 11 || month <= 4;
+      const southernClustersSeason = month >= 11 || month <= 3;
       document.querySelectorAll("[data-sky-walk]").forEach(button => {
-        if (button.dataset.skyWalk === "orion") button.hidden = !orionVisible;
-        else if (button.dataset.skyWalk === "pleiades") button.hidden = !pleiadesVisible;
+        const id = button.dataset.skyWalk;
+        const isSouthern = button.dataset.skyWalkHemisphere === "south" || id === "southerncross";
+        if (isSouthern && northernHemisphere) { button.hidden = true; return; }
+        if (!isSouthern && southernHemisphere) { button.hidden = true; return; }
+        if (id === "orion") button.hidden = !orionVisible || !northSeason.orion;
+        else if (id === "pleiades") button.hidden = !pleiadesVisible || !northSeason.pleiades;
+        else if (id === "southerncross") button.hidden = !southernCrossVisible || !southernCrossSeason;
+        else if (id === "southernbeacons") button.hidden = !southernBeaconsVisible || !southernBeaconSeason;
+        else if (id === "southernomega") button.hidden = !southernOmegaVisible || !southernOmegaSeason;
+        else if (id === "southerncarina") button.hidden = !southernCarinaVisible || !southernCarinaSeason;
+        else if (id === "southernclusters") button.hidden = !southernClustersVisible || !southernClustersSeason;
+        else if (Object.prototype.hasOwnProperty.call(northSeason, id)) button.hidden = !northSeason[id];
+        else button.hidden = false;
       });
     };
 
@@ -2683,7 +2984,10 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         betelgeuse: 27989, mintaka: 25930, alnilam: 26311, alnitak: 26727,
         rigel: 24436, sirius: 32349, capella: 24608, pollux: 37826,
         procyon: 37279, arcturus: 69673, spica: 65474, regulus: 49669,
-        alkaid: 67301, muandromedae: 116631
+        alkaid: 67301, muandromedae: 116631,
+        canopus: 30438, achernar: 7588, fomalhaut: 113368,
+        alphacentauri: 71683, hadar: 68702, avior: 39953,
+        gacrux: 62434, acrux: 60718, mimosa: 61084, deltacrucis: 59747
       };
       const names = new Set();
       const targetObjects = new Set();
