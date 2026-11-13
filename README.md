@@ -1,5 +1,15 @@
 Seduwa Ciel — version 1.4
 
+## v2.0 — ajout de "pilotage de télescope", mobile et ordinateur
+
+- Ajout d'une nouvelle fonction : Pilotage de télescope.
+- Ajout du bouton « Pointer le télescope vers cet objet » dans la fiche descriptive ; il n'apparaît que lorsque le serveur INDI et la monture sont confirmés disponibles et que les coordonnées équatoriales de l'objet sont valides.
+- Chaque GOTO depuis une fiche exige une confirmation explicite, il utilise le jeton saisi dans le panneau de pilotage.
+- Un marqueur cyan en forme de télescope indique la position actuelle sur la carte céleste. Les coordonnées de monture INDIGO (`MOUNT_EQUATORIAL_COORDINATES`) sont traitées en J2000 ; les corps du système solaire fournissent donc aussi leurs coordonnées J2000 dédiées pour le GOTO, sans modifier les coordonnées de date utilisées par l'affichage. Le marqueur est masqué lorsque la monture n'est plus disponible, lorsque les coordonnées ne sont pas lisibles ou lorsque la carte est réglée sur une date passée.
+- Une paire de coordonnées J2000 supplémentaire est calculée pour les corps du système solaire afin de fournir au GOTO l'époque attendue par INDIGO.
+
+**Réseau local et navigateur :** sur un mobile, renseigner l'adresse LAN de l'appareil qui héberge la passerelle (par exemple `http://192.168.x.x:8768`). La passerelle doit écouter sur l'interface LAN et autoriser CORS pour l'origine de l'application, les méthodes `GET` et `POST`, ainsi que les en-têtes `Content-Type` et `X-Seduwa-Token`. Aucun jeton n'est enregistré dans le navigateur. Si l'application est chargée depuis une adresse HTTPS publique, le navigateur peut bloquer l'appel vers une passerelle HTTP locale (contenu mixte / accès au réseau local) : il faut alors une passerelle HTTPS avec certificat approuvé par le mobile, ou servir également l'application depuis le réseau local en HTTP. CORS seul ne contourne pas cette restriction.
+
 ## v1.4 — Calendrier céleste dynamique sur 12 mois glissants
 
 - Le calendrier utilise maintenant la date réelle du lieu d’observation sélectionné, indépendamment de la date de session choisie pour l'observation.
