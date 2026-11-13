@@ -10,6 +10,8 @@ import { assessObservingDifficulty } from "./observing-difficulty.js";
 import { angularSeparationDeg, buildStarHopRoute, formatStarHopTargetLabel, recommendedStarHopMaxDeg, selectTargetGuideStar } from "./star-hop-route.js";
 import { SOLAR_PLANETS, getLocalizedSolarPlanet, calculateSolarOrbitPosition, calculateSolarOrbitPositions } from "./solar-system-orbits.js";
 import { t, getLocale, getDataLocale } from "./i18n.js";
+import { calculateObservationWindow, calculateAltitudeScale, fetchObservationWeather, fetchTerrainHorizon } from "./observation-window.js";
+import { theoreticalMaximumAltitude, isEverVisibleFromLatitude, deduplicateNamedObjects, getDiscoveryObjectType, selectDistinctDiscoverySteps, calculateContextFrame } from "./sky-visibility.js";
 
 export function createUI({
   state,
@@ -472,11 +474,23 @@ export function createUI({
 
   function updateObjectCard(object) {
     if (!object) {
+      window.dispatchEvent(new CustomEvent("seduwa:object-card-target", { detail: null }));
       setHidden("object-card", true);
       return;
     }
 
     const name = localizedObjectName(object, displayObjectName(object.proper_name, displayObjectName(object.id, displayObjectName(object.designation))));
+    const targetRaHours = Number(object.raJ2000 ?? object.ra);
+    const targetDecDegrees = Number(object.decJ2000 ?? object.dec);
+    window.dispatchEvent(new CustomEvent("seduwa:object-card-target", {
+      detail: {
+        name,
+        raHours: targetRaHours,
+        decDegrees: targetDecDegrees,
+        available: Number.isFinite(targetRaHours) && targetRaHours >= 0 && targetRaHours < 24 &&
+          Number.isFinite(targetDecDegrees) && targetDecDegrees >= -90 && targetDecDegrees <= 90
+      }
+    }));
     const typeNames = {
       star: t("ui.star"), planet: t("ui.planet"), sun: t("ui.sun"), moon: t("ui.moon"),
       galaxy: t("ui.galaxy"), nebula: t("ui.nebula"), cluster: t("ui.starCluster"),
@@ -721,7 +735,7 @@ export function createUI({
         add(t("riseTransit.transit"), events.transit);
         add(t("riseTransit.set"), events.set);
       }
-      const maximumAltitude = theoreticalMaximumAltitude(object);
+      const maximumAltitude = getTheoreticalMaximumAltitude(object);
       if (Number.isFinite(maximumAltitude)) add(t("ui.maximumTheoreticalAltitude"), `${maximumAltitude.toFixed(1).replace(".", ",")}° ${t("ui.atMeridian")}`);
       if (Number.isFinite(object.alt)) {
         const altitudeLabel = object.alt > 0 ? t("ui.aboveHorizonState") : t("ui.belowHorizonState");
@@ -1033,16 +1047,13 @@ export function createUI({
     return calculateRiseTransitSetAt(object, date, lat, lon, getLocale());
   }
 
-  function theoreticalMaximumAltitude(object) {
-    const latitude = Number(state.latitude);
-    const declination = Number(object?.dec);
-    if (!Number.isFinite(latitude) || !Number.isFinite(declination)) return null;
-    return Math.max(-90, Math.min(90, 90 - Math.abs(latitude - declination)));
+  function getTheoreticalMaximumAltitude(object) {
+    return theoreticalMaximumAltitude(object?.dec, state.latitude);
   }
 
   function observingWindowSummary(object) {
     const events = calculateRiseTransitSet(object);
-    const maxAltitude = theoreticalMaximumAltitude(object);
+    const maxAltitude = getTheoreticalMaximumAltitude(object);
     const parts = [];
     if (events?.transit && !events.belowHorizon) parts.push(`${t("riseTransit.transit")} ${events.transit}`);
     if (Number.isFinite(maxAltitude)) parts.push(`${t("ui.maxTheoreticalAltitude")} ${Math.round(maxAltitude)}°`);
@@ -1070,6 +1081,7 @@ export function createUI({
   function closeObjectCard() {
     // Masquer la fiche sans effacer la sélection : le repère de la cible
     // reste visible sur la carte jusqu’à une nouvelle sélection explicite.
+    window.dispatchEvent(new CustomEvent("seduwa:object-card-target", { detail: null }));
     setHidden("object-card", true);
     safely(t("ui.skyRefresh"), () => drawSky());
   }
@@ -1134,8 +1146,11 @@ export function createUI({
     };
 
   function getSearchCommonStarName(object) {
-    const match = String(object?.id ?? object?.name ?? "").match(/^HIP[_\s-]*(\d+)$/i);
-    const hip = Number(object?.hip ?? (match ? match[1] : NaN));
+    const directHip = Number(object?.hip);
+    const hipText = String(object?.hip ?? object?.id ?? object?.name ?? "");
+    const match = hipText.match(/(?:^|[^A-Z0-9])HIP[_\s-]*(\d+)(?:$|[^0-9])/i) ||
+      String(object?.id ?? object?.name ?? "").match(/^HIP[_\s-]*(\d+)$/i);
+    const hip = Number.isFinite(directHip) && directHip > 0 ? directHip : Number(match?.[1] ?? NaN);
     const storedName = SEARCH_COMMON_STAR_NAMES[hip];
     const candidate = (typeof storedName === "string" && storedName.startsWith("names.star.") ? t(storedName) : storedName) || object?.proper_name || object?.properName ||
       (object?.name && !/^HIP[_\s-]*\d+$/i.test(object.name) ? object.name : "");
@@ -1149,6 +1164,7 @@ export function createUI({
       .toLocaleLowerCase(getLocale())
       .trim();
   }
+
 
   function getDiscoveryCommonName(object) {
     if (!object || typeof object !== "object") return "";
@@ -1965,9 +1981,16 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
     const todayKey = calendarDateKey(new Date());
     const [year, month, day] = todayKey.split("-").map(Number);
     const start = new Date(Date.UTC(year, month - 1, day, 12, 0, 0));
-    const end = new Date(start);
-    end.setUTCMonth(end.getUTCMonth() + CELESTIAL_CALENDAR_MONTHS);
-    const endKey = `${end.getUTCFullYear()}-${String(end.getUTCMonth() + 1).padStart(2, "0")}-${String(end.getUTCDate()).padStart(2, "0")}`;
+    // Calculer la borne par année/mois civils, en plafonnant le jour au dernier
+    // jour du mois cible (ex. 29 février -> 28 février l'année suivante).
+    // Cela évite les débordements de Date#setUTCMonth sur les fins de mois.
+    const endMonthIndex = year * 12 + (month - 1) + CELESTIAL_CALENDAR_MONTHS;
+    const endYear = Math.floor(endMonthIndex / 12);
+    const endMonth = endMonthIndex % 12;
+    const lastDayOfEndMonth = new Date(Date.UTC(endYear, endMonth + 1, 0)).getUTCDate();
+    const endDay = Math.min(day, lastDayOfEndMonth);
+    const end = new Date(Date.UTC(endYear, endMonth, endDay, 12, 0, 0));
+    const endKey = `${endYear}-${String(endMonth + 1).padStart(2, "0")}-${String(endDay).padStart(2, "0")}`;
     return { start, end, startKey: todayKey, endKey };
   }
 
@@ -2011,7 +2034,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       try {
         let quarter = astronomy.SearchMoonQuarter(new Date(range.start.getTime() - 2 * 86400000));
         let guard = 0;
-        while (quarter?.time?.date instanceof Date && guard++ < 60) {
+        while (quarter?.time?.date instanceof Date && guard++ < 80) {
           const date = quarter.time.date;
           const key = eventDateFromAstronomyTime(quarter.time);
           if (!key || key >= range.endKey) break;
@@ -2084,7 +2107,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       try {
         let eclipse = astronomy.SearchLunarEclipse(new Date(range.start.getTime() - 2 * 86400000));
         let guard = 0;
-        while (eclipse?.peak?.date instanceof Date && guard++ < 12) {
+        while (eclipse?.peak?.date instanceof Date && guard++ < 24) {
           const key = eventDateFromAstronomyTime(eclipse.peak);
           if (!key || key >= range.endKey) break;
           if (key >= range.startKey) {
@@ -2109,7 +2132,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
           const observer = new astronomy.Observer(latitude, longitude, 0);
           let eclipse = astronomy.SearchLocalSolarEclipse(new Date(range.start.getTime() - 2 * 86400000), observer);
           let guard = 0;
-          while (eclipse?.peak?.time?.date instanceof Date && guard++ < 12) {
+          while (eclipse?.peak?.time?.date instanceof Date && guard++ < 24) {
             const key = eventDateFromAstronomyTime(eclipse.peak.time);
             if (!key || key >= range.endKey) break;
             const visible = [eclipse.partial_begin, eclipse.peak, eclipse.partial_end].some(phase => Number(phase?.altitude) > 0);
@@ -2174,7 +2197,7 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         try {
           let event = astronomy.SearchMaxElongation(body, startSearch);
           let guard = 0;
-          while (event?.time?.date instanceof Date && guard++ < 8) {
+          while (event?.time?.date instanceof Date && guard++ < 16) {
             const dateKey = eventDateFromAstronomyTime(event.time);
             if (!dateKey || dateKey >= range.endKey) break;
             if (dateKey >= range.startKey) {
@@ -2902,21 +2925,25 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         if (typeof drawSky === "function") drawSky();
       }
     };
+    const CONSTELLATION_SAFE_ALTITUDE = 15;
+    const CONSTELLATION_MIN_VISIBLE_STARS = 2;
+    const visibleConstellationMembers = item => {
+      const starsById = new Map((state.stars || []).map(star => [String(star.id), star]));
+      const memberIds = new Set((item?.lines || []).flatMap(segment => Array.isArray(segment) ? segment.map(String) : []));
+      return [...memberIds].map(id => starsById.get(id)).filter(Boolean).map(star => ({
+        star,
+        horizontal: typeof getStarPosition === "function" ? getStarPosition(star) : null
+      })).filter(entry => Number.isFinite(entry.horizontal?.az)
+        && Number.isFinite(entry.horizontal?.alt)
+        && entry.horizontal.alt >= CONSTELLATION_SAFE_ALTITUDE);
+    };
     const populateDiscoveryConstellations = select => {
       if (!select) return;
       const previousValue = String(select.value || "");
       select.replaceChildren(new Option(t("discovery.constellationPicker.placeholder"), ""));
-      const starsById = new Map((state.stars || []).map(star => [String(star.id), star]));
       const list = [...(state.constellations || [])].filter(item => {
         if (!item || !item.id || !(item.name || item.name_fr)) return false;
-        const memberIds = new Set((item.lines || []).flatMap(segment => Array.isArray(segment) ? segment.map(String) : []));
-        for (const id of memberIds) {
-          const star = starsById.get(id);
-          if (!star) continue;
-          const position = typeof getStarPosition === "function" ? getStarPosition(star) : null;
-          if (Number.isFinite(position?.alt) && position.alt > 0) return true;
-        }
-        return false;
+        return visibleConstellationMembers(item).length >= CONSTELLATION_MIN_VISIBLE_STARS;
       }).sort((a, b) => localizedConstellationName(a).localeCompare(localizedConstellationName(b), getLocale()));
       for (const item of list) {
         const option = document.createElement("option");
@@ -3013,7 +3040,8 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
       const addStarPosition = star => {
         if (!star || includedStarIds.has(String(star.id))) return;
         const horizontal = getStarPosition(star);
-        if (Number.isFinite(horizontal?.az) && Number.isFinite(horizontal?.alt) && horizontal.alt > 0) {
+        if (Number.isFinite(horizontal?.az) && Number.isFinite(horizontal?.alt) && horizontal.alt >= 15
+          && isEverVisibleFromLatitude(star, state.latitude)) {
           positions.push({ horizontal });
           includedStarIds.add(String(star.id));
         }
@@ -3043,29 +3071,22 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
           [candidate.id, candidate.name, candidate.designation, candidate.common_name, candidate.commonName]
             .some(value => normalize(value) === targetKey)
         );
-        if (object && Number.isFinite(object.az) && Number.isFinite(object.alt) && object.alt > 0) {
+        if (object && Number.isFinite(object.az) && Number.isFinite(object.alt) && object.alt >= 15
+          && isEverVisibleFromLatitude(object, state.latitude)) {
           positions.push({ horizontal: { az: object.az, alt: object.alt } });
         }
       }
       if (!positions.length) return;
-      const sx = positions.reduce((sum, entry) => sum + Math.sin(entry.horizontal.az * Math.PI / 180), 0);
-      const cx = positions.reduce((sum, entry) => sum + Math.cos(entry.horizontal.az * Math.PI / 180), 0);
-      state.heading = norm360(Math.atan2(sx, cx) * 180 / Math.PI);
-      // La caméra doit réellement viser l'altitude moyenne des étoiles ciblées.
-      // Limiter le pitch à 12° laissait les étoiles hautes hors champ : le tracé
-      // était bien calculé, mais entièrement projeté au-dessus de la carte.
-      state.pitch = clamp(positions.reduce((sum, entry) => sum + entry.horizontal.alt, 0) / positions.length, 0, 80);
-      const offsets = positions.map(entry => {
-        let delta = entry.horizontal.az - state.heading;
-        while (delta > 180) delta -= 360;
-        while (delta < -180) delta += 360;
-        return Math.abs(delta);
-      });
-      const maxOffset = Math.max(0, ...offsets);
-      const maxAltitude = Math.max(...positions.map(entry => entry.horizontal.alt));
-      const horizontalFov = maxOffset * 2 * 1.3;
-      const verticalFov = 2 * (maxAltitude - state.pitch + 10) / (83.3333333333 / 75);
-      state.fov = clamp(Math.max(32, horizontalFov, verticalFov), 15, 120);
+      // Centre calculé sur la moyenne sphérique des directions, et non sur
+      // les moyennes séparées azimut/altitude : cela évite les décentrages
+      // sensibles pour les figures étendues ou proches du passage au nord.
+      const frame = calculateContextFrame(positions.map(entry => entry.horizontal), 70, 1.4);
+      if (!frame) return;
+      state.heading = norm360(frame.heading);
+      state.pitch = clamp(frame.pitch, 0, 80);
+      // 70° minimum de champ : le zoom automatique reste à 0,64× au plus,
+      // avec une marge de contexte même lorsque seules quelques étoiles sont visibles.
+      state.fov = clamp(frame.fov, 70, 120);
       state.verticalFov = clamp(state.fov * (83.3333333333 / 75), 15, 110);
       const zoomIndicator = $("zoom-level");
       if (zoomIndicator) zoomIndicator.textContent = `${(45 / state.fov).toLocaleString(getLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}×`;
@@ -3305,12 +3326,16 @@ summary.textContent = `${t("ui.tonightSummaryPrefix")} ${visibleNowDateDescripti
         const currentObject = findCurrentDiscoverySearchObject(item, currentCatalog);
         const rawAltitude = currentObject?.alt;
         const altitude = rawAltitude == null || rawAltitude === "" ? NaN : Number(rawAltitude);
-        if (!Number.isFinite(altitude) || altitude <= 0) {
+        const canRiseFromSelectedHemisphere = isEverVisibleFromLatitude(currentObject, state.latitude);
+        if (!canRiseFromSelectedHemisphere || !Number.isFinite(altitude) || altitude <= 0) {
           const status = document.createElement("span");
-          status.className = `discovery-search-status${Number.isFinite(altitude) ? " is-below-horizon" : " is-unknown"}`;
-          status.textContent = Number.isFinite(altitude)
-            ? t("ui.belowHorizonForNow")
-            : t("ui.positionUnavailableForNow");
+          const hemisphereMessage = Number(state.latitude) < 0
+            ? t("ui.neverVisibleFromSouthernHemisphere")
+            : t("ui.neverVisibleFromNorthernHemisphere");
+          status.className = `discovery-search-status${!canRiseFromSelectedHemisphere ? " is-never-visible" : (Number.isFinite(altitude) ? " is-below-horizon" : " is-unknown")}`;
+          status.textContent = !canRiseFromSelectedHemisphere
+            ? hemisphereMessage
+            : (!Number.isFinite(altitude) ? t("ui.positionUnavailableForNow") : t("ui.belowHorizonForNow"));
           status.setAttribute("aria-label", `${item.discoveryLabel} : ${status.textContent.toLowerCase()}`);
           row.append(name, status);
           results.append(row);
@@ -3496,28 +3521,34 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       const list = $("discovery-evening-route-list");
       if (!panel || !list) return;
       const catalog = typeof getCatalogObjects === "function" ? getCatalogObjects() || [] : [];
-      const candidates = catalog.map(object => {
+      const rawCandidates = catalog.map(object => {
         // Le parcours Découverte n'affiche que des cibles ayant un vrai nom
         // commun, en réutilisant la même résolution que le reste de l'interface.
         const commonName = typeof getDiscoveryCommonName === "function" ? getDiscoveryCommonName(object) : "";
-        return commonName ? { ...object, discoveryCommonName: commonName } : null;
+        return commonName ? { ...object, discoveryCommonName: commonName, discoveryType: getDiscoveryObjectType(object) } : null;
       }).filter(object => {
         const alt = Number(object?.alt);
-        return object && Number.isFinite(alt) && Number.isFinite(Number(object.az)) && alt >= 15 && object.type !== "sun" && object.type !== "comet";
-      });
-      const choose = (predicate, used) => candidates.filter(o => !used.has(String(o.id)) && predicate(o))
-        .sort((a,b) => Number(a.mag ?? 99) - Number(b.mag ?? 99))[0];
-      const used = new Set();
+        return object
+          && Number.isFinite(alt)
+          && Number.isFinite(Number(object.az))
+          && alt >= 15
+          && !["sun", "comet"].includes(object.discoveryType)
+          && isEverVisibleFromLatitude(object, state.latitude);
+      }).sort((a, b) => Number(a.mag ?? 99) - Number(b.mag ?? 99));
+      // Le catalogue peut contenir plusieurs entrées pour la même étoile
+      // (nom usuel et identifiant HIP, ou sources distinctes). Une seule
+      // occurrence d'un nom commun est conservée dans la soirée.
+      const candidates = deduplicateNamedObjects(rawCandidates, object => object.discoveryCommonName);
       const route = [
-        { label: t("ui.suggestBrightLandmark"), predicate: o => ["planet","moon"].includes(String(o.type).toLowerCase()) || (String(o.type).toLowerCase()==="star" && Number(o.mag)<=2.5), advice: t("ui.suggestBrightLandmarkAdvice") },
-        { label: t("ui.suggestRecognizeStar"), predicate: o => String(o.type).toLowerCase()==="star" && Number(o.mag)<=4.5, advice: t("ui.suggestUseStarAsLandmark") },
-        { label: t("ui.suggestHarderTarget"), predicate: o => ["cluster","open-cluster","globular-cluster","star-cluster","galaxy","nebula","deep-sky"].includes(String(o.type).toLowerCase()) || /^(M|NGC|IC)\s?\d/i.test(String(o.id || "")) && !["star","planet","moon"].includes(String(o.type).toLowerCase()), advice: t("ui.suggestHarderTargetAdvice") }
+        { label: t("ui.suggestBrightLandmark"), predicate: o => ["planet", "moon"].includes(o.discoveryType) || (o.discoveryType === "star" && Number(o.mag) <= 2.5), advice: t("ui.suggestBrightLandmarkAdvice") },
+        { label: t("ui.suggestRecognizeStar"), predicate: o => o.discoveryType === "star" && Number(o.mag) <= 4.5, advice: t("ui.suggestUseStarAsLandmark") },
+        { label: t("ui.suggestHarderTarget"), predicate: o => ["cluster", "open-cluster", "globular-cluster", "star-cluster", "galaxy", "nebula", "deep-sky"].includes(o.discoveryType) || /^(M|NGC|IC)\s?\d/i.test(String(o.id || "")) && !["star", "planet", "moon"].includes(o.discoveryType), advice: t("ui.suggestHarderTargetAdvice") }
       ];
-      const selected = route.map(step => ({ ...step, object: choose(step.predicate, used) })).filter(step => {
-        if (!step.object) return false;
-        used.add(String(step.object.id));
-        return true;
-      });
+      // Sélection séquentielle : les identités sont réservées immédiatement,
+      // avant de calculer l'étape suivante. Si une catégorie ne propose que
+      // le même astre, son objectif pédagogique est fusionné avec sa première
+      // apparition au lieu de créer une seconde carte identique.
+      const selected = selectDistinctDiscoverySteps(candidates, route, object => object.discoveryCommonName);
       list.replaceChildren();
       if (!selected.length) {
         const empty = document.createElement("li");
@@ -3527,9 +3558,10 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         selected.forEach((step, index) => {
           const item = document.createElement("li");
           const title = document.createElement("strong");
-          title.textContent = `${step.label} : ${step.object.discoveryCommonName}`;
+          const groupedSteps = Array.isArray(step.mergedSteps) && step.mergedSteps.length ? step.mergedSteps : [step];
+          title.textContent = `${groupedSteps.map(item => item.label).join(" · ")} : ${step.object.discoveryCommonName}`;
           const note = document.createElement("p");
-          note.textContent = `${step.advice} ${t("ui.currentAltitude", { altitude: Number(step.object.alt).toFixed(0) })}°.`;
+          note.textContent = `${groupedSteps.map(item => item.advice).filter(Boolean).join(" ")} ${t("ui.currentAltitude", { altitude: Number(step.object.alt).toFixed(0) })}°.`;
           const show = document.createElement("button");
           show.type = "button"; show.textContent = t("ui.showOnMap");
           show.addEventListener("click", () => {
@@ -3797,9 +3829,12 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const starsById = new Map((state.stars || []).map(star => [String(star.id), star]));
         const memberIds = [...new Set((selected.lines || []).flatMap(segment => Array.isArray(segment) ? segment.map(String) : []))];
         const members = memberIds.map(id => starsById.get(id)).filter(Boolean);
-        state.discoveryConstellationStarIds = new Set(memberIds);
-        const positions = members.map(star => ({ star, horizontal: typeof getStarPosition === "function" ? getStarPosition(star) : null }))
-          .filter(entry => Number.isFinite(entry.horizontal?.az) && Number.isFinite(entry.horizontal?.alt) && entry.horizontal.alt > 0);
+        const positions = visibleConstellationMembers(selected);
+        // Ne dessiner/cadrer que la partie réellement exploitable de la figure.
+        state.discoveryConstellationStarIds = new Set(positions.map(entry => String(entry.star.id)));
+        if (positions.length < CONSTELLATION_MIN_VISIBLE_STARS) {
+          showToast(t("ui.constellationNotHighEnough"));
+        }
         // Parcours pédagogique : étoiles visibles triées de la plus brillante à la moins brillante.
         const learningSequence = [...positions]
           .sort((a, b) => Number(a.star.mag ?? 99) - Number(b.star.mag ?? 99))
@@ -3811,35 +3846,15 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
         const targetStar = positions.find(entry => String(entry.star.id) === targetId)?.star;
         state.discoveryConstellationTargetStarId = targetStar ? String(targetStar.id) : "";
         if (positions.length) {
-          const sx = positions.reduce((sum, entry) => sum + Math.sin(entry.horizontal.az * Math.PI / 180), 0);
-          const cx = positions.reduce((sum, entry) => sum + Math.cos(entry.horizontal.az * Math.PI / 180), 0);
-          state.heading = norm360(Math.atan2(sx, cx) * 180 / Math.PI);
-          // Centrer horizontalement sur la constellation tout en gardant l’horizon
-          // dans le champ dès que possible. Au-delà d’environ 12° d’inclinaison,
-          // l’horizon descend souvent sous le bord inférieur de la carte.
-          // Pour les constellations hautes, on privilégie donc l’horizon visible
-          // plutôt qu’un centrage vertical parfait.
-          const averageAltitude = positions.reduce((sum, entry) => sum + entry.horizontal.alt, 0) / positions.length;
-          const horizonFriendlyPitch = 12;
-          state.pitch = clamp(averageAltitude, 0, horizonFriendlyPitch);
-
-          // Ajuster automatiquement le champ de vision pour éviter de couper
-          // les extrémités des constellations. Le calcul tient compte de leur
-          // largeur en azimut et de la hauteur de leurs étoiles au-dessus de
-          // l’horizon, tout en gardant une marge autour de la figure.
-          const azimuthOffsets = positions.map(entry => {
-            let delta = entry.horizontal.az - state.heading;
-            while (delta > 180) delta -= 360;
-            while (delta < -180) delta += 360;
-            return Math.abs(delta);
-          });
-          const maxAzimuthOffset = Math.max(0, ...azimuthOffsets);
-          const maxAltitude = Math.max(...positions.map(entry => entry.horizontal.alt));
-          const requiredHorizontalFov = maxAzimuthOffset * 2 * 1.28;
-          const requiredVerticalFov = Math.max(15, 2 * (maxAltitude - state.pitch + 9));
-          const requiredFov = clamp(Math.max(25, requiredHorizontalFov, requiredVerticalFov / (83.3333333333 / 75)), 15, 120);
-          state.fov = requiredFov;
-          state.verticalFov = clamp(requiredFov * (83.3333333333 / 75), 15, 110);
+          const frame = calculateContextFrame(positions.map(entry => entry.horizontal), 70, 1.4);
+          if (frame) {
+            state.heading = norm360(frame.heading);
+            state.pitch = clamp(frame.pitch, 0, 80);
+            // Champ plus large que le plafond initial de 0,8× : 70° minimum
+            // correspond à 0,64× et évite les cadrages serrés sur deux étoiles.
+            state.fov = clamp(frame.fov, 70, 120);
+            state.verticalFov = clamp(state.fov * (83.3333333333 / 75), 15, 110);
+          }
           const zoomIndicator = $("zoom-level");
           if (zoomIndicator) zoomIndicator.textContent = `${(45 / state.fov).toLocaleString(getLocale(), { minimumFractionDigits: 1, maximumFractionDigits: 1 })}×`;
           if (state.sensorActive && typeof sensors?.stopListening === "function") {
@@ -4163,11 +4178,20 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
     const starHopHip = star => {
       const direct = Number(star?.hip);
       if (Number.isFinite(direct) && direct > 0) return direct;
-      const match = String(star?.id ?? star?.name ?? "").match(/^HIP[_\s-]*(\d+)$/i);
+      const match = String(star?.hip ?? star?.id ?? star?.name ?? "").match(/(?:^|[^A-Z0-9])HIP[_\s-]*(\d+)(?:$|[^0-9])/i) ||
+        String(star?.id ?? star?.name ?? "").match(/^HIP[_\s-]*(\d+)$/i);
       return match ? Number(match[1]) : NaN;
     };
-    const starHopName = star => starHopCommonNames.get(starHopHip(star)) || star?.proper_name || star?.properName || (star?.name && !/^HIP\s*\d+$/i.test(star.name) ? star.name : (star?.hip ? `${t("ui.unnamedStar")} (HIP ${star.hip})` : t("starHop.anchorStar")));
-    const starHopHasCommonName = star => Boolean(starHopCommonNames.has(starHopHip(star)) || star?.proper_name || star?.properName || (star?.name && !/^HIP\s*\d+$/i.test(star.name)));
+    const isHumanReadableStarName = value => {
+      const name = String(value || "").trim();
+      return Boolean(name) && !/^(?:HIP|HD|HR|SAO|TYC|Gaia)[_\s-]*\d+(?:\s*[-/].*)?$/i.test(name);
+    };
+    const starHopName = star => starHopCommonNames.get(starHopHip(star)) ||
+      [star?.proper_name, star?.properName, star?.common_name, star?.commonName, star?.name]
+        .find(isHumanReadableStarName) ||
+      (star?.hip ? `${t("ui.unnamedStar")} (HIP ${star.hip})` : t("starHop.anchorStar"));
+    const starHopHasCommonName = star => Boolean(starHopCommonNames.has(starHopHip(star)) ||
+      [star?.proper_name, star?.properName, star?.common_name, star?.commonName, star?.name].some(isHumanReadableStarName));
     const starHopAboveHorizon = object => {
       if (!object) return false;
       const horizontal = typeof getStarPosition === "function" ? getStarPosition(object) : null;
@@ -4755,6 +4779,205 @@ if (summary) summary.textContent = `${t("ui.forThe")} ${date.toLocaleString(getL
       closeStarHop();
       showToast(`${t("ui.guidanceLaunchedTo")} ${target.name || target.id || t("ui.theTarget")}.`);
     });
+
+    // Fenêtre d'observation : analyse horaire indépendante de la carte en direct.
+    const observationWindowDialog = $("observation-window-dialog");
+    const observationWindowTarget = $("observation-window-target");
+    const observationWindowDate = $("observation-window-date");
+    const observationWindowThreshold = $("observation-window-threshold");
+    const observationWindowThresholdValue = $("observation-window-threshold-value");
+    const observationWindowSummary = $("observation-window-summary");
+    const observationWindowChart = $("observation-window-chart");
+    const observationWindowTerrain = $("observation-window-terrain");
+    const observationWindowTerrainLoad = $("observation-window-terrain-load");
+    const observationWindowWeather = $("observation-window-weather");
+    const observationWindowMoon = $("observation-window-moon");
+    let observationWindowObjects = [];
+    let observationHorizonProfile = [];
+    const observationTerrainCache = new Map();
+    const observationWeatherCache = new Map();
+    let observationWeatherRequest = 0;
+    const observationCompass = ["N","NE","E","SE","S","SW","W","NW"];
+    const observationTerrainSummary = profile => {
+      if (!Array.isArray(profile) || !profile.length) return t("observationWindow.terrainMissing");
+      const valid = profile.filter(point => point && point.altitude !== null && point.altitude !== undefined && point.azimuth !== null && point.azimuth !== undefined && Number.isFinite(Number(point.altitude)) && Number.isFinite(Number(point.azimuth)));
+      if (!valid.length) return t("observationWindow.terrainMissing");
+      const highest = valid.reduce((a,b) => Number(b.altitude) > Number(a.altitude) ? b : a);
+      const lowest = valid.reduce((a,b) => Number(b.altitude) < Number(a.altitude) ? b : a);
+      const direction = azimuth => observationCompass[Math.round((((Number(azimuth)%360)+360)%360)/45)%8];
+      const sectors = observationCompass.map((name,index) => {
+        const azimuth=index*45;
+        const nearest=valid.reduce((best,point)=>Math.abs((((Number(point.azimuth)-azimuth+540)%360)-180)) < Math.abs((((Number(best.azimuth)-azimuth+540)%360)-180)) ? point : best, valid[0]);
+        return `${name} ${Number(nearest.altitude).toFixed(1)}°`;
+      }).join(" · ");
+      const values = {
+        directions: valid.length,
+        min: Number(lowest.altitude).toFixed(1),
+        minDirection: direction(lowest.azimuth),
+        max: Number(highest.altitude).toFixed(1),
+        maxDirection: direction(highest.azimuth),
+        sectors
+      };
+      // Remplacement explicite des variables après récupération de la traduction :
+      // évite d'afficher des accolades si une version de dictionnaire est ancienne.
+      return Object.entries(values).reduce((result, [name, value]) =>
+        result.replaceAll(`{${name}}`, String(value)), t("observationWindow.terrainDetails"));
+    };
+    const localDateValue = date => `${date.getFullYear()}-${String(date.getMonth()+1).padStart(2,"0")}-${String(date.getDate()).padStart(2,"0")}`;
+    const parseLocalDate = value => { const m = /^(\d{4})-(\d{2})-(\d{2})$/.exec(value || ""); return m ? new Date(Number(m[1]), Number(m[2])-1, Number(m[3]), 12) : new Date(); };
+    const observationTime = date => date.toLocaleTimeString(getLocale(), { hour: "2-digit", minute: "2-digit", hourCycle: "h23" });
+    const renderObservationWindow = () => {
+      if (!observationWindowTarget || !observationWindowDate || !observationWindowChart || !observationWindowSummary) return;
+      const target = observationWindowObjects.find(object => String(object.id ?? object.name) === observationWindowTarget.value);
+      const threshold = Number(observationWindowThreshold?.value || 25);
+      if (observationWindowThresholdValue) observationWindowThresholdValue.textContent = `${threshold}°`;
+      if (!target) { observationWindowSummary.textContent = t("observationWindow.noTarget"); observationWindowChart.replaceChildren(); return; }
+      const date = parseLocalDate(observationWindowDate.value);
+      const result = calculateObservationWindow(target, date, Number(state.latitude), Number(state.longitude), threshold, observationHorizonProfile);
+      if (!result) { observationWindowSummary.textContent = t("observationWindow.unavailable"); observationWindowChart.replaceChildren(); return; }
+      const bestWindow = result.windows.reduce((best, item) => !best || item.endMinute-item.startMinute > best.endMinute-best.startMinute ? item : best, null);
+      const maximum = `${observationTime(result.maximum.date)} · ${result.maximum.altitude.toFixed(1)}°`;
+      observationWindowSummary.textContent = bestWindow
+        ? `${t("observationWindow.bestWindow")} ${observationTime(bestWindow.start)}–${observationTime(bestWindow.end)}. ${t("observationWindow.maximum")} ${maximum}.`
+        : `${t("observationWindow.noWindow", { altitude: threshold })} ${t("observationWindow.maximum")} ${maximum}.`;
+      const referenceMinute = bestWindow ? Math.round((bestWindow.startMinute + bestWindow.endMinute) / 20) * 10 : result.maximum.minute;
+      const moonSample = result.samples[Math.max(0, Math.min(result.samples.length-1, Math.round(referenceMinute/10)))];
+      if (observationWindowMoon && moonSample) {
+        const moonImpact = moonSample.moonAltitude <= 0 ? t("observationWindow.moonBelowHorizon")
+          : moonSample.moonIllumination >= .6 && moonSample.moonSeparation < 60 ? t("observationWindow.moonStrongImpact")
+          : moonSample.moonIllumination >= .3 && moonSample.moonSeparation < 90 ? t("observationWindow.moonModerateImpact")
+          : t("observationWindow.moonLimitedImpact");
+        observationWindowMoon.textContent = t("observationWindow.moonDetails", { altitude: moonSample.moonAltitude.toFixed(1), illumination: Math.round(moonSample.moonIllumination*100), separation: moonSample.moonSeparation.toFixed(1), impact: moonImpact });
+      }
+      const ns = "http://www.w3.org/2000/svg";
+      const make = (tag, attrs, text) => { const node = document.createElementNS(ns, tag); for (const [key,value] of Object.entries(attrs || {})) node.setAttribute(key, String(value)); if (text != null) node.textContent = text; return node; };
+      observationWindowChart.replaceChildren();
+      const left=48, right=700, top=18, bottom=226, width=right-left, height=bottom-top;
+      const scale=calculateAltitudeScale(result.samples,threshold,observationHorizonProfile.length>0);
+      const y = altitude => bottom - (altitude - scale.min) / (scale.max - scale.min) * height;
+      const firstTick=Math.ceil(scale.min/scale.step)*scale.step;
+      for (let alt=firstTick; alt<=scale.max; alt+=scale.step) { const yy=y(alt); observationWindowChart.append(make("line",{x1:left,y1:yy,x2:right,y2:yy,stroke:"#52647c","stroke-width":1,opacity:.45}), make("text",{x:left-9,y:yy+4,"text-anchor":"end",fill:"#aab8cb","font-size":11},`${alt}°`)); }
+      const thresholdY=y(threshold);
+      observationWindowChart.append(make("line",{x1:left,y1:thresholdY,x2:right,y2:thresholdY,stroke:"#e8c56e","stroke-width":1.5,"stroke-dasharray":"6 5"}));
+      for (let hour=0;hour<=24;hour+=3) { const xx=left+hour/24*width; observationWindowChart.append(make("line",{x1:xx,y1:top,x2:xx,y2:bottom,stroke:"#52647c","stroke-width":1,opacity:.25}),make("text",{x:xx,y:bottom+21,"text-anchor":"middle",fill:"#aab8cb","font-size":11},`${String(hour%24).padStart(2,"0")}h`)); }
+      const points=result.samples.filter(p=>Number.isFinite(p.altitude)).map(p=>`${(left+p.minute/1440*width).toFixed(1)},${y(p.altitude).toFixed(1)}`).join(" ");
+      const visiblePoints=result.samples.filter(p=>Number.isFinite(p.altitude)).map(p=>`${(left+p.minute/1440*width).toFixed(1)},${y(clamp(p.visibleAltitude,scale.min,scale.max)).toFixed(1)}`).join(" ");
+      observationWindowChart.append(make("polyline",{points,fill:"none",stroke:"#8fc5ff","stroke-width":2,"stroke-linejoin":"round","stroke-linecap":"round",opacity:.55}));
+      if (observationHorizonProfile.length) observationWindowChart.append(make("polyline",{points:visiblePoints,fill:"none",stroke:"#8fe0b0","stroke-width":3,"stroke-linejoin":"round","stroke-linecap":"round"}));
+      const maxX=left+result.maximum.minute/1440*width, maxY=y(result.maximum.altitude);
+      observationWindowChart.append(make("circle",{cx:maxX,cy:maxY,r:5,fill:"#ffe29a",stroke:"#17243a","stroke-width":2}),make("text",{x:clamp(maxX,80,660),y:Math.max(13,maxY-12),fill:"#ffe29a","font-size":11,"text-anchor":"middle"},t("observationWindow.maximumShort")));
+      observationWindowChart.append(make("text",{x:left,y:266,fill:"#aab8cb","font-size":11},t("observationWindow.localTime")));
+      loadObservationWeather(target, date, bestWindow, result.maximum);
+    };
+    const loadObservationWeather = async (target, date, bestWindow, maximum) => {
+      if (!observationWindowWeather) return;
+      const lat=Number(state.latitude), lon=Number(state.longitude);
+      if (!Number.isFinite(lat)||!Number.isFinite(lon)) { observationWindowWeather.textContent=t("observationWindow.weatherUnavailable"); return; }
+      const key=`${lat.toFixed(3)},${lon.toFixed(3)},${localDateValue(date)}`;
+      const request=++observationWeatherRequest;
+      try {
+        let data=observationWeatherCache.get(key);
+        if (!data) { data=await fetchObservationWeather(lat,lon,date); observationWeatherCache.set(key,data); }
+        if(request!==observationWeatherRequest)return;
+        const minute=bestWindow?Math.round((bestWindow.startMinute+bestWindow.endMinute)/2):maximum.minute;
+        const hour=Math.max(0,Math.min(23,Math.round(minute/60)));
+        const prefix=`${localDateValue(date)}T${String(hour).padStart(2,"0")}:`;
+        let index=data.hourly.time.findIndex(value=>value.startsWith(prefix));
+        if(index<0) index=Math.max(0,Math.min(data.hourly.time.length-1,hour));
+        const cloud=data.hourly.cloud_cover?.[index], rain=data.isHistorical?data.hourly.precipitation?.[index]:data.hourly.precipitation_probability?.[index], visibility=data.hourly.visibility?.[index], wind=data.hourly.wind_speed_10m?.[index];
+        const rainText=Number.isFinite(rain)?(data.isHistorical?`${Number(rain).toFixed(1)} mm`:`${Math.round(rain)} %`):"—";
+        const values={time:String(hour).padStart(2,"0")+"h",cloud:Number.isFinite(cloud)?Math.round(cloud):"—",rain:rainText,visibility:Number.isFinite(visibility)?(visibility/1000).toFixed(1):"—",wind:Number.isFinite(wind)?Math.round(wind):"—"};
+        observationWindowWeather.textContent=t("observationWindow.weatherDetails",values);
+      } catch(error) { if(request===observationWeatherRequest) observationWindowWeather.textContent=t("observationWindow.weatherUnavailable"); console.warn("[Seduwa] Prévision météo indisponible",error); }
+    };
+    const loadObservationTerrain = async () => {
+      if(!observationWindowTerrain||!observationWindowTerrainLoad)return;
+      const lat=Number(state.latitude),lon=Number(state.longitude);
+      if(!Number.isFinite(lat)||!Number.isFinite(lon)){observationWindowTerrain.textContent=t("observationWindow.terrainUnavailable");return;}
+      const key=`${lat.toFixed(3)},${lon.toFixed(3)}`;
+      observationWindowTerrain.textContent=t("observationWindow.terrainLoading");
+      observationWindowTerrainLoad.disabled=true;
+      try {
+        let profile=observationTerrainCache.get(key);
+        if(!profile){profile=await fetchTerrainHorizon(lat,lon);observationTerrainCache.set(key,profile);}
+        observationHorizonProfile=profile;
+        observationWindowTerrain.textContent=observationTerrainSummary(profile);
+        // Le relief est chargé automatiquement à l'ouverture. Une fois le
+        // profil disponible, masquer le bouton de calcul pour éviter un clic
+        // qui ne ferait que relire le cache sans rien changer à l'écran.
+        observationWindowTerrainLoad.hidden=true;
+        renderObservationWindow();
+      } catch(error) {
+        observationWindowTerrain.textContent=t("observationWindow.terrainUnavailable");
+        observationWindowTerrainLoad.hidden=false;
+        console.warn("[Seduwa] Profil topographique indisponible",error);
+      }
+      finally {observationWindowTerrainLoad.disabled=false;}
+    };
+    const observationWindowObjectName = object => {
+      if (!object) return "";
+      if (object.catalogue === "Hipparcos" || String(object.type || "").toLowerCase() === "star") {
+        // Réutiliser la résolution des noms communs de la recherche Expert :
+        // elle associe les identifiants HIP aux noms localisés (Alpheratz, Véga…).
+        // Un identifiant brut, même écrit HIP_123, n'est jamais un nom commun.
+        const commonName = getSearchCommonStarName(object);
+        return isHumanReadableStarName(commonName) ? commonName : "";
+      }
+      // Messier et NGC : ne retenir que les objets possédant un véritable
+      // nom usuel, et jamais une simple désignation de catalogue.
+      const candidates = getDataLocale() === "en"
+        ? [object.englishName, object.english_name, object.name_en, object.common_name_en, object.common_name, object.name, object.proper_name]
+        : [object.name_fr, object.name, object.common_name_fr, object.common_name, object.proper_name, object.englishName];
+      const designationOnly = /^(?:M\s*\d+|NGC\s*\d+(?:\s*[/,]\s*\d+)?|HIP[_\s-]*\d+|HD\s*\d+)$/i;
+      return candidates.map(value => String(value || "").trim()).find(value => value && !designationOnly.test(value)) || "";
+    };
+    const openObservationWindow = () => {
+      if (!observationWindowDialog || !observationWindowTarget) return;
+      const combined = [...(typeof getCatalogObjects === "function" ? getCatalogObjects() || [] : []), ...(typeof getVisibleNowObjects === "function" ? getVisibleNowObjects() || [] : []), ...(state.selected ? [state.selected] : [])];
+      const unique = new Map();
+      for (const object of combined) {
+        if (!object || !["Hipparcos", "Messier", "NGC"].includes(object.catalogue) || !Number.isFinite(Number(object.ra)) || !Number.isFinite(Number(object.dec)) || !isEverVisibleFromLatitude(object, Number(state.latitude))) continue;
+        const displayName = observationWindowObjectName(object);
+        if (!displayName) continue;
+        const key = String(object.id ?? `${object.ra}:${object.dec}`);
+        if (!unique.has(key)) unique.set(key, { ...object, observationWindowName: displayName });
+      }
+      observationWindowObjects = [...unique.values()].sort((a,b)=>a.observationWindowName.localeCompare(b.observationWindowName,getLocale()));
+      observationWindowTarget.replaceChildren();
+      for (const object of observationWindowObjects) {
+        const option=document.createElement("option");
+        option.value=String(object.id ?? `${object.ra}:${object.dec}`);
+        // Afficher d'abord le nom commun, puis la désignation du catalogue
+        // pour identifier les objets Messier/NGC sans masquer leur nom usuel.
+        // Les étoiles restent affichées par leur seul nom commun (jamais HIP xxx).
+        const catalogueId = String(object.id || "").trim();
+        const isDeepSky = object.catalogue === "Messier" || object.catalogue === "NGC";
+        option.textContent = isDeepSky && catalogueId
+          ? `${object.observationWindowName} — ${catalogueId}`
+          : object.observationWindowName;
+        observationWindowTarget.append(option);
+      }
+      const selectedKey=state.selected ? String(state.selected.id ?? state.selected.name ?? "") : "";
+      if (selectedKey && [...observationWindowTarget.options].some(option=>option.value===selectedKey)) observationWindowTarget.value=selectedKey;
+      if (observationWindowDate && !observationWindowDate.value) observationWindowDate.value=localDateValue(new Date());
+      const placeKey=`${Number(state.latitude).toFixed(3)},${Number(state.longitude).toFixed(3)}`;
+      observationHorizonProfile=observationTerrainCache.get(placeKey)||[];
+      if(observationWindowTerrain) observationWindowTerrain.textContent=observationTerrainSummary(observationHorizonProfile);
+      if(observationWindowTerrainLoad) {
+        observationWindowTerrainLoad.hidden=observationHorizonProfile.length>0;
+        observationWindowTerrainLoad.disabled=false;
+      }
+      renderObservationWindow(); observationWindowDialog.hidden=false;
+      if (!observationHorizonProfile.length) loadObservationTerrain();
+    };
+    const closeObservationWindow = () => { if (observationWindowDialog) observationWindowDialog.hidden=true; };
+    on("star-hop-open", "click", openObservationWindow);
+    on("observation-window-close", "click", closeObservationWindow);
+    on("observation-window-dialog", "click", event => { if (event.target?.matches?.("[data-close-observation-window]")) closeObservationWindow(); });
+    on("observation-window-target", "change", renderObservationWindow);
+    on("observation-window-date", "change", renderObservationWindow);
+    on("observation-window-threshold", "input", renderObservationWindow);
+    on("observation-window-terrain-load", "click", loadObservationTerrain);
 
     const conditionsDialog = $("conditions-dialog");
     const closeConditions = () => { if (conditionsDialog) conditionsDialog.hidden = true; };

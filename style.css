@@ -1435,6 +1435,8 @@ html, body {
 
 /* Conditions météo et calendrier céleste */
 .conditions-grid, .events-list { display: grid; grid-template-columns: repeat(2, minmax(0, 1fr)); gap: 10px; overflow-y: auto; padding: 3px 2px 12px; }
+/* Le calendrier occupe l’espace restant du panneau et défile sur toute sa période. */
+.events-list { flex: 1 1 auto; min-height: 0; align-content: start; overscroll-behavior: contain; -webkit-overflow-scrolling: touch; touch-action: pan-y; }
 .condition-card, .event-card { min-width: 0; padding: 13px; border: 1px solid var(--border); border-radius: 13px; background: rgba(20,31,52,.52); }
 .condition-card { display: flex; flex-direction: column; gap: 6px; }
 .condition-card > span, .event-card time { color: var(--muted); font-size: 11px; }
@@ -4812,6 +4814,7 @@ button:disabled, input:disabled, select:disabled {
 #app.discovery-mode .discovery-search-show { flex:0 0 auto; min-width:66px; padding:7px 9px; font-size:10px; }
 #app.discovery-mode .discovery-search-status { flex:0 1 58%; max-width:58%; font-size:10px; line-height:1.3; text-align:right; overflow-wrap:anywhere; }
 #app.discovery-mode .discovery-search-status.is-below-horizon { color:#e7c98d; }
+#app.discovery-mode .discovery-search-status.is-never-visible { color:#f0a8a0; }
 #app.discovery-mode .discovery-search-status.is-unknown { color:#aebdd5; }
 #app.discovery-mode .discovery-search-empty { margin:5px 0; color:#c1cde0; font-size:11px; line-height:1.4; }
 @media (max-width:600px) {
@@ -6412,4 +6415,226 @@ comme en mode Expert, pour uniformiser les deux en-têtes. */
   textarea {
     font-size: 16px !important;
   }
+}
+
+/* Fenêtre d'observation */
+.observation-window-panel { box-sizing:border-box; width:min(960px,100%); max-height:none; overflow:visible; padding:22px; }
+.observation-window-controls { display:grid; grid-template-columns:minmax(0,1fr) minmax(150px,.7fr); gap:9px 14px; align-items:center; padding:16px 0; }
+.observation-window-controls label { color:var(--muted); font-size:13px; }
+.observation-window-controls select,.observation-window-controls input[type="date"] { box-sizing:border-box; width:100%; min-height:40px; padding:8px 10px; border:1px solid var(--border); border-radius:9px; background:rgba(7,14,29,.95); color:var(--text); font:inherit; }
+.observation-window-controls input[type="range"] { width:100%; }
+.observation-window-controls strong { color:var(--text); }
+.observation-window-chart-wrap { margin-top:14px; padding:10px; border:1px solid rgba(156,201,255,.2); border-radius:13px; background:rgba(17,29,49,.56); }
+.observation-window-chart { display:block; width:100%; height:auto; overflow:visible; }
+.observation-window-note { flex:0 0 auto; font-size:12px; line-height:1.6; white-space:normal; overflow-wrap:anywhere; margin:14px 0 2px; }
+@media(max-width:600px) { .observation-window-panel { width:100%; max-height:none; padding:12px 10px; } .observation-window-controls { grid-template-columns:minmax(0,1fr) minmax(0,1fr); gap:5px 8px; padding:9px 0; } .observation-window-controls label { font-size:11px; } .observation-window-controls select,.observation-window-controls input[type="date"] { min-height:34px; padding:5px 7px; font-size:12px; } .observation-window-chart-wrap { margin-top:8px; padding:3px; } .observation-window-note { font-size:10px; margin-top:8px; } .observation-window-info { padding:9px; } .observation-window-enrichment { gap:7px; margin-top:8px; } .observation-window-info p { font-size:11px; } }
+
+/* Fenêtre d'observation — données locales, météo et Lune */
+.observation-window-enrichment { display:grid; grid-template-columns:repeat(3,minmax(0,1fr)); gap:12px; margin-top:14px; }
+.observation-window-info { min-width:0; padding:13px; border:1px solid var(--border); border-radius:12px; background:rgba(17,29,49,.42); }
+.observation-window-info h3 { margin:0 0 8px; font-size:14px; }
+.observation-window-info p { min-height:48px; margin:0 0 10px; font-size:12px; line-height:1.55; overflow-wrap:anywhere; }
+.observation-window-info button { width:100%; white-space:normal; }
+.observation-window-info button:disabled { opacity:.6; cursor:wait; }
+@media(max-width:700px) { .observation-window-enrichment { grid-template-columns:minmax(0,1fr); } .observation-window-info p { min-height:0; } }
+
+
+/* Telescope mount setup — v540 (configuration only, no motion commands). */
+.mount-control-panel { margin-top: 12px; padding: 14px; border: 1px solid var(--panel-border, rgba(160,190,220,.28)); border-radius: 14px; background: var(--panel-bg, rgba(8,18,35,.92)); display: grid; gap: 9px; }
+.mount-control-panel[hidden] { display: none !important; }
+.mount-control-heading { display:flex; align-items:flex-start; justify-content:space-between; gap:12px; }
+.mount-control-heading strong { display:block; }
+.mount-control-heading p { margin:4px 0 0; opacity:.78; font-size:.9em; }
+.mount-control-panel label { font-size:.88em; font-weight:600; }
+.mount-control-panel select, .mount-control-panel input { width:100%; min-width:0; box-sizing:border-box; padding:10px; border-radius:9px; }
+.mount-control-status { margin:4px 0; padding:10px; border-radius:9px; background:rgba(120,160,210,.12); font-size:.88em; line-height:1.4; }
+.mount-control-status { border-left:3px solid #d6a64b; overflow-wrap:anywhere; }
+
+/* v542 — panneau de pilotage accessible depuis les menus Découverte et Expert. */
+.mount-control-panel {
+  position: fixed !important; z-index: 80 !important; top: 86px !important; right: 14px !important;
+  width: min(390px, calc(100vw - 28px)) !important; max-height: calc(100dvh - 108px) !important;
+  overflow: auto !important; overscroll-behavior: contain !important; box-shadow: 0 18px 55px rgba(0,0,0,.5) !important;
+  -webkit-backdrop-filter: blur(18px); backdrop-filter: blur(18px);
+}
+.mount-control-panel[hidden] { display: none !important; }
+@media (max-width: 900px) {
+  .mount-control-panel { top: 76px !important; right: 10px !important; max-height: calc(100dvh - 90px) !important; }
+}
+@media (max-width: 600px) {
+  .mount-control-panel { top: 68px !important; right: 8px !important; width: min(390px, calc(100vw - 16px)) !important; max-height: calc(100dvh - 78px) !important; }
+}
+
+/* v542 — accès au pilotage depuis les menus Découverte et Expert. */
+.discovery-actions .discovery-mount-control-action {
+  border: 1px solid rgba(230, 190, 115, .55);
+  background: rgba(126, 91, 43, .18);
+}
+.discovery-actions .discovery-mount-control-action > span:first-child {
+  color: var(--gold, #e9c47d);
+  font-size: 19px;
+}
+.expert-mount-control-button.is-active {
+  border-color: var(--gold, #e9c47d);
+  color: var(--gold, #e9c47d);
+}
+
+/* Le bouton Expert reprend le même état visuel actif que le panneau partagé. */
+.expert-mount-control-button[aria-expanded="true"],
+.expert-mount-control-button.is-active {
+  border-color: var(--gold, #e9c47d) !important;
+  color: var(--gold, #e9c47d) !important;
+  background: rgba(126, 91, 43, .22) !important;
+}
+
+
+/* v543 — accent doré du bouton Découverte et état réel de la passerelle. */
+#app.discovery-mode .discovery-actions > button.discovery-mount-control-action {
+  border-color: rgba(231,196,119,.62) !important;
+  background: linear-gradient(145deg, rgba(128,105,60,.23), rgba(57,76,112,.25)) !important;
+  color: #fff4d5 !important;
+  font-weight: 650;
+}
+#app.discovery-mode .discovery-actions > button.discovery-mount-control-action > span:first-child {
+  color: #f2d493 !important;
+  filter: drop-shadow(0 0 7px rgba(242,212,147,.16));
+}
+#app.discovery-mode .discovery-actions > button.discovery-mount-control-action:hover,
+#app.discovery-mode .discovery-actions > button.discovery-mount-control-action:focus-visible {
+  border-color: rgba(255,220,145,.88) !important;
+  background: linear-gradient(145deg, rgba(145,117,63,.36), rgba(55,83,129,.31)) !important;
+}
+.mount-control-status.is-connected {
+  color: #8fe0a5 !important;
+  border-left-color: #36bd65 !important;
+  background: rgba(35,150,75,.16) !important;
+}
+.mount-control-status.is-unavailable {
+  color: #f0c98c !important;
+  border-left-color: #d6a64b !important;
+}
+.mount-control-status[data-state="online"] {
+  color: #f0d69c !important;
+  border-left-color: #d6a64b !important;
+}
+
+/* v544 — sur mobile, les quatre actions « Pour commencer » tiennent sur une seule ligne. */
+@media (max-width: 600px) {
+  #app.discovery-mode .discovery-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+    column-gap: 4px !important;
+    row-gap: 5px !important;
+  }
+  #app.discovery-mode .discovery-actions > .discovery-section-primary {
+    grid-column: 1 / -1 !important;
+  }
+  #app.discovery-mode .discovery-actions > button.discovery-action-primary {
+    min-width: 0 !important;
+    min-height: 68px !important;
+    padding: 5px 2px !important;
+    gap: 3px !important;
+    font-size: 9px !important;
+    line-height: 1.12 !important;
+    overflow-wrap: anywhere;
+    hyphens: auto;
+  }
+  #app.discovery-mode .discovery-actions > button.discovery-action-primary > span:first-child {
+    width: 21px !important;
+    height: 21px !important;
+    flex-basis: 21px !important;
+    font-size: 19px !important;
+  }
+  #app.discovery-mode .discovery-actions > button.discovery-action-primary > span:nth-child(2) {
+    max-width: 100%;
+    text-wrap: balance;
+  }
+}
+
+/* v552 — le pilotage reste accessible sur mobile en réseau local. */
+@media (max-width: 900px), (hover: none) and (pointer: coarse) {
+  #app.discovery-mode .discovery-actions {
+    grid-template-columns: repeat(4, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Le panneau ne doit jamais s'afficher lorsque son état HTML est hidden. */
+.mount-control-panel[hidden] {
+  display: none !important;
+}
+
+
+/* v546 — deux états indépendants : serveur INDI et monture. */
+.mount-connection-indicators { display:grid; gap:8px; margin:4px 0; }
+.mount-connection-indicator { display:flex; align-items:center; gap:11px; margin:0; padding:10px 12px; border:1px solid var(--panel-border, rgba(160,190,220,.28)); border-radius:10px; background:rgba(120,160,210,.08); }
+.mount-status-light { flex:0 0 11px; width:11px; height:11px; border-radius:50%; background:#87909d; box-shadow:0 0 0 3px rgba(135,144,157,.15); }
+.mount-status-copy { display:grid; gap:2px; min-width:0; font-size:.88em; line-height:1.35; }
+.mount-status-copy strong { font-size:.98em; }
+.mount-connection-indicator[data-state="online"] .mount-status-light { background:#35c878; box-shadow:0 0 0 3px rgba(53,200,120,.18), 0 0 10px rgba(53,200,120,.4); }
+.mount-connection-indicator[data-state="offline"] .mount-status-light { background:#e05b5b; box-shadow:0 0 0 3px rgba(224,91,91,.16); }
+.mount-connection-indicator[data-state="checking"] .mount-status-light { background:#d6a64b; box-shadow:0 0 0 3px rgba(214,166,75,.18); }
+
+.mount-connection-indicator[data-state="not-responding"] .mount-status-light { background:#e05b5b; box-shadow:0 0 0 3px rgba(224,91,91,.16); }
+
+
+/* v551 — controlled GoTo test controls and timing feedback. */
+.mount-goto-controls { display:grid; gap:9px; margin-top:4px; padding-top:12px; border-top:1px solid var(--panel-border, rgba(160,190,220,.28)); }
+.mount-goto-controls label { margin-top:2px; }
+.mount-control-status[data-state="success"] { border-left-color:#35c878; }
+.mount-control-status[data-state="error"] { border-left-color:#e05b5b; }
+.mount-control-status[data-state="warning"] { border-left-color:#d6a64b; }
+
+
+/* v552 — bouton GOTO depuis la fiche de l'objet sélectionné. */
+.mount-goto-selected {
+  width: 100%;
+  margin-top: 10px;
+  border-color: rgba(85, 230, 223, .58) !important;
+  background: linear-gradient(135deg, rgba(23, 112, 122, .32), rgba(15, 45, 66, .72)) !important;
+  color: #d7fffc !important;
+}
+.mount-goto-selected[hidden] { display: none !important; }
+
+/* v552 — l'option de masquage de l'interface est réservée à Découverte. */
+#app:not(.discovery-mode) > .toolbar #hide-interface-btn {
+  display: none !important;
+}
+
+/* v552 — statut Éphémérides contenu dans la largeur de la fiche Jupiter, y compris mobile. */
+.jupiter-moons-chart-heading {
+  min-width: 0;
+}
+.jupiter-moons-live-pill {
+  box-sizing: border-box;
+  flex: 0 1 auto;
+  max-width: 100%;
+  white-space: normal;
+}
+.jupiter-moons-live-pill > span:last-child {
+  min-width: 0;
+  white-space: normal;
+  overflow-wrap: anywhere;
+}
+@media (max-width: 600px) {
+  .jupiter-moons-chart-heading {
+    flex-wrap: wrap;
+    align-items: flex-start;
+  }
+  .jupiter-moons-live-pill {
+    align-self: flex-start;
+    margin-left: 0;
+  }
+}
+
+@media (max-width: 600px) {
+  #app.discovery-mode > .toolbar .expert-mount-control-button {
+    display: none !important;
+  }
+  #app.discovery-mode > .toolbar {
+    grid-template-columns: repeat(10, minmax(0, 1fr)) !important;
+  }
+}
+
+/* Le bouton Expert porte déjà son libellé dans le HTML : ne pas le répéter via title. */
+#app > .toolbar .expert-mount-control-button::after {
+  display: none !important;
 }

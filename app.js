@@ -25,6 +25,7 @@ import { t, getLocale, getDataLocale } from "./js/i18n.js";
 import { createSolarSystem } from "./js/solar-system.js";
 import { calculateMinorPlanetPosition, calculateMinorPlanetPositions } from "./js/minor-planets.js";
 import { createUI } from "./js/ui.js";
+import { initMountControl } from "./js/mount-control.js";
 
 (() => {
   const $ = id => document.getElementById(id);
@@ -352,6 +353,7 @@ import { createUI } from "./js/ui.js";
     constellationBoundaryLines: null,
     constellationBoundariesLoading: false,
     selected: null,
+    mountPosition: null,
     finderActive: false,
     finderLocked: false,
     finderLockSince: 0,
@@ -2843,9 +2845,12 @@ function drawMilkyWay(date) {
         date
       );
 
+      // En mode Découverte, les tracés doivent rester au-dessus du relief
+      // dessiné : le seuil conservateur correspond à celui du sélecteur.
+      const minimumDiscoveryAltitude = appElement?.classList.contains("discovery-mode") ? 15 : 0;
       if (
         !Number.isFinite(horizontal.alt) ||
-        horizontal.alt <= 0
+        horizontal.alt < minimumDiscoveryAltitude
       ) {
         drawing = false;
         previous = null;
@@ -3310,6 +3315,10 @@ function drawMilkyWay(date) {
           const eq = interpolateStar(a, b, i / steps);
           if (!eq) { drawing = false; previous = null; continue; }
           const horizontal = horizontalPosition(eq.ra, eq.dec, date);
+          const minimumDiscoveryAltitude = appElement?.classList.contains("discovery-mode") ? 15 : 0;
+          if (!Number.isFinite(horizontal.alt) || horizontal.alt < minimumDiscoveryAltitude) {
+            drawing = false; previous = null; continue;
+          }
           const point = project(horizontal.az, horizontal.alt, true);
           if (!point) { drawing = false; previous = null; continue; }
           if (!drawing || !previous || Math.hypot(point.x - previous.x, point.y - previous.y) > Math.max(state.width, state.height) * 0.22) {
@@ -3329,7 +3338,8 @@ function drawMilkyWay(date) {
       let targetPoint = null;
       if (targetStar) {
         const horizontal = horizontalPosition(Number(targetStar.ra), Number(targetStar.dec), date);
-        targetPoint = project(horizontal.az, horizontal.alt);
+        targetPoint = Number.isFinite(horizontal.alt) && horizontal.alt >= (appElement?.classList.contains("discovery-mode") ? 15 : 0)
+          ? project(horizontal.az, horizontal.alt) : null;
       } else if (guide.targetObject) {
         const targetObject = [...(state.messier || []), ...(state.ngc || [])].find(object => {
           const values = [object.id, object.name, object.designation, object.common_name, object.commonName].map(value => nameKey(String(value || "")));
@@ -3337,7 +3347,8 @@ function drawMilkyWay(date) {
         });
         if (targetObject && Number.isFinite(Number(targetObject.ra)) && Number.isFinite(Number(targetObject.dec))) {
           const horizontal = horizontalPosition(Number(targetObject.ra), Number(targetObject.dec), date);
-          targetPoint = project(horizontal.az, horizontal.alt);
+          targetPoint = Number.isFinite(horizontal.alt) && horizontal.alt >= (appElement?.classList.contains("discovery-mode") ? 15 : 0)
+            ? project(horizontal.az, horizontal.alt) : null;
         }
       }
       if (targetPoint) {
@@ -5228,6 +5239,41 @@ function drawSelectedStarMarker(point) {
   ctx.restore();
 }
 
+function drawMountPositionMarker(point) {
+  if (!point) return;
+  ctx.save();
+  ctx.lineCap = "round";
+  ctx.lineJoin = "round";
+  ctx.strokeStyle = "rgba(2, 10, 22, .96)";
+  ctx.lineWidth = 6;
+  ctx.beginPath();
+  ctx.arc(point.x, point.y, 13, 0, TAU);
+  ctx.moveTo(point.x - 18, point.y);
+  ctx.lineTo(point.x + 18, point.y);
+  ctx.moveTo(point.x, point.y - 18);
+  ctx.lineTo(point.x, point.y + 18);
+  ctx.stroke();
+  ctx.strokeStyle = "#55e6df";
+  ctx.fillStyle = "rgba(12, 52, 68, .88)";
+  ctx.lineWidth = 2.2;
+  ctx.beginPath();
+  ctx.arc(point.x, point.y, 11, 0, TAU);
+  ctx.fill();
+  ctx.stroke();
+  ctx.beginPath();
+  ctx.moveTo(point.x - 7, point.y - 6);
+  ctx.lineTo(point.x + 6, point.y - 2);
+  ctx.lineTo(point.x + 3, point.y + 3);
+  ctx.moveTo(point.x, point.y + 2);
+  ctx.lineTo(point.x - 5, point.y + 10);
+  ctx.moveTo(point.x, point.y + 2);
+  ctx.lineTo(point.x + 6, point.y + 10);
+  ctx.moveTo(point.x - 6, point.y + 10);
+  ctx.lineTo(point.x + 7, point.y + 10);
+  ctx.stroke();
+  ctx.restore();
+}
+
 function drawDiscoveryTargetArrow(point) {
   if (!point) return;
   // Flèche jaune plus lisible, séparée du cercle de cible par un espace net.
@@ -5644,6 +5690,25 @@ function renderSkyNow() {
           ? project(Number(refreshedSelected.az), Number(refreshedSelected.alt)) : null))
       : null;
     if (selectedPoint) drawSelectedStarMarker(selectedPoint);
+
+    // INDIGO expose MOUNT_EQUATORIAL_COORDINATES en J2000. Convertir ces
+    // coordonnées avec la même époque que les catalogues fixes. Ne pas afficher
+    // la position réelle sur une carte réglée sur une date passée.
+    if (state.mountPosition && !state.observationDate) {
+      const mountHorizontal = equatorialToHorizontal(
+        state.mountPosition.raHours,
+        state.mountPosition.decDegrees,
+        date,
+        state.latitude,
+        state.longitude,
+        { epoch: "J2000" }
+      );
+      const mountPoint = Number.isFinite(mountHorizontal.alt) && mountHorizontal.alt > 0
+        ? project(mountHorizontal.az, mountHorizontal.alt)
+        : null;
+      if (mountPoint) drawMountPositionMarker(mountPoint);
+    }
+
     const startPanelOpen = !discoveryStartPanelElement?.hidden;
     const discoverySearchOpen = !discoverySearchPanelElement?.hidden;
     const discoverySearchTargetActive = Boolean(appElement?.classList.contains("discovery-search-target-active"));
@@ -6192,7 +6257,7 @@ function renderSkyNow() {
   ) {
     const registerServiceWorker = () => {
       navigator.serviceWorker
-        .register("./service-worker.js")
+        .register("./service-worker.js", { updateViaCache: "none" })
         .catch(error => {
           console.warn("Service worker :", error);
         });
@@ -6231,6 +6296,24 @@ function renderSkyNow() {
       }
     }
   }, 1000);
+
+  initMountControl();
+  window.addEventListener("seduwa:mount-position", event => {
+    const position = event.detail;
+    const next = position?.available === true ? {
+      raHours: Number(position.raHours),
+      decDegrees: Number(position.decDegrees),
+      updatedAt: Number(position.updatedAt) || Date.now()
+    } : null;
+    if (next && (!Number.isFinite(next.raHours) || next.raHours < 0 || next.raHours >= 24 ||
+        !Number.isFinite(next.decDegrees) || next.decDegrees < -90 || next.decDegrees > 90)) return;
+    const previous = state.mountPosition;
+    if (!next && !previous) return;
+    if (next && previous && Math.abs(next.raHours - previous.raHours) < 1e-6 &&
+        Math.abs(next.decDegrees - previous.decDegrees) < 1e-5) return;
+    state.mountPosition = next;
+    drawSky();
+  });
 
   console.info(
     t("ui.initializationComplete")

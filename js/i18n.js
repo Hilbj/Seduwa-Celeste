@@ -16,8 +16,7 @@ const BUILTIN_LOCALE_CONFIG = {
   defaultLocale: "fr",
   locales: [
     { code: "fr", label: "Français", dataLocale: "fr" },
-    { code: "en", label: "English", dataLocale: "en" },
-    { code: "de", label: "Deutsch", dataLocale: "de" }
+    { code: "en", label: "English", dataLocale: "en" }
   ]
 };
 let localeConfig = BUILTIN_LOCALE_CONFIG;

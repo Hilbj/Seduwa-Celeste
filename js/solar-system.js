@@ -131,6 +131,17 @@ export function createSolarSystem({
           continue;
         }
 
+        // Le pilote INDIGO reçoit MOUNT_EQUATORIAL_COORDINATES en J2000.
+        // Conserver séparément ces coordonnées pour le GOTO sans modifier
+        // les coordonnées équinoxe-de-date utilisées par l'affichage du ciel.
+        const equJ2000 = A.Equator(
+          item.body,
+          date,
+          observer,
+          false,
+          true
+        );
+
         const hor = A.Horizon(
           date,
           observer,
@@ -156,6 +167,8 @@ export function createSolarSystem({
           name: t(item.nameKey),
           ra: equ.ra,
           dec: equ.dec,
+          raJ2000: Number.isFinite(equJ2000?.ra) ? equJ2000.ra : NaN,
+          decJ2000: Number.isFinite(equJ2000?.dec) ? equJ2000.dec : NaN,
           az: norm360(hor.azimuth),
           alt: hor.altitude
         });

@@ -1,7 +1,7 @@
 
 "use strict";
 
-const CACHE_NAME = "seduwa-v1.4";
+const CACHE_NAME = "seduwa-v2.0";
 
 const MILKY_WAY_MAP_URL = "https://cdn.eso.org/images/screen/ESA_Gaia_DR2_AllSky_Brightness_Colour_black_bg_8k.jpg";
 
@@ -18,6 +18,7 @@ const APP_FILES = [
   // Modules JavaScript
   "./js/astronomy.js",
   "./js/ui.js",
+  "./js/mount-control.js",
   "./js/sensors.js",
   "./js/solar-system.js",
   "./js/solar-system-orbits.js",
@@ -27,8 +28,10 @@ const APP_FILES = [
   "./js/visible-target-ranking.js",
   "./js/visible-target-filters.js",
   "./js/tonight-recommendations.js",
+  "./js/sky-visibility.js",
   "./js/observing-difficulty.js",
   "./js/star-hop-route.js",
+  "./js/observation-window.js",
   "./i18n/locales.json",
   "./i18n/fr.json",
   "./i18n/en.json",
@@ -105,7 +108,7 @@ self.addEventListener("activate", event => {
     await Promise.all(
       cacheNames
         .filter(name =>
-          name.startsWith("atlas-celeste-") &&
+          (name.startsWith("atlas-celeste-") || name.startsWith("seduwa-")) &&
           name !== CACHE_NAME
         )
         .map(name => caches.delete(name))
@@ -155,7 +158,7 @@ self.addEventListener("fetch", event => {
       const offlineUrl = new URL("./offline.html", self.registration.scope).href;
 
       try {
-        const response = await fetch(request);
+        const response = await fetch(new Request(request, { cache: "reload" }));
 
         // fetch() ne rejette pas les réponses HTTP 404/500 : elles doivent être
         // traitées explicitement pour afficher la page de secours.
@@ -186,7 +189,9 @@ self.addEventListener("fetch", event => {
 
   event.respondWith((async () => {
     try {
-      const response = await fetch(request);
+      // Eviter qu'un ancien cache HTTP du navigateur masque les fichiers
+      // fraîchement déployés (notamment ui.js et les nouveaux modules).
+      const response = await fetch(new Request(request, { cache: "reload" }));
 
       if (response.ok) {
         const cache = await caches.open(CACHE_NAME);
